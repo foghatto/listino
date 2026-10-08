@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ListinoRapido — Il tuo listino servizi su codice QR</title>
+  <meta name="description" content="Il listino digitale per estetiste, parrucchieri e professionisti. QR code, prezzi modificabili dal telefono, zero commissioni. Gratis per iniziare.">
+  <meta name="theme-color" content="#020617">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="bg-slate-950 text-slate-300 antialiased">
+
+  <!-- NAVBAR -->
+  <header class="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur">
+    <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6">
+      <a href="index.html" class="flex items-center gap-2 text-lg font-extrabold text-white">
+        <span class="grid h-8 w-8 place-items-center rounded-lg bg-emerald-500 text-slate-950">
+          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h.01M17 21h4v-4"/></svg>
+        </span>
+        <span>Listino<span class="text-emerald-400">Rapido</span></span>
+      </a>
+      <div class="hidden items-center gap-8 text-sm font-medium md:flex">
+        <a href="#come-funziona" class="text-slate-300 transition hover:text-emerald-400">Come funziona</a>
+        <a href="#funzionalita" class="text-slate-300 transition hover:text-emerald-400">Funzionalità</a>
+        <a href="#prezzi" class="text-slate-300 transition hover:text-emerald-400">Prezzi</a>
+        <a href="demo-pro.html" class="text-slate-300 transition hover:text-emerald-400">Esempio live</a>
+      </div>
+      <div class="hidden items-center gap-3 md:flex">
+        <a href="accedi.html" class="btn btn-ghost !py-2 text-sm">Accedi</a>
+        <a href="dashboard.html" class="btn btn-primary !py-2 text-sm">Inizia gratis</a>
+      </div>
+      <button id="menu-btn" class="grid h-10 w-10 place-items-center rounded-lg border border-slate-800 md:hidden" aria-label="Apri menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </nav>
+    <div id="mobile-menu" class="border-t border-slate-800 px-4 pb-4 md:hidden">
+      <div class="flex flex-col gap-1 py-3 text-sm font-medium">
+        <a href="#come-funziona" class="rounded-lg px-3 py-2 hover:bg-slate-900">Come funziona</a>
+        <a href="#funzionalita" class="rounded-lg px-3 py-2 hover:bg-slate-900">Funzionalità</a>
+        <a href="#prezzi" class="rounded-lg px-3 py-2 hover:bg-slate-900">Prezzi</a>
+        <a href="demo-pro.html" class="rounded-lg px-3 py-2 hover:bg-slate-900">Esempio live</a>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <a href="accedi.html" class="btn btn-ghost text-sm">Accedi</a>
+        <a href="dashboard.html" class="btn btn-primary text-sm">Inizia gratis</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO con splash -->
+    <section class="splash glow-bg" style="--splash:url('https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1600&q=70')">
+      <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-14 sm:px-6 lg:grid-cols-2 lg:pb-24 lg:pt-24">
+        <div>
+          <span class="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-300 sm:text-sm">✨ Il listino digitale per professionisti - Gratis per iniziare</span>
+          <h1 class="mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            Il tuo listino servizi su <span class="text-emerald-400">codice QR</span>, in pochi minuti.
+          </h1>
+          <p class="mt-5 max-w-xl text-base leading-relaxed text-slate-300 sm:text-lg">
+            Niente app da scaricare per i clienti, prezzi modificabili all'istante dal telefono, zero commissioni. Ideale per estetiste, parrucchieri e professionisti.
+          </p>
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a href="dashboard.html" class="btn btn-primary px-6 py-3.5 text-base">Crea il tuo listino gratis</a>
+            <a href="demo-pro.html" class="btn btn-ghost px-6 py-3.5 text-base">
+              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Guarda una demo
+            </a>
+          </div>
+          <ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400">
+            <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Pronto in ~10 minuti</li>
+            <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Funziona su ogni telefono</li>
+            <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Nessuna carta richiesta</li>
+          </ul>
+        </div>
+
+        <!-- Mockup smartphone scrollabile -->
+        <div class="relative">
+          <div class="phone">
+            <div id="hero-phone" class="phone-screen"></div>
+            <div class="scroll-hint" id="scroll-hint">↕ scorri il listino</div>
+          </div>
+          <div class="pointer-events-none absolute -left-2 top-24 hidden rounded-xl border border-slate-800 bg-slate-900/90 px-3 py-2 text-xs shadow-xl sm:block lg:-left-10">
+            <p class="text-slate-400">Prezzo aggiornato</p>
+            <p class="font-semibold text-emerald-400">Manicure 28 € ✓</p>
+          </div>
+          <div class="pointer-events-none absolute -right-2 bottom-28 hidden rounded-xl border border-slate-800 bg-slate-900/90 px-3 py-2 text-xs shadow-xl sm:block lg:-right-6">
+            <p class="text-slate-400">Nuova prenotazione</p>
+            <p class="font-semibold text-white">via WhatsApp 💬</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scritte che scorrono -->
+      <div class="border-y border-slate-800/80 bg-slate-950/60 py-4">
+        <div class="marquee text-sm font-medium uppercase tracking-widest text-slate-400">
+          <div class="marquee-track" id="marquee"></div>
+        </div>
+        <div class="marquee marquee-rev mt-3 text-xs font-semibold text-slate-300" aria-hidden="true">
+          <div class="marquee-track" id="marquee2"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEMA vs SOLUZIONE -->
+    <section id="funzionalita" class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <div class="mx-auto max-w-2xl text-center reveal">
+        <p class="text-sm font-semibold uppercase tracking-widest text-emerald-400">Perché cambiare</p>
+        <h2 class="mt-3 text-3xl font-extrabold text-white sm:text-4xl">Basta carta e PDF dimenticati nelle chat.</h2>
+      </div>
+      <div class="mt-12 grid gap-6 md:grid-cols-3">
+        <article class="card p-7 reveal">
+          <div class="grid h-12 w-12 place-items-center rounded-xl bg-emerald-500/10 text-emerald-400">
+            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+          </div>
+          <h3 class="mt-5 text-lg font-bold text-white">I PDF e la carta costano tempo e denaro</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-400">I listini di carta si rovinano, i PDF su WhatsApp sono scomodi e non si aggiornano mai.</p>
+        </article>
+        <article class="card p-7 reveal">
+          <div class="grid h-12 w-12 place-items-center rounded-xl bg-emerald-500/10 text-emerald-400">
+            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </div>
+          <h3 class="mt-5 text-lg font-bold text-white">Aggiorna i prezzi in 30 secondi</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-400">Cambia un prezzo o aggiungi un trattamento dal telefono e tutti vedono subito la modifica.</p>
+        </article>
+        <article class="card p-7 reveal">
+          <div class="grid h-12 w-12 place-items-center rounded-xl bg-emerald-500/10 text-emerald-400">
+            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/><path d="m9 9 2 2 4-4"/></svg>
+          </div>
+          <h3 class="mt-5 text-lg font-bold text-white">Nessuna app richiesta</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-400">I clienti inquadrano il QR code e il listino si apre direttamente nel browser del telefono.</p>
+        </article>
+      </div>
+
+      <!-- Righe alternate con foto (struttura stile "why") -->
+      <div class="mt-20 space-y-16">
+        <div class="grid items-center gap-8 md:grid-cols-2 reveal">
+          <div class="img-fallback aspect-[4/3] overflow-hidden rounded-2xl border border-slate-800">
+            <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=900&q=70" alt="Parrucchiera al lavoro in salone" class="h-full w-full object-cover" loading="lazy" onerror="this.remove()">
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-white">Un listino sempre ordinato e curato</h3>
+            <p class="mt-3 leading-relaxed text-slate-400">Categorie, foto, durata e prezzo di ogni trattamento in una pagina elegante. Il cliente sceglie con calma, tu risparmi domande ripetute al banco o in chat.</p>
+          </div>
+        </div>
+        <div class="grid items-center gap-8 md:grid-cols-2 reveal">
+          <div class="md:order-2 img-fallback aspect-[4/3] overflow-hidden rounded-2xl border border-slate-800">
+            <img src="https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=900&q=70" alt="Manicure con smalto semipermanente" class="h-full w-full object-cover" loading="lazy" onerror="this.remove()">
+          </div>
+          <div class="md:order-1">
+            <h3 class="text-2xl font-bold text-white">Prenotazione in un tocco, via WhatsApp</h3>
+            <p class="mt-3 leading-relaxed text-slate-400">Ogni servizio ha il suo tasto: il cliente ti scrive con il trattamento già indicato. Nessuna commissione sulle prenotazioni, parli direttamente con i tuoi clienti.</p>
+          </div>
+        </div>
+        <div class="grid items-center gap-8 md:grid-cols-2 reveal">
+          <div class="img-fallback aspect-[4/3] overflow-hidden rounded-2xl border border-slate-800">
+            <img src="https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=900&q=70" alt="Trattamento benessere in un centro estetico" class="h-full w-full object-cover" loading="lazy" onerror="this.remove()">
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-white">Stampa il QR una volta, per sempre</h3>
+            <p class="mt-3 leading-relaxed text-slate-400">Il codice resta lo stesso anche quando cambi prezzi e trattamenti. Niente ristampe a ogni stagione: un cavalletto sul banco e il listino è sempre aggiornato.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COME FUNZIONA -->
+    <section id="come-funziona" class="border-y border-slate-800/80 bg-slate-900/30 py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <div class="mx-auto max-w-2xl text-center reveal">
+          <p class="text-sm font-semibold uppercase tracking-widest text-emerald-400">Come funziona</p>
+          <h2 class="mt-3 text-3xl font-extrabold text-white sm:text-4xl">Tre passaggi. Nessuna competenza tecnica.</h2>
+        </div>
+        <ol class="relative mt-14 grid gap-6 md:grid-cols-3">
+          <li class="card p-7 reveal">
+            <span class="grid h-11 w-11 place-items-center rounded-full bg-emerald-500 text-lg font-extrabold text-slate-950">1</span>
+            <h3 class="mt-5 text-lg font-bold text-white">Inserisci i tuoi servizi</h3>
+            <p class="mt-2 text-sm leading-relaxed text-slate-400">Aggiungi trattamenti, categorie, foto e prezzi in pochi clic.</p>
+          </li>
+          <li class="card p-7 reveal">
+            <span class="grid h-11 w-11 place-items-center rounded-full bg-emerald-500 text-lg font-extrabold text-slate-950">2</span>
+            <h3 class="mt-5 text-lg font-bold text-white">Stampa o condividi il QR</h3>
+            <p class="mt-2 text-sm leading-relaxed text-slate-400">Scarica il QR code pronto da mettere sul banco o da mandare su WhatsApp.</p>
+          </li>
+          <li class="card p-7 reveal">
+            <span class="grid h-11 w-11 place-items-center rounded-full bg-emerald-500 text-lg font-extrabold text-slate-950">3</span>
+            <h3 class="mt-5 text-lg font-bold text-white">I clienti scelgono e prenotano</h3>
+            <p class="mt-2 text-sm leading-relaxed text-slate-400">Il cliente apre il listino sul telefono e prenota direttamente tramite il tasto WhatsApp.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ESEMPIO LIVE -->
+    <section id="esempio" class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <div class="card grid items-center gap-10 p-8 sm:p-12 md:grid-cols-[1fr_auto] reveal">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-widest text-emerald-400">Esempio live</p>
+          <h2 class="mt-3 text-3xl font-extrabold text-white sm:text-4xl">Provalo adesso: inquadra questo codice.</h2>
+          <p class="mt-4 max-w-xl leading-relaxed text-slate-400">È esattamente quello che faranno i tuoi clienti. Se ti piace, il tuo listino è a pochi minuti di distanza.</p>
+          <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+            <a href="demo-pro.html" class="btn btn-primary">Apri la demo PRO</a>
+            <a href="dashboard.html" class="btn btn-ghost">Crea il tuo listino</a>
+          </div>
+        </div>
+        <div class="mx-auto rounded-2xl bg-white p-4"><div id="qr-demo" class="h-[160px] w-[160px]"></div></div>
+      </div>
+    </section>
+
+    <!-- PREZZI -->
+    <section id="prezzi" class="border-t border-slate-800/80 bg-slate-900/30 py-20">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6">
+        <div class="mx-auto max-w-2xl text-center reveal">
+          <p class="text-sm font-semibold uppercase tracking-widest text-emerald-400">Prezzi</p>
+          <h2 class="mt-3 text-3xl font-extrabold text-white sm:text-4xl">Parti gratis. Passa a PRO quando vuoi.</h2>
+          <p class="mt-3 text-slate-400">Nessuna commissione sulle prenotazioni. Disdici quando vuoi.</p>
+        </div>
+        <div class="mt-12 grid gap-6 md:grid-cols-2">
+          <!-- Free -->
+          <div class="card flex flex-col p-8 reveal">
+            <h3 class="text-xl font-bold text-white">Inizia gratis</h3>
+            <p class="mt-4 flex items-end gap-2"><span class="text-5xl font-extrabold text-white">0 €</span><span class="pb-2 text-slate-400">/ per sempre</span></p>
+            <p class="mt-3 text-sm text-slate-400">Perfetto per partire senza impegno.</p>
+            <ul class="mt-6 flex-1 space-y-3 text-sm">
+              <li class="flex gap-3"><span class="text-emerald-400">✓</span> Fino a 10 servizi</li>
+              <li class="flex gap-3"><span class="text-emerald-400">✓</span> QR code incluso</li>
+              <li class="flex gap-3"><span class="text-emerald-400">✓</span> Link personalizzato</li>
+              <li class="flex gap-3"><span class="text-emerald-400">✓</span> Branding della piattaforma</li>
+            </ul>
+            <a href="dashboard.html" class="btn btn-ghost mt-8 w-full">Inizia gratis</a>
+          </div>
+          <!-- PRO -->
+          <div class="relative flex flex-col rounded-2xl border-2 border-emerald-500 bg-slate-900/70 p-8 shadow-[0_0_60px_-15px_rgba(16,185,129,.5)] reveal">
+            <span class="absolute -top-3.5 right-6 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-slate-950">Più scelto</span>
+            <h3 class="text-xl font-bold text-white">Professionale</h3>
+            <p class="mt-4 flex items-end gap-2"><span class="text-5xl font-extrabold text-white">9 €</span><span class="pb-2 text-slate-400">/ al mese</span></p>
+            <p class="mt-3 text-sm text-slate-400">Per chi vuole un'immagine impeccabile.</p>
+            <ul class="mt-6 flex-1 space-y-3 text-sm">
+              <li class="flex gap-3"><span class="text-emerald-400">✓</span> Servizi illimitati</li>
+              <li class="flex gap-3"><span class="text-emerald-400">✓</span> Nessun logo della piattaforma</li>
+              <li class="flex gap-3"><span class="text-emerald-400">✓</span> Statistiche di visualizzazione</li>
+              <li class="flex gap-3"><span class="text-emerald-400">✓</span> Traduzioni multilingua</li>
+              <li class="flex gap-3"><span class="text-emerald-400">✓</span> Supporto prioritario</li>
+            </ul>
+            <a href="demo-pro.html" class="btn btn-primary mt-8 w-full">Scegli PRO</a>
+            <a href="demo-pro.html" class="mt-3 text-center text-xs text-emerald-400 hover:underline">Guarda prima la demo PRO →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800 bg-slate-950">
+    <div class="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
+      <div class="md:col-span-2">
+        <a href="index.html" class="text-lg font-extrabold text-white">Listino<span class="text-emerald-400">Rapido</span></a>
+        <p class="mt-3 max-w-sm text-sm leading-relaxed text-slate-400">Il listino servizi su codice QR per estetiste, parrucchieri e professionisti. Semplice da aggiornare, comodo per i clienti.</p>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-white">Esplora</p>
+        <ul class="mt-4 space-y-2 text-sm text-slate-400">
+          <li><a class="hover:text-emerald-400" href="#come-funziona">Come funziona</a></li>
+          <li><a class="hover:text-emerald-400" href="#funzionalita">Funzionalità</a></li>
+          <li><a class="hover:text-emerald-400" href="#prezzi">Prezzi</a></li>
+          <li><a class="hover:text-emerald-400" href="demo-pro.html">Esempio live</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-white">Note legali</p>
+        <ul class="mt-4 space-y-2 text-sm text-slate-400">
+          <li><a class="hover:text-emerald-400" href="note-legali.html#privacy">Privacy Policy</a></li>
+          <li><a class="hover:text-emerald-400" href="note-legali.html#termini">Termini e condizioni</a></li>
+          <li><a class="hover:text-emerald-400" href="note-legali.html#cookie">Cookie</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-slate-800/80 py-5 text-center text-xs text-slate-500">© <span id="year">2026</span> ListinoRapido. Tutti i diritti riservati.</div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="assets/data.js"></script>
+  <script>
+    // Listino nel mockup (piano Free: con badge piattaforma)
+    LR.renderListino(document.getElementById('hero-phone'), { pro: false, lang: 'it' });
+    const hero = document.getElementById('hero-phone');
+    hero.addEventListener('scroll', () => { document.getElementById('scroll-hint').style.opacity = '0'; }, { once: true });
+
+    // Marquee
+    const words = ['Estetiste', 'Parrucchieri', 'Barbieri', 'Nail artist', 'Centri benessere', 'Massaggiatori', 'Tatuatori', 'Personal trainer', 'Make-up artist'];
+    const row = words.map(w => `<span class="inline-flex items-center gap-3"><span class="text-emerald-500">✦</span>${w}</span>`).join('');
+    // 4 copie: la prima metà (2 copie) copre anche gli schermi larghi e il loop a -50% resta continuo
+    document.getElementById('marquee').innerHTML = row + row + row + row;
+    const perks = ['Nessuna app da scaricare', 'Zero commissioni', 'Prezzi aggiornati in 30 secondi', 'QR code incluso', 'Funziona su ogni telefono', 'Prenotazione via WhatsApp', 'Gratis per iniziare'];
+    const pills = perks.map(w => `<span class="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/70 px-4 py-1.5"><span class="text-emerald-400">✓</span>${w}</span>`).join('');
+    document.getElementById('marquee2').innerHTML = pills + pills + pills + pills;
+
+    // QR verso la demo PRO
+    try {
+      const url = new URL('demo-pro.html', location.href).href;
+      new QRCode(document.getElementById('qr-demo'), { text: url, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
+    } catch (e) { document.getElementById('qr-demo').textContent = 'QR'; }
+
+    // Menu mobile
+    const btn = document.getElementById('menu-btn'), mm = document.getElementById('mobile-menu');
+    btn.addEventListener('click', () => { const o = mm.classList.toggle('open'); btn.setAttribute('aria-expanded', o); });
+    mm.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mm.classList.remove('open')));
+
+    // Reveal on scroll
+    const io = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

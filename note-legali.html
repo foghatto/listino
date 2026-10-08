@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Note legali — ListinoRapido</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };</script>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="glow-bg min-h-screen bg-slate-950 text-slate-300 antialiased">
+
+  <header class="border-b border-slate-800/80 bg-slate-950/85 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6">
+      <a href="index.html" class="text-lg font-extrabold text-white">Listino<span class="text-emerald-400">Rapido</span></a>
+      <a href="index.html" class="btn btn-ghost !py-2 text-sm">← Torna al sito</a>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+    <p class="text-sm font-semibold uppercase tracking-widest text-emerald-400">Note legali</p>
+    <h1 class="mt-3 text-3xl font-extrabold text-white sm:text-4xl">Privacy, termini e cookie</h1>
+
+    <div class="mt-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200">
+      <b>Bozza da completare.</b> Questo testo è un modello segnaposto: sostituisci i campi tra [parentesi quadre] con i dati reali dell'attività e fallo verificare da un consulente prima della pubblicazione.
+    </div>
+
+    <nav class="mt-8 flex flex-wrap gap-2 text-sm" aria-label="Sezioni">
+      <a href="#privacy" class="btn btn-ghost !py-1.5">Privacy Policy</a>
+      <a href="#termini" class="btn btn-ghost !py-1.5">Termini e condizioni</a>
+      <a href="#cookie" class="btn btn-ghost !py-1.5">Cookie</a>
+    </nav>
+
+    <article class="mt-10 space-y-12 leading-relaxed text-slate-400">
+      <section id="privacy" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-white">Privacy Policy</h2>
+        <p class="mt-3"><b class="text-slate-200">Titolare del trattamento:</b> [Ragione sociale / Nome e cognome], [indirizzo], P. IVA [partita IVA], email [indirizzo email di contatto].</p>
+        <h3 class="mt-5 font-semibold text-slate-200">Dati trattati</h3>
+        <ul class="mt-2 list-disc space-y-1 pl-5">
+          <li>Dati dell'account: indirizzo email e password (conservata in forma cifrata dal fornitore di autenticazione).</li>
+          <li>Contenuti inseriti: nome dell'attività, categorie, servizi, prezzi, immagini e numero WhatsApp pubblicato nel listino.</li>
+          <li>Dati di utilizzo del listino pubblico (piano PRO): numero di visualizzazioni e click sul tasto WhatsApp, in forma aggregata e senza identificare il visitatore.</li>
+        </ul>
+        <h3 class="mt-5 font-semibold text-slate-200">Finalità e base giuridica</h3>
+        <p class="mt-2">Erogazione del servizio richiesto (art. 6.1.b GDPR), adempimenti di legge (art. 6.1.c) e, per eventuali comunicazioni commerciali, il consenso dell'interessato (art. 6.1.a).</p>
+        <h3 class="mt-5 font-semibold text-slate-200">Fornitori e conservazione</h3>
+        <p class="mt-2">I dati sono ospitati tramite Supabase (database e autenticazione) e il sito è servito da Vercel. I dati dell'account sono conservati finché l'account resta attivo; puoi chiederne la cancellazione in ogni momento.</p>
+        <h3 class="mt-5 font-semibold text-slate-200">Diritti dell'interessato</h3>
+        <p class="mt-2">Puoi chiedere accesso, rettifica, cancellazione, limitazione, portabilità e opposizione scrivendo a [email di contatto]. Hai inoltre diritto di proporre reclamo al Garante per la protezione dei dati personali.</p>
+      </section>
+
+      <section id="termini" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-white">Termini e condizioni</h2>
+        <ul class="mt-3 list-disc space-y-2 pl-5">
+          <li><b class="text-slate-200">Servizio.</b> ListinoRapido permette di pubblicare un listino di servizi accessibile tramite link e codice QR.</li>
+          <li><b class="text-slate-200">Piano Free.</b> Gratuito, fino a 10 servizi, con il marchio della piattaforma sul listino pubblico.</li>
+          <li><b class="text-slate-200">Piano Professionale.</b> [9 €] al mese [IVA inclusa/esclusa], servizi illimitati, senza marchio della piattaforma, statistiche e traduzioni. Puoi disdire in qualsiasi momento; l'abbonamento resta attivo fino alla fine del periodo già pagato.</li>
+          <li><b class="text-slate-200">Contenuti.</b> Sei responsabile dei contenuti pubblicati (prezzi, testi, immagini) e di avere i diritti per usarli.</li>
+          <li><b class="text-slate-200">Prenotazioni.</b> Le prenotazioni avvengono direttamente tra cliente e professionista tramite WhatsApp; ListinoRapido non applica commissioni e non è parte del rapporto.</li>
+          <li><b class="text-slate-200">Foro competente e legge applicabile:</b> [da definire].</li>
+        </ul>
+      </section>
+
+      <section id="cookie" class="scroll-mt-24">
+        <h2 class="text-2xl font-bold text-white">Cookie</h2>
+        <p class="mt-3">Il sito usa solo strumenti tecnici necessari al funzionamento (ad esempio il mantenimento della sessione di accesso e la memorizzazione locale dei dati di prova nel tuo browser). Non sono presenti cookie di profilazione o di marketing.</p>
+        <p class="mt-3">Il sito carica risorse da servizi esterni (Google Fonts, jsDelivr/cdnjs, Unsplash per le foto di esempio): i relativi fornitori possono ricevere il tuo indirizzo IP. Valuta di ospitare i font e le librerie in autonomia e di aggiornare questa sezione se aggiungi strumenti di analisi o pubblicità.</p>
+      </section>
+    </article>
+  </main>
+
+  <footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+    © <span id="year">2026</span> ListinoRapido. Tutti i diritti riservati.
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

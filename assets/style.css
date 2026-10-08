@@ -1,0 +1,57 @@
+/* ListinoRapido — stili condivisi (Tailwind via CDN + queste utility) */
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+
+/* Sfondo con alone smeraldo */
+.glow-bg {
+  background:
+    radial-gradient(60% 50% at 70% 0%, rgba(16,185,129,.16), transparent 70%),
+    radial-gradient(40% 40% at 0% 30%, rgba(16,185,129,.07), transparent 70%);
+}
+
+/* Scritte che scorrono (marquee) */
+.marquee { overflow: hidden; white-space: nowrap; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.marquee-track { display: inline-flex; gap: 3rem; animation: marquee 32s linear infinite; padding-right: 3rem; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+.marquee-rev .marquee-track { animation-direction: reverse; animation-duration: 40s; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+
+/* Splash hero con foto */
+.splash { position: relative; isolation: isolate; }
+.splash::before { content: ""; position: absolute; inset: 0; z-index: -1; background-image: var(--splash); background-size: cover; background-position: center; opacity: .28; }
+.splash::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(2,6,23,.55) 0%, rgba(2,6,23,.85) 70%, #020617 100%); }
+
+/* Smartphone mockup scrollabile */
+.phone { width: 300px; height: 600px; border-radius: 42px; border: 8px solid #1e293b; background: #020617; box-shadow: 0 30px 80px -20px rgba(16,185,129,.35), 0 0 0 1px #334155; position: relative; overflow: hidden; margin-inline: auto; }
+.phone::before { content: ""; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 90px; height: 22px; background: #0f172a; border-radius: 999px; z-index: 20; }
+.phone-screen { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding-top: 34px; }
+.phone-screen::-webkit-scrollbar { display: none; }
+.scroll-hint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 25; font-size: 11px; padding: 4px 10px; border-radius: 999px; background: rgba(2,6,23,.85); border: 1px solid #1e293b; color: #6ee7b7; pointer-events: none; transition: opacity .3s; }
+
+/* Foto con fallback */
+.img-fallback { background: linear-gradient(135deg, #0f172a, #064e3b); }
+
+/* Card con hover */
+.card { background: rgba(15,23,42,.6); border: 1px solid #1e293b; border-radius: 1rem; transition: border-color .2s, transform .2s; }
+.card:hover { border-color: rgba(16,185,129,.45); }
+
+/* Bottoni */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; font-weight: 600; border-radius: .75rem; padding: .7rem 1.25rem; transition: all .15s; cursor: pointer; }
+.btn-primary { background: #10b981; color: #022c22; }
+.btn-primary:hover { background: #34d399; }
+.btn-ghost { border: 1px solid #334155; color: #e2e8f0; }
+.btn-ghost:hover { border-color: #10b981; color: #6ee7b7; }
+
+/* Input */
+.input { width: 100%; background: #0f172a; border: 1px solid #1e293b; border-radius: .6rem; padding: .6rem .8rem; color: #e2e8f0; outline: none; }
+.input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.15); }
+
+/* Animazioni di entrata */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+
+/* Menu mobile */
+#mobile-menu { display: none; }
+#mobile-menu.open { display: block; }

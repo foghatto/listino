@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demo PRO — ListinoRapido</title>
+  <meta name="description" content="Prova il piano Professionale: listino senza logo della piattaforma, traduzioni multilingua e statistiche di visualizzazione.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };</script>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="glow-bg min-h-screen bg-slate-950 text-slate-300">
+
+  <header class="border-b border-slate-800/80 bg-slate-950/85 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6">
+      <a href="index.html" class="text-lg font-extrabold text-white">Listino<span class="text-emerald-400">Rapido</span></a>
+      <div class="flex items-center gap-3">
+        <a href="index.html#prezzi" class="hidden text-sm text-slate-300 hover:text-emerald-400 sm:inline">Prezzi</a>
+        <a href="dashboard.html" class="btn btn-ghost !py-2 text-sm">Dashboard</a>
+        <a href="index.html#prezzi" class="btn btn-primary !py-2 text-sm">Scegli PRO · 9 €/mese</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto grid max-w-7xl items-start gap-12 px-4 py-12 sm:px-6 lg:grid-cols-[auto_1fr] lg:gap-20 lg:py-16">
+
+    <!-- Telefono -->
+    <section aria-label="Anteprima listino PRO" class="order-2 lg:order-1">
+      <div class="mb-4 flex items-center justify-center gap-2" role="group" aria-label="Lingua del listino">
+        <button class="lang active" data-lang="it">🇮🇹 IT</button>
+        <button class="lang" data-lang="en">🇬🇧 EN</button>
+        <button class="lang" data-lang="fr">🇫🇷 FR</button>
+      </div>
+      <div class="phone" style="width:320px;height:640px">
+        <div id="pro-phone" class="phone-screen"></div>
+        <div class="scroll-hint" id="hint">↕ scorri il listino</div>
+      </div>
+      <p class="mt-4 text-center text-xs text-slate-500">Nessun logo della piattaforma · traduzione con un tocco</p>
+    </section>
+
+    <!-- Pannello PRO -->
+    <section class="order-1 lg:order-2">
+      <span class="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-300 sm:text-sm">Demo piano Professionale</span>
+      <h1 class="mt-5 text-3xl font-extrabold leading-tight text-white sm:text-4xl">Un'immagine impeccabile, <span class="text-emerald-400">tutta tua</span>.</h1>
+      <p class="mt-4 max-w-xl leading-relaxed text-slate-400">Prova il listino come lo vedrebbero i clienti con il piano PRO: cambia lingua, scorri le categorie e tocca "Prenota". Qui accanto vedi anche cosa misurano le statistiche.</p>
+
+      <!-- Statistiche live (simulate) -->
+      <div class="card mt-8 p-5">
+        <div class="flex items-center justify-between">
+          <h2 class="font-bold text-white">Statistiche di visualizzazione</h2>
+          <span class="inline-flex items-center gap-1.5 text-xs text-emerald-400"><span class="h-2 w-2 animate-pulse rounded-full bg-emerald-400"></span> dati di esempio</span>
+        </div>
+        <div class="mt-4 grid grid-cols-3 gap-3 text-center">
+          <div class="rounded-xl border border-slate-800 p-3"><p id="st-views" class="text-2xl font-bold text-white">1.248</p><p class="text-xs text-slate-400">Visualizzazioni</p></div>
+          <div class="rounded-xl border border-slate-800 p-3"><p id="st-clicks" class="text-2xl font-bold text-white">214</p><p class="text-xs text-slate-400">Click WhatsApp</p></div>
+          <div class="rounded-xl border border-slate-800 p-3"><p id="st-rate" class="text-2xl font-bold text-emerald-400">17%</p><p class="text-xs text-slate-400">Conversione</p></div>
+        </div>
+        <p class="mt-5 text-sm font-medium text-white">Trattamenti più guardati</p>
+        <ul id="top" class="mt-3 space-y-2.5 text-sm"></ul>
+        <p class="mt-4 text-xs text-slate-500">Prova: tocca un "Prenota su WhatsApp" nel telefono e guarda i click aumentare.</p>
+      </div>
+
+      <!-- Checklist PRO -->
+      <ul class="mt-6 grid gap-3 sm:grid-cols-2">
+        <li class="card flex gap-3 p-4 text-sm"><span class="text-emerald-400">✓</span><span><b class="text-white">Servizi illimitati</b><br><span class="text-slate-400">Nessun tetto a trattamenti e categorie.</span></span></li>
+        <li class="card flex gap-3 p-4 text-sm"><span class="text-emerald-400">✓</span><span><b class="text-white">Nessun logo della piattaforma</b><br><span class="text-slate-400">Il listino porta solo il tuo nome.</span></span></li>
+        <li class="card flex gap-3 p-4 text-sm"><span class="text-emerald-400">✓</span><span><b class="text-white">Traduzioni multilingua</b><br><span class="text-slate-400">Italiano, inglese e francese in un tocco.</span></span></li>
+        <li class="card flex gap-3 p-4 text-sm"><span class="text-emerald-400">✓</span><span><b class="text-white">Supporto prioritario</b><br><span class="text-slate-400">Risposte rapide quando ti servono.</span></span></li>
+      </ul>
+
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <a href="index.html#prezzi" class="btn btn-primary px-6 py-3.5">Scegli PRO · 9 € / al mese</a>
+        <a href="dashboard.html" class="btn btn-ghost px-6 py-3.5">Resta sul piano gratuito</a>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    .lang { padding: .4rem .9rem; border-radius: 999px; border: 1px solid #334155; font-size: .8rem; font-weight: 600; color: #cbd5e1; }
+    .lang:hover { border-color: #10b981; }
+    .lang.active { background: #10b981; border-color: #10b981; color: #022c22; }
+  </style>
+
+  <script src="assets/data.js"></script>
+  <script>
+    const phone = document.getElementById('pro-phone');
+    let lang = 'it';
+    const stats = { views: 1248, clicks: 214 };
+    const hits = {}; // click per servizio (solo demo)
+
+    const names = {};
+    LR.DATA.categories.forEach(c => c.items.forEach(i => { names[i.id] = i; hits[i.id] = { s1: 86, s2: 61, s3: 142, s4: 54, s5: 118, s6: 73 }[i.id] || 40; }));
+
+    function draw() { LR.renderListino(phone, { pro: true, lang, onView: onBook }); }
+
+    function onBook(id) {
+      stats.clicks++; hits[id]++;
+      stats.views += 3; // un click implica anche nuove visualizzazioni nella simulazione
+      refresh();
+    }
+
+    function refresh() {
+      document.getElementById('st-views').textContent = stats.views.toLocaleString('it-IT');
+      document.getElementById('st-clicks').textContent = stats.clicks.toLocaleString('it-IT');
+      document.getElementById('st-rate').textContent = Math.round(stats.clicks / stats.views * 100) + '%';
+      const sorted = Object.keys(hits).sort((a, b) => hits[b] - hits[a]).slice(0, 4);
+      const max = hits[sorted[0]];
+      document.getElementById('top').innerHTML = sorted.map(id => `
+        <li>
+          <div class="flex justify-between"><span class="text-slate-200">${LR.esc(names[id].name.it)}</span><span class="text-slate-400">${hits[id]}</span></div>
+          <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-800"><div class="h-full rounded-full bg-emerald-500" style="width:${Math.round(hits[id] / max * 100)}%"></div></div>
+        </li>`).join('');
+    }
+
+    document.querySelectorAll('.lang').forEach(b => b.addEventListener('click', () => {
+      lang = b.dataset.lang;
+      document.querySelectorAll('.lang').forEach(x => x.classList.toggle('active', x === b));
+      const keep = phone.scrollTop; draw(); phone.scrollTop = keep;
+      stats.views++; refresh();
+    }));
+    phone.addEventListener('scroll', () => { document.getElementById('hint').style.opacity = '0'; }, { once: true });
+
+    draw(); refresh();
+  </script>
+</body>
+</html>
