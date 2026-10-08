@@ -16,22 +16,25 @@
     <a href="index.html" class="mb-8 text-center text-2xl font-extrabold text-white">Listino<span class="text-emerald-400">Rapido</span></a>
     <div class="card p-7">
       <h1 id="title" class="text-xl font-bold text-white">Accedi al tuo account</h1>
-      <p class="mt-1 text-sm text-slate-400">Gestisci listino, prezzi e QR code.</p>
+      <p id="subtitle" class="mt-1 text-sm text-slate-400">Gestisci listino, prezzi e QR code.</p>
 
       <form id="form" class="mt-6 space-y-4" novalidate>
-        <div>
+        <div id="row-email">
           <label for="email" class="mb-1.5 block text-sm font-medium">Email</label>
           <input id="email" type="email" required autocomplete="email" class="input" placeholder="nome@studio.it">
         </div>
-        <div>
-          <label for="password" class="mb-1.5 block text-sm font-medium">Password</label>
+        <div id="row-password">
+          <div class="mb-1.5 flex items-center justify-between">
+            <label id="pw-label" for="password" class="block text-sm font-medium">Password</label>
+            <button id="forgot" type="button" class="text-xs font-medium text-emerald-400 hover:underline">Password dimenticata?</button>
+          </div>
           <input id="password" type="password" required minlength="6" autocomplete="current-password" class="input" placeholder="••••••••">
         </div>
         <p id="msg" class="hidden rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm" role="status"></p>
         <button id="submit" type="submit" class="btn btn-primary w-full">Accedi</button>
       </form>
 
-      <p class="mt-5 text-center text-sm text-slate-400">
+      <p id="switch-row" class="mt-5 text-center text-sm text-slate-400">
         <span id="switch-text">Non hai un account?</span>
         <button id="switch" type="button" class="font-semibold text-emerald-400 hover:underline">Registrati gratis</button>
       </p>
@@ -39,7 +42,7 @@
         Modalità demo attiva: qualsiasi email funziona e i dati restano nel tuo browser.
       </p>
     </div>
-    <a href="dashboard.html" class="mt-5 text-center text-sm text-slate-400 hover:text-emerald-400">Entra direttamente nella dashboard demo →</a>
+    <a href="dashboard.html?demo=1" class="mt-5 text-center text-sm text-slate-400 hover:text-emerald-400">Prova la dashboard demo (dati di prova, senza account) →</a>
   </main>
 
   <script src="assets/config.js?v=2"></script>
@@ -53,40 +56,96 @@
     const sb = live ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
     if (configured) document.getElementById('demo-note').remove();
 
-    let signup = false;
     const $ = (id) => document.getElementById(id);
     const msg = (t, err) => { const m = $('msg'); m.textContent = t; m.className = 'rounded-lg border px-3 py-2 text-sm ' + (err ? 'border-red-500/40 bg-red-500/10 text-red-300' : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'); };
+    const NO_SERVICE = 'Impossibile contattare il servizio di accesso. Ricarica la pagina o disattiva il blocco pubblicità e riprova.';
 
-    $('switch').addEventListener('click', () => {
-      signup = !signup;
-      $('title').textContent = signup ? 'Crea il tuo account gratuito' : 'Accedi al tuo account';
-      $('submit').textContent = signup ? 'Crea account' : 'Accedi';
-      $('switch-text').textContent = signup ? 'Hai già un account?' : 'Non hai un account?';
-      $('switch').textContent = signup ? 'Accedi' : 'Registrati gratis';
-      $('password').autocomplete = signup ? 'new-password' : 'current-password';
-      $('msg').className = 'hidden';
-    });
+    // Modalità della pagina: login | signup | forgot | newpass
+    const MODES = {
+      login:   { title: 'Accedi al tuo account', sub: 'Gestisci listino, prezzi e QR code.', submit: 'Accedi', email: true, pw: true, forgot: true, sw: ['Non hai un account?', 'Registrati gratis', 'signup'], auto: 'current-password' },
+      signup:  { title: 'Crea il tuo account gratuito', sub: 'Pronto in pochi minuti, nessuna carta richiesta.', submit: 'Crea account', email: true, pw: true, forgot: false, sw: ['Hai già un account?', 'Accedi', 'login'], auto: 'new-password' },
+      forgot:  { title: 'Password dimenticata?', sub: 'Inserisci la tua email: ti inviamo un link per scegliere una nuova password.', submit: 'Invia il link', email: true, pw: false, forgot: false, sw: ['Ti sei ricordato?', 'Torna ad accedere', 'login'], auto: 'current-password' },
+      newpass: { title: 'Scegli una nuova password', sub: 'Almeno 6 caratteri.', submit: 'Salva la password', email: false, pw: true, forgot: false, sw: null, auto: 'new-password' }
+    };
+    let mode = 'login';
+    function setMode(m, keepMsg) {
+      mode = m;
+      const c = MODES[m];
+      $('title').textContent = c.title;
+      $('subtitle').textContent = c.sub;
+      $('submit').textContent = c.submit;
+      $('row-email').classList.toggle('hidden', !c.email);
+      $('row-password').classList.toggle('hidden', !c.pw);
+      $('forgot').classList.toggle('hidden', !c.forgot);
+      $('pw-label').textContent = m === 'newpass' ? 'Nuova password' : 'Password';
+      $('password').autocomplete = c.auto;
+      $('switch-row').classList.toggle('hidden', !c.sw);
+      if (c.sw) { $('switch-text').textContent = c.sw[0]; $('switch').textContent = c.sw[1]; $('switch').dataset.to = c.sw[2]; }
+      if (!keepMsg) $('msg').className = 'hidden';
+    }
+    $('switch').addEventListener('click', () => setMode($('switch').dataset.to));
+    $('forgot').addEventListener('click', () => setMode('forgot'));
+
+    // Link dalla landing ("Inizia gratis") → direttamente la registrazione
+    if (new URLSearchParams(location.search).has('signup')) setMode('signup');
+
+    // Ritorno dal link di recupero ricevuto via email (o link scaduto)
+    let recovering = /type=recovery/.test(location.hash);
+    const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+    if (hashParams.get('error_description')) {
+      setMode('forgot');
+      msg('Il link non è più valido (è scaduto o è già stato usato). Richiedine uno nuovo.', true);
+    } else if (recovering) {
+      setMode('newpass');
+    }
+    if (sb) {
+      sb.auth.onAuthStateChange((event) => {
+        if (event === 'PASSWORD_RECOVERY') { recovering = true; setMode('newpass'); }
+      });
+      // Già connesso: vai dritto alla dashboard (tranne durante il recupero password)
+      sb.auth.getSession().then(({ data }) => {
+        if (data && data.session && !recovering && mode !== 'newpass') location.href = 'dashboard.html';
+      });
+    }
 
     $('form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = $('email').value.trim(), password = $('password').value;
-      if (!/^\S+@\S+\.\S+$/.test(email)) return msg('Inserisci un indirizzo email valido.', true);
-      if (password.length < 6) return msg('La password deve avere almeno 6 caratteri.', true);
+      const needEmail = MODES[mode].email, needPw = MODES[mode].pw;
+      if (needEmail && !/^\S+@\S+\.\S+$/.test(email)) return msg('Inserisci un indirizzo email valido.', true);
+      if (needPw && password.length < 6) return msg('La password deve avere almeno 6 caratteri.', true);
 
-      if (configured && !live) return msg('Impossibile contattare il servizio di accesso. Ricarica la pagina o disattiva il blocco pubblicità e riprova.', true);
-      if (!live) { localStorage.setItem('lr_user', email); location.href = 'dashboard.html'; return; }
+      if (configured && !live) return msg(NO_SERVICE, true);
+      if (!live) {                                   // modalità demo (Supabase non configurato)
+        if (mode === 'forgot') return msg('In modalità demo il recupero password non è disponibile.', true);
+        localStorage.setItem('lr_user', email || 'demo@listinorapido.it'); location.href = 'dashboard.html?demo=1'; return;
+      }
 
       $('submit').disabled = true;
       try {
-        const { data, error } = signup
-          ? await sb.auth.signUp({ email, password })
-          : await sb.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        if (signup && !data.session) { msg('Controlla la tua email per confermare la registrazione.'); }
-        else { location.href = 'dashboard.html'; }
+        if (mode === 'forgot') {
+          // L'indirizzo di ritorno deve essere tra i "Redirect URLs" di Supabase
+          const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+          if (error) throw error;
+          msg('Se l\'indirizzo è registrato, riceverai a breve un\'email con il link per scegliere una nuova password. Controlla anche la posta indesiderata.');
+        } else if (mode === 'newpass') {
+          const { error } = await sb.auth.updateUser({ password });
+          if (error) throw error;
+          msg('Password aggiornata. Ti porto alla dashboard…');
+          setTimeout(() => { location.href = 'dashboard.html'; }, 1200);
+        } else {
+          const { data, error } = mode === 'signup'
+            ? await sb.auth.signUp({ email, password })
+            : await sb.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          if (mode === 'signup' && !data.session) msg('Controlla la tua email per confermare la registrazione.');
+          else location.href = 'dashboard.html';
+        }
       } catch (err) { msg(err.message || 'Operazione non riuscita. Riprova.', true); }
       finally { $('submit').disabled = false; }
     });
+
+    setMode(mode === 'login' && new URLSearchParams(location.search).has('signup') ? 'signup' : mode, true);
   </script>
 </body>
 </html>

@@ -37,7 +37,7 @@ python3 -m http.server 8080   # oppure: npx serve .
 
 1. Crea un progetto su [supabase.com](https://supabase.com).
 2. **SQL Editor** → incolla ed esegui `supabase/schema.sql`.
-3. **Authentication → URL Configuration**: imposta *Site URL* sul dominio Vercel e aggiungi `https://tuo-dominio.vercel.app/dashboard` tra i *Redirect URLs*.
+3. **Authentication → URL Configuration**: imposta *Site URL* sul dominio Vercel e aggiungi tra i *Redirect URLs* sia `https://tuo-dominio.vercel.app/dashboard` sia `https://tuo-dominio.vercel.app/accedi` (serve al link "Password dimenticata?").
 4. **Project Settings → API**: copia *Project URL* e *anon public key* in `assets/config.js`.
    La anon key è pubblica per design: la sicurezza è garantita dalle policy RLS dello schema. **Non** mettere mai la `service_role` key nel sito.
 
