@@ -42,13 +42,16 @@
     <a href="dashboard.html" class="mt-5 text-center text-sm text-slate-400 hover:text-emerald-400">Entra direttamente nella dashboard demo →</a>
   </main>
 
-  <script src="assets/config.js"></script>
+  <script src="assets/config.js?v=2"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const cfg = window.LR_CONFIG || {};
-    const live = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase);
+    // Demo SOLO se Supabase non è configurato. Se è configurato ma la libreria non si carica
+    // (rete, blocco pubblicità, cache) mostriamo un errore: mai accettare credenziali a caso.
+    const configured = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY);
+    const live = configured && !!window.supabase;
     const sb = live ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
-    if (live) document.getElementById('demo-note').remove();
+    if (configured) document.getElementById('demo-note').remove();
 
     let signup = false;
     const $ = (id) => document.getElementById(id);
@@ -70,6 +73,7 @@
       if (!/^\S+@\S+\.\S+$/.test(email)) return msg('Inserisci un indirizzo email valido.', true);
       if (password.length < 6) return msg('La password deve avere almeno 6 caratteri.', true);
 
+      if (configured && !live) return msg('Impossibile contattare il servizio di accesso. Ricarica la pagina o disattiva il blocco pubblicità e riprova.', true);
       if (!live) { localStorage.setItem('lr_user', email); location.href = 'dashboard.html'; return; }
 
       $('submit').disabled = true;

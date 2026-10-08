@@ -10,7 +10,8 @@
  */
 (function () {
   const cfg = window.LR_CONFIG || {};
-  const live = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase);
+  const configured = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY);
+  const live = configured && !!window.supabase;
   const sb = live ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
 
   const KEY = 'lr_demo_data_v1';
@@ -52,6 +53,8 @@
   const demoSave = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
   async function init() {
+    // Configurato ma libreria non caricata: errore, mai demo silenziosa con dati finti
+    if (configured && !live) throw new Error('impossibile contattare Supabase. Ricarica la pagina o disattiva il blocco pubblicità.');
     if (!live) {
       let saved = null;
       try { saved = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}

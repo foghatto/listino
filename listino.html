@@ -22,7 +22,7 @@
     <p id="msg" class="absolute inset-0 grid place-items-center bg-slate-950 p-8 text-center text-slate-400" role="status">Caricamento…</p>
   </div>
 
-  <script src="/assets/config.js"></script>
+  <script src="/assets/config.js?v=2"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/data.js"></script>
   <script>
@@ -33,6 +33,7 @@
       const slug = m ? decodeURIComponent(m[1]) : qs.get('s');
       const cfg = window.LR_CONFIG || {};
       const live = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase);
+      const configured = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY);
       const sb = live ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
       const show = (t) => { $('msg').textContent = t; $('msg').classList.remove('hidden'); };
 
@@ -41,7 +42,7 @@
       try {
         if (slug) {
           // Listino reale: letto da Supabase (policy RLS: lettura pubblica)
-          if (!live) return show('Listino non disponibile.');
+          if (!live) return show(configured ? 'Impossibile caricare il listino. Ricarica la pagina.' : 'Listino non disponibile.');
           const { data: v, error } = await sb.from('venues')
             .select('id,name,tagline,whatsapp,cover_url,plan').eq('slug', slug).maybeSingle();
           if (error) throw error;
