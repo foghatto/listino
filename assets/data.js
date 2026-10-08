@@ -111,7 +111,7 @@
 
     html += o.pro
       ? `<p class="mt-8 text-center text-[10px] text-slate-600">${esc(d.business.name)} · Listino digitale</p>`
-      : `<a href="index.html" class="mt-8 mx-auto flex w-fit items-center gap-1.5 rounded-full border border-slate-800 px-3 py-1.5 text-[10px] text-slate-400"><span class="text-emerald-400">●</span> ${esc(t.powered)}</a>`;
+      : `<a href="/" class="mt-8 mx-auto flex w-fit items-center gap-1.5 rounded-full border border-slate-800 px-3 py-1.5 text-[10px] text-slate-400"><span class="text-emerald-400">●</span> ${esc(t.powered)}</a>`;
     html += `</div>`;
 
     el.innerHTML = html;

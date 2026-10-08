@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Listino — ListinoRapido</title>
+  <meta name="theme-color" content="#020617">
+  <!-- Percorsi assoluti: questa pagina viene servita anche su /s/nome-attivita (vedi vercel.json) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };</script>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body class="bg-slate-950 text-slate-300 antialiased">
+
+  <!-- Solo il listino: è la pagina che si apre quando il cliente inquadra il QR code -->
+  <div class="relative mx-auto h-[100dvh] max-w-md border-x border-slate-900">
+    <div id="langs" class="absolute right-3 top-3 z-20 hidden gap-1.5" role="group" aria-label="Lingua"></div>
+    <main id="menu" class="h-full overflow-y-auto" style="scrollbar-width:none"></main>
+    <p id="msg" class="absolute inset-0 grid place-items-center bg-slate-950 p-8 text-center text-slate-400" role="status">Caricamento…</p>
+  </div>
+
+  <script src="/assets/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/data.js"></script>
+  <script>
+    (async () => {
+      const $ = (id) => document.getElementById(id);
+      const qs = new URLSearchParams(location.search);
+      const m = location.pathname.match(/\/s\/([^/]+)\/?$/);
+      const slug = m ? decodeURIComponent(m[1]) : qs.get('s');
+      const cfg = window.LR_CONFIG || {};
+      const live = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase);
+      const sb = live ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
+      const show = (t) => { $('msg').textContent = t; $('msg').classList.remove('hidden'); };
+
+      let data, pro = false, venueId = null, lang = 'it';
+
+      try {
+        if (slug) {
+          // Listino reale: letto da Supabase (policy RLS: lettura pubblica)
+          if (!live) return show('Listino non disponibile.');
+          const { data: v, error } = await sb.from('venues')
+            .select('id,name,tagline,whatsapp,cover_url,plan').eq('slug', slug).maybeSingle();
+          if (error) throw error;
+          if (!v) return show('Questo listino non esiste o è stato rimosso.');
+          const [c, s] = await Promise.all([
+            sb.from('categories').select('id,name,name_i18n,position').eq('venue_id', v.id).order('position'),
+            sb.from('services').select('*').eq('venue_id', v.id).eq('visible', true).order('position')
+          ]);
+          if (c.error) throw c.error;
+          if (s.error) throw s.error;
+          data = {
+            business: { name: v.name, tagline: { it: v.tagline || '' }, whatsapp: v.whatsapp || '', cover: v.cover_url || LR.DATA.business.cover },
+            categories: c.data.map((x) => ({
+              id: x.id,
+              name: Object.assign({}, x.name_i18n, { it: x.name }),
+              items: s.data.filter((y) => y.category_id === x.id).map((y) => ({
+                id: y.id,
+                name: Object.assign({}, y.name_i18n, { it: y.name }),
+                desc: Object.assign({}, y.description_i18n, { it: y.description || '' }),
+                price: y.price_cents / 100, min: y.duration_min || 0, img: y.image_url || ''
+              }))
+            }))
+          };
+          pro = v.plan === 'pro';
+          venueId = v.id;
+        } else {
+          // Nessun link: listino di esempio (?demo=pro per la versione Professionale)
+          pro = qs.get('demo') === 'pro';
+          data = pro ? LR.DATA : LR.freeData();
+        }
+      } catch (e) {
+        return show('Impossibile caricare il listino. Riprova tra poco.');
+      }
+
+      // Statistiche (PRO): una visita per sessione + click sul tasto WhatsApp
+      const track = (kind, serviceId) => {
+        if (!venueId) return;
+        sb.from('page_views').insert({ venue_id: venueId, kind, service_id: serviceId || null }).then(() => {}, () => {});
+      };
+      try {
+        if (!sessionStorage.getItem('lr_v_' + venueId)) { sessionStorage.setItem('lr_v_' + venueId, '1'); track('view'); }
+      } catch (e) { track('view'); }
+
+      const el = $('menu');
+      const draw = () => {
+        const keep = el.scrollTop;
+        LR.renderListino(el, { pro, lang, data, onView: (id) => track('whatsapp_click', id) });
+        el.scrollTop = keep;
+      };
+
+      document.title = data.business.name + ' — Listino';
+      draw();
+      $('msg').classList.add('hidden');
+
+      // Cambio lingua (solo PRO)
+      if (pro) {
+        const box = $('langs');
+        box.innerHTML = ['it', 'en', 'fr'].map((l) =>
+          `<button data-l="${l}" class="rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase backdrop-blur ${l === lang ? 'border-emerald-500 bg-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-950/80 text-slate-200'}">${l}</button>`).join('');
+        box.classList.remove('hidden'); box.classList.add('flex');
+        box.addEventListener('click', (e) => {
+          const b = e.target.closest('[data-l]'); if (!b) return;
+          lang = b.dataset.l;
+          box.querySelectorAll('button').forEach((x) => {
+            const on = x === b;
+            x.className = `rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase backdrop-blur ${on ? 'border-emerald-500 bg-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-950/80 text-slate-200'}`;
+          });
+          draw();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

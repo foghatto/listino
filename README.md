@@ -8,10 +8,12 @@ Sito statico multi-pagina (HTML + Tailwind + JS vanilla), pronto per **GitHub �
 | File | Cosa contiene |
 | --- | --- |
 | `index.html` | Landing: navbar, hero con splash e telefono scrollabile, scritte che scorrono, problema/soluzione, come funziona, esempio live (QR), prezzi, footer |
-| `dashboard.html` | Dashboard fittizia (si apre da "Inizia gratis"): categorie, servizi, prezzi, anteprima, QR, statistiche (bloccate nel Free) |
+| `listino.html` | **Pagina pubblica del listino** (solo il listino, a schermo intero): è ciò che apre il QR. Serve anche su `/s/nome-attivita`. `?demo=1` / `?demo=pro` per gli esempi |
+| `dashboard.html` | Dashboard: categorie, servizi, prezzi, anteprima, QR e link, profilo (nome, WhatsApp, link), statistiche (PRO). Dati di prova senza Supabase, dati reali con Supabase |
 | `demo-pro.html` | Demo del piano Professionale: telefono scrollabile senza logo piattaforma, lingue IT/EN/FR, statistiche che reagiscono ai click |
 | `accedi.html` | Accesso / registrazione (demo oppure Supabase Auth reale) |
 | `note-legali.html` | Privacy, termini, cookie (**bozza da completare**) |
+| `assets/store.js` | Livello dati della dashboard: localStorage (demo) oppure Supabase |
 | `assets/data.js` | Dati di prova + funzione che disegna il listino (usata da landing, dashboard e demo) |
 | `assets/config.js` | URL e anon key di Supabase |
 | `supabase/schema.sql` | Tabelle, limite 10 servizi del Free, policy RLS, bucket immagini |
@@ -41,13 +43,22 @@ python3 -m http.server 8080   # oppure: npx serve .
 
 Con `config.js` vuoto tutto funziona in **modalità demo** (accesso finto, dati nel `localStorage` del browser).
 
-### Cosa è già collegato e cosa no
+### Cosa è collegato
 
-- ✅ `accedi.html`: registrazione e login reali con Supabase Auth, se `config.js` è compilato.
-- ✅ Schema database con RLS, limite Free di 10 servizi applicato lato database, bucket immagini.
-- ⏳ `dashboard.html` usa ancora dati di prova nel browser: il passo successivo è sostituire `localStorage` con letture/scritture sulle tabelle `venues`, `categories`, `services`.
-- ⏳ Pagina pubblica del listino per slug (`/s/<slug>`) e raccolta delle statistiche (`page_views`).
-- ⏳ Pagamento del piano PRO: il campo `venues.plan` può essere cambiato solo dal backend (service_role, es. webhook Stripe), mai dal client.
+- ✅ `accedi.html`: registrazione e login reali con Supabase Auth.
+- ✅ `dashboard.html`: al primo accesso crea la tua attività (piano Free) e salva categorie, servizi e profilo nelle tabelle.
+- ✅ `listino.html` / `/s/<link>`: legge il listino da Supabase (lettura pubblica) e registra visite e click WhatsApp in `page_views`.
+- ✅ Limite di 10 servizi del Free applicato anche dal database.
+- ⏳ Caricamento delle foto dei servizi (bucket `service-images` già predisposto nello schema, manca il pulsante di upload).
+- ⏳ Pagamento del piano PRO: `venues.plan` può essere cambiato solo dal backend (service_role, es. webhook Stripe), mai dal browser.
+
+Per provare il piano PRO prima di avere i pagamenti, esegui nel SQL Editor di Supabase:
+
+```sql
+update public.venues set plan = 'pro' where slug = 'il-tuo-link';
+```
+
+> Il link `/s/<link>` usa una riscrittura di Vercel (`vercel.json`). In locale con `python3 -m http.server` usa `listino.html?s=<link>`.
 
 ## Immagini
 
