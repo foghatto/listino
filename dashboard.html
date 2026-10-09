@@ -20,7 +20,7 @@
       <a href="index.html" class="text-lg font-extrabold text-white">Listino<span class="text-emerald-400">Rapido</span></a>
       <div class="flex items-center gap-3">
         <span id="plan-badge" class="hidden rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-400 sm:inline">Piano Free</span>
-        <a id="upgrade" href="demo-pro.html" class="btn btn-primary !px-4 !py-2 text-sm">Passa a PRO</a>
+        <a id="upgrade" href="demo-pro.html" title="Il piano PRO non è ancora acquistabile: guarda la demo" class="btn btn-ghost !px-4 !py-2 text-sm">PRO in arrivo · vedi demo</a>
         <button id="logout" class="text-sm text-slate-400 hover:text-white">Esci</button>
       </div>
     </div>
@@ -56,7 +56,7 @@
             <span id="count" class="text-slate-400">0 / 10</span>
           </div>
           <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-800"><div id="bar" class="h-full rounded-full bg-emerald-500 transition-all" style="width:0"></div></div>
-          <p id="limit-msg" class="mt-2 hidden text-xs text-amber-300">Hai raggiunto il limite del piano Free. <a id="limit-link" href="demo-pro.html" class="underline">Scopri PRO: servizi illimitati</a>.</p>
+          <p id="limit-msg" class="mt-2 hidden text-xs text-amber-300">Hai raggiunto il limite di 10 servizi del piano Free. Il piano PRO (servizi illimitati) non è ancora acquistabile: <a id="limit-link" href="demo-pro.html" class="underline">guarda la demo PRO</a>.</p>
         </div>
 
         <div class="grid items-start gap-4 md:grid-cols-2">
@@ -85,7 +85,11 @@
 
       <!-- VISTA ANTEPRIMA -->
       <section id="view-anteprima" class="view hidden">
-        <p class="mb-4 text-sm text-slate-400">Così i clienti vedono il tuo listino. <a id="open-public" target="_blank" rel="noopener" class="text-emerald-400 underline">Aprilo a schermo intero ↗</a></p>
+        <p class="mb-3 text-sm text-slate-400">Così i clienti vedono il tuo listino. <a id="open-public" target="_blank" rel="noopener" class="text-emerald-400 underline">Aprilo a schermo intero ↗</a></p>
+        <div class="mb-4 flex flex-wrap gap-2">
+          <button type="button" class="btn btn-ghost !px-4 !py-2 text-sm" data-cover="change">📷 Cambia foto copertina</button>
+          <button type="button" class="btn btn-ghost !px-4 !py-2 text-sm" data-goto="profilo">Imposta numero WhatsApp</button>
+        </div>
         <div class="phone"><div id="preview" class="phone-screen"></div></div>
       </section>
 
@@ -122,7 +126,9 @@
           </div>
           <div>
             <label for="p-wa" class="mb-1.5 block text-sm font-medium">Numero WhatsApp per le prenotazioni</label>
-            <input id="p-wa" class="input" inputmode="numeric" placeholder="393331234567 (con prefisso, senza + né spazi)">
+            <input id="p-wa" class="input" inputmode="tel" autocomplete="tel" placeholder="Es. 333 123 4567">
+            <p class="mt-1 text-xs text-slate-500">Accanto a ogni servizio i clienti vedranno il pulsante verde <span class="font-semibold text-emerald-400">Prenota</span> con il simbolo di WhatsApp: toccandolo ti scrivono già con il nome del trattamento. Se non inserisci il prefisso aggiungiamo il 39 (Italia).</p>
+            <p id="p-wa-info" class="mt-1 text-xs text-slate-400"></p>
           </div>
           <div>
             <label for="p-slug" class="mb-1.5 block text-sm font-medium">Link personalizzato</label>
@@ -132,6 +138,17 @@
           <p id="p-msg" class="hidden rounded-lg border px-3 py-2 text-sm" role="status"></p>
           <button class="btn btn-primary" type="submit">Salva</button>
         </form>
+
+        <div class="card mt-6 max-w-xl p-6">
+          <h2 class="text-lg font-bold text-white">Foto di copertina</h2>
+          <p class="mt-1 text-sm text-slate-400">È l'immagine in alto nel tuo listino (la tua struttura, il tuo studio).</p>
+          <div id="cover-box" class="relative mt-4 h-40 overflow-hidden rounded-xl border border-slate-800 img-fallback"><img id="cover-img" alt="Foto di copertina" class="absolute inset-0 h-full w-full object-cover" onerror="this.style.display='none'"></div>
+          <p id="cover-note" class="mt-2 hidden text-xs text-amber-300">Questa è una foto di esempio: caricane una tua.</p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button type="button" id="cover-up" class="btn btn-primary !px-4 !py-2 text-sm" data-cover="change">Carica foto</button>
+            <button type="button" id="cover-rm" class="btn btn-ghost !px-4 !py-2 text-sm" data-cover="remove">Rimuovi</button>
+          </div>
+        </div>
       </section>
 
       <!-- VISTA STATISTICHE -->
@@ -151,7 +168,7 @@
           <div class="absolute inset-0 grid place-items-center bg-slate-950/70 p-6 text-center">
             <div>
               <p class="text-lg font-bold text-white">Le statistiche sono incluse nel piano PRO</p>
-              <p class="mx-auto mt-1 max-w-sm text-sm text-slate-400">Scopri quanti clienti aprono il listino e quanti ti scrivono su WhatsApp.</p>
+              <p class="mx-auto mt-1 max-w-sm text-sm text-slate-400">Scopri quanti clienti aprono il listino e quanti ti scrivono su WhatsApp. Il piano PRO non è ancora acquistabile: per ora usa il piano Free.</p>
               <a id="stats-cta" href="demo-pro.html" class="btn btn-primary mt-4">Guarda la demo PRO</a>
             </div>
           </div>
@@ -168,6 +185,34 @@
       </section>
     </main>
   </div>
+
+  <input id="file" type="file" accept="image/jpeg,image/png,image/webp,image/*" class="hidden">
+
+  <!-- Modifica servizio -->
+  <dialog id="svc-dialog" class="w-[min(30rem,92vw)] rounded-2xl border border-slate-700 bg-slate-900 p-0 text-slate-300 backdrop:bg-black/70">
+    <form id="edit-form" class="space-y-3 p-6" novalidate>
+      <h2 class="text-lg font-bold text-white">Modifica servizio</h2>
+      <div class="flex items-center gap-3">
+        <div id="ed-thumb" class="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-slate-700 img-fallback"></div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" id="ed-photo" class="btn btn-ghost !px-3 !py-1.5 text-xs">Carica foto</button>
+          <button type="button" id="ed-photo-rm" class="btn btn-ghost !px-3 !py-1.5 text-xs">Rimuovi foto</button>
+        </div>
+      </div>
+      <div><label for="ed-name" class="mb-1 block text-sm font-medium">Nome</label><input id="ed-name" class="input" maxlength="60" required></div>
+      <div><label for="ed-cat" class="mb-1 block text-sm font-medium">Categoria</label><select id="ed-cat" class="input"></select></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label for="ed-price" class="mb-1 block text-sm font-medium">Prezzo €</label><input id="ed-price" class="input" type="number" min="0" step="0.5" required></div>
+        <div><label for="ed-min" class="mb-1 block text-sm font-medium">Durata (min)</label><input id="ed-min" class="input" type="number" min="5" step="5"></div>
+      </div>
+      <div><label for="ed-desc" class="mb-1 block text-sm font-medium">Descrizione</label><textarea id="ed-desc" class="input" rows="3" maxlength="120"></textarea></div>
+      <p id="ed-msg" class="hidden rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300" role="alert"></p>
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" id="ed-cancel" class="btn btn-ghost !px-4 !py-2 text-sm">Annulla</button>
+        <button type="submit" class="btn btn-primary !px-4 !py-2 text-sm">Salva modifiche</button>
+      </div>
+    </form>
+  </dialog>
 
   <div id="toast" class="pointer-events-none fixed bottom-5 left-1/2 z-50 hidden -translate-x-1/2 rounded-xl border px-4 py-2.5 text-sm shadow-xl" role="status"></div>
 
@@ -243,16 +288,20 @@
           <div class="mt-3 divide-y divide-slate-800">
             ${c.items.length ? c.items.map((it) => `
               <div class="flex items-center gap-3 py-3" data-item="${esc(it.id)}">
-                <div class="h-12 w-12 shrink-0 overflow-hidden rounded-lg img-fallback">${it.img ? `<img src="${esc(it.img)}" alt="" class="h-full w-full object-cover" loading="lazy" onerror="this.remove()">` : ''}</div>
+                <button type="button" class="group relative h-14 w-14 shrink-0 overflow-hidden rounded-lg img-fallback" data-photo="${esc(it.id)}" title="${it.img ? 'Sostituisci foto' : 'Aggiungi foto'}" aria-label="${it.img ? 'Sostituisci foto' : 'Aggiungi foto'}">
+                  ${it.img ? `<img src="${esc(it.img)}" alt="" class="h-full w-full object-cover" loading="lazy" onerror="this.remove()">` : ''}
+                  <span class="absolute inset-x-0 bottom-0 bg-slate-950/75 py-0.5 text-center text-[10px] font-semibold text-emerald-300">📷 ${it.img ? 'Cambia' : 'Aggiungi'}</span>
+                </button>
                 <div class="min-w-0 flex-1">
                   <input class="row-input text-sm font-semibold text-white" data-edit="name" value="${esc(it.name.it)}" aria-label="Nome servizio">
-                  <p class="px-1 text-xs text-slate-500">${esc(it.min)} min</p>
+                  <p class="px-1 text-xs text-slate-500">${esc(it.min)} min${it.desc.it ? ' · ' + esc(it.desc.it) : ''}</p>
                 </div>
                 <div class="flex items-center gap-1">
                   <input type="number" min="0" step="0.5" class="row-input w-20 text-right text-sm font-bold text-emerald-400" data-edit="price" value="${esc(it.price)}" aria-label="Prezzo">
                   <span class="text-sm text-slate-500">€</span>
                 </div>
-                <button class="px-2 text-slate-500 hover:text-red-400" data-del-item="${esc(it.id)}" aria-label="Elimina servizio">✕</button>
+                <button class="px-2 text-slate-400 hover:text-emerald-400" data-edit-item="${esc(it.id)}" title="Modifica servizio" aria-label="Modifica servizio">✎</button>
+                <button class="px-2 text-slate-500 hover:text-red-400" data-del-item="${esc(it.id)}" title="Elimina servizio" aria-label="Elimina servizio">✕</button>
               </div>`).join('') : '<p class="py-3 text-sm text-slate-500">Nessun servizio in questa categoria.</p>'}
           </div>
         </div>`).join('') : '<p class="card p-8 text-center text-slate-400">Nessuna categoria. Creane una per iniziare.</p>';
@@ -264,7 +313,7 @@
 
     function renderPreview() {
       // L'anteprima mostra solo i servizi con almeno un elemento; il listino pubblico è identico
-      LR.renderListino($('preview'), { pro: isPro(), lang: 'it', data: S });
+      LR.renderListino($('preview'), { pro: isPro(), lang: 'it', data: S, preview: true });
     }
 
     // --- Categorie e servizi ---
@@ -295,15 +344,19 @@
 
     $('list').addEventListener('click', (e) => {
       const dc = e.target.closest('[data-del-cat]'), di = e.target.closest('[data-del-item]');
+      const ph = e.target.closest('[data-photo]'), ed = e.target.closest('[data-edit-item]');
+      if (ph) { const f = findItem(ph.dataset.photo); if (f) changePhoto(f.it, f.cat); }
+      if (ed) openEdit(ed.dataset.editItem);
       if (dc && confirm('Eliminare la categoria e i suoi servizi?')) {
         S.categories = S.categories.filter((c) => c.id !== dc.dataset.delCat);
         render();
         run(() => LRStore.deleteCategory(dc.dataset.delCat));
       }
       if (di) {
+        const f = findItem(di.dataset.delItem), old = f && f.it.img;
         S.categories.forEach((c) => { c.items = c.items.filter((i) => i.id !== di.dataset.delItem); });
         render();
-        run(() => LRStore.deleteService(di.dataset.delItem));
+        run(async () => { await LRStore.deleteService(di.dataset.delItem); await LRStore.removeImage(old); });
       }
     });
 
@@ -319,18 +372,147 @@
       if (f === 'name') { const v = e.target.value.trim(); if (!v) return render(); it.name.it = v; }
       if (f === 'price') { const p = parseFloat(e.target.value); if (!(p >= 0)) return render(); it.price = p; }
       render();
-      run(() => LRStore.updateService(it), 'Salvato: il listino è aggiornato per tutti i clienti.');
+      run(() => LRStore.updateService(it, cat.id), 'Salvato: il listino è aggiornato per tutti i clienti.');
+    });
+
+    // --- Foto (servizi e copertina) ---
+    const findItem = (id) => {
+      for (const cat of S.categories) { const it = cat.items.find((i) => i.id === id); if (it) return { it, cat }; }
+      return null;
+    };
+    // Apre il selettore file e restituisce il file scelto (o null se annullato)
+    function chooseFile() {
+      return new Promise((resolve) => {
+        const inp = $('file');
+        inp.value = '';
+        inp.onchange = () => resolve(inp.files && inp.files[0] || null);
+        inp.oncancel = () => resolve(null);
+        inp.click();
+      });
+    }
+    let busy = false;
+    async function changePhoto(it, cat) {
+      if (busy) return;
+      const file = await chooseFile(); if (!file) return;
+      busy = true; toast('Carico la foto…');
+      try {
+        const old = it.img;
+        it.img = await LRStore.uploadImage(file, 'service');
+        render();
+        await LRStore.updateService(it, cat.id);
+        await LRStore.removeImage(old);
+        toast('Foto aggiornata: i clienti la vedono subito.');
+      } catch (e) { toast(e.message || 'Foto non caricata.', true); await reload(); }
+      finally { busy = false; }
+    }
+    async function removePhoto(it, cat) {
+      const old = it.img; it.img = '';
+      render();
+      await run(async () => { await LRStore.updateService(it, cat.id); await LRStore.removeImage(old); }, 'Foto rimossa.');
+    }
+    async function changeCover() {
+      if (busy) return;
+      const file = await chooseFile(); if (!file) return;
+      busy = true; toast('Carico la foto…');
+      try {
+        const old = S.business.cover;
+        S.business.cover = await LRStore.uploadImage(file, 'cover');
+        await LRStore.updateBusiness();
+        render();
+        if (old && old !== LRStore.defaultCover) await LRStore.removeImage(old);
+        toast('Foto di copertina aggiornata.');
+      } catch (e) { toast(e.message || 'Foto non caricata.', true); await reload(); }
+      finally { busy = false; }
+    }
+    async function removeCover() {
+      const old = S.business.cover;
+      S.business.cover = LRStore.defaultCover;
+      render();
+      await run(async () => { await LRStore.updateBusiness(); if (old !== LRStore.defaultCover) await LRStore.removeImage(old); }, 'Foto di copertina rimossa.');
+    }
+    document.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-cover]');
+      if (c) { c.dataset.cover === 'remove' ? removeCover() : changeCover(); }
+      const g = e.target.closest('[data-goto]');
+      if (g) document.querySelector('.navbtn[data-view="' + g.dataset.goto + '"]').click();
+    });
+
+    // --- Modifica servizio (finestra) ---
+    let editing = null;                              // { it, cat }
+    const edThumb = () => {
+      const img = editing.it.img;
+      $('ed-thumb').innerHTML = img ? `<img src="${esc(img)}" alt="" class="h-full w-full object-cover" onerror="this.remove()">` : '';
+      $('ed-photo').textContent = img ? 'Sostituisci foto' : 'Carica foto';
+      $('ed-photo-rm').classList.toggle('hidden', !img);
+    };
+    function openEdit(id) {
+      const f = findItem(id); if (!f) return;
+      editing = f;
+      $('ed-name').value = f.it.name.it;
+      $('ed-cat').innerHTML = S.categories.map((c) => `<option value="${esc(c.id)}"${c.id === f.cat.id ? ' selected' : ''}>${esc(c.name.it)}</option>`).join('');
+      $('ed-price').value = f.it.price;
+      $('ed-min').value = f.it.min || '';
+      $('ed-desc').value = f.it.desc.it || '';
+      $('ed-msg').classList.add('hidden');
+      edThumb();
+      $('svc-dialog').showModal();
+    }
+    $('ed-cancel').addEventListener('click', () => $('svc-dialog').close());
+    $('ed-photo').addEventListener('click', async () => {
+      const file = await chooseFile(); if (!file) return;
+      try { toast('Carico la foto…'); const old = editing.it.img; editing.it.img = await LRStore.uploadImage(file, 'service'); editing.old = (editing.old || []).concat(old || []); edThumb(); toast('Foto pronta: premi "Salva modifiche".'); }
+      catch (e) { toast(e.message, true); }
+    });
+    $('ed-photo-rm').addEventListener('click', () => { editing.old = (editing.old || []).concat(editing.it.img || []); editing.it.img = ''; edThumb(); });
+    $('svc-dialog').addEventListener('cancel', () => {});
+    $('svc-dialog').addEventListener('close', () => { if (editing && !editing.saved) reload(); editing = null; });   // annullato: ripristina lo stato salvato
+    $('edit-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = (t) => { $('ed-msg').textContent = t; $('ed-msg').classList.remove('hidden'); };
+      const name = $('ed-name').value.trim(), price = parseFloat($('ed-price').value), min = parseInt($('ed-min').value, 10) || 0;
+      if (!name) return err('Inserisci il nome del servizio.');
+      if (!(price >= 0)) return err('Inserisci un prezzo valido.');
+      const { it, cat } = editing, newCat = S.categories.find((c) => c.id === $('ed-cat').value) || cat;
+      it.name.it = name; it.price = price; it.min = min; it.desc.it = $('ed-desc').value.trim();
+      if (newCat !== cat) { cat.items = cat.items.filter((i) => i.id !== it.id); newCat.items.push(it); }
+      editing.saved = true;
+      const olds = (editing.old || []).filter((u) => u && u !== it.img);
+      $('svc-dialog').close();
+      render();
+      run(async () => { await LRStore.updateService(it, newCat.id); for (const u of olds) await LRStore.removeImage(u); }, 'Servizio aggiornato.');
     });
 
     // --- Profilo ---
+    // Numero → formato internazionale per wa.me (solo cifre; se manca il prefisso, Italia = 39)
+    function normWa(v) {
+      let d = String(v || '').replace(/\D/g, '').replace(/^00/, '');
+      if (!d) return '';
+      if (/^3\d{8,9}$/.test(d)) d = '39' + d;      // cellulare italiano senza prefisso
+      return d;
+    }
+    function fillCover() {
+      const c = S.business.cover || '';
+      $('cover-img').style.display = ''; $('cover-img').src = c;
+      const sample = !c || c === LRStore.defaultCover;
+      $('cover-note').classList.toggle('hidden', !sample);
+      $('cover-up').textContent = sample ? 'Carica foto' : 'Sostituisci foto';
+      $('cover-rm').classList.toggle('hidden', sample);
+    }
     function fillProfile() {
+      fillCover();
       if (document.activeElement && document.activeElement.closest('#profile-form')) return;   // non sovrascrivere mentre scrivi
       $('p-name').value = S.business.name || '';
       $('p-tagline').value = (S.business.tagline && S.business.tagline.it) || '';
       $('p-wa').value = S.business.whatsapp || '';
       $('p-slug').value = S.business.slug || '';
       $('p-url').textContent = publicUrl();
+      waInfo();
     }
+    function waInfo() {
+      const n = normWa($('p-wa').value), el = $('p-wa-info');
+      el.innerHTML = n ? `Link di prenotazione: <a class="text-emerald-400 underline" target="_blank" rel="noopener" href="https://wa.me/${n}">wa.me/${n}</a> (provalo)` : 'Nessun numero: i clienti non vedranno il pulsante Prenota.';
+    }
+    $('p-wa').addEventListener('input', waInfo);
     $('p-slug').addEventListener('input', () => {
       const base = S.mode === 'supabase' ? new URL('/s/', location.origin).href : '';
       $('p-url').textContent = S.mode === 'supabase' ? base + $('p-slug').value : publicUrl();
@@ -339,10 +521,10 @@
       e.preventDefault();
       const msg = (t, err) => { const m = $('p-msg'); m.textContent = t; m.className = 'rounded-lg border px-3 py-2 text-sm ' + (err ? 'border-red-500/40 bg-red-500/10 text-red-300' : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'); };
       const name = $('p-name').value.trim();
-      const wa = $('p-wa').value.replace(/\D/g, '');
+      const wa = normWa($('p-wa').value);
       const slug = $('p-slug').value.trim().toLowerCase();
       if (!name) return msg('Inserisci il nome dell\'attività.', true);
-      if (wa && wa.length < 8) return msg('Numero WhatsApp troppo corto: includi il prefisso (es. 39…).', true);
+      if (wa && (wa.length < 8 || wa.length > 15)) return msg('Numero WhatsApp non valido: controlla le cifre e il prefisso (es. 39 per l\'Italia).', true);
       if (S.mode === 'supabase' && !SLUG_RE.test(slug)) return msg('Il link può contenere solo lettere minuscole, numeri e trattini (da 3 a 40 caratteri).', true);
 
       const before = JSON.stringify(S.business);
@@ -350,7 +532,7 @@
       S.business.tagline = { it: $('p-tagline').value.trim() };
       S.business.whatsapp = wa;
       if (S.mode === 'supabase') S.business.slug = slug;
-      try { await LRStore.updateBusiness(); msg('Salvato.'); render(); }
+      try { await LRStore.updateBusiness(); msg(wa ? 'Salvato. Il pulsante Prenota (WhatsApp) è attivo accanto ai servizi.' : 'Salvato. Senza numero WhatsApp il pulsante Prenota non viene mostrato.'); $('p-wa').value = wa; render(); }
       catch (err) { S.business = JSON.parse(before); msg(err.message, true); }
     });
 
@@ -415,11 +597,9 @@
       if (!S) return;
       $('loading').classList.add('hidden');
       $('app').classList.remove('hidden');
+      $('stats-cta').href = 'demo-pro.html';   // sempre la demo PRO (il PRO non è ancora acquistabile)
       if (S.mode === 'supabase') {
         $('subtitle').textContent = 'Accesso come ' + S.email + '. Ogni modifica è salvata subito nel tuo listino.';
-        $('upgrade').href = 'index.html#prezzi';
-        $('stats-cta').href = 'index.html#prezzi';
-        $('limit-link').href = 'index.html#prezzi';
       } else {
         $('subtitle').textContent = 'Questa è una dashboard di prova con dati fittizi: modificali liberamente.';
         $('reset').classList.remove('hidden');

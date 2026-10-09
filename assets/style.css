@@ -55,3 +55,20 @@ body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; -
 /* Menu mobile */
 #mobile-menu { display: none; }
 #mobile-menu.open { display: block; }
+
+/* Come funziona: passaggi cliccabili a sinistra, immagine e testo a destra */
+.step-tabs::before { content: ""; position: absolute; left: 35px; top: 24px; bottom: 24px; width: 1px; background: #1e293b; z-index: 0; }
+.step-tab { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; border-radius: 16px; border: 1px solid #1e293b; background: rgba(15,23,42,.55); text-align: left; color: #cbd5e1; cursor: pointer; transition: border-color .2s, background .2s; }
+.step-tab:hover { border-color: #334155; }
+.step-tab:focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }
+.step-ico { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #1e293b; color: #94a3b8; flex: none; transition: background .2s, color .2s; }
+.step-num { display: block; font-size: 11px; font-weight: 700; letter-spacing: .14em; color: #64748b; }
+.step-name { display: block; font-weight: 600; color: #e2e8f0; line-height: 1.3; }
+.step-tab[aria-selected="true"] { border-color: rgba(16,185,129,.45); background: rgba(16,185,129,.08); }
+.step-tab[aria-selected="true"] .step-ico { background: #10b981; color: #022c22; }
+.step-tab[aria-selected="true"] .step-num { color: #34d399; }
+.step-tab[aria-selected="true"] .step-name { color: #fff; }
+.step-in > * { animation: stepin .45s ease both; }
+@keyframes stepin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (max-width: 1023px) { .step-tabs::before { display: none; } }
+@media (prefers-reduced-motion: reduce) { .step-in > * { animation: none; } }

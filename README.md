@@ -70,3 +70,10 @@ Per un sito in produzione scarica le foto che vuoi usare, mettile in `assets/img
 - Compila `note-legali.html` con i dati reali (ora ci sono segnaposto).
 - Tailwind è caricato dal CDN, comodo per partire; per la produzione conviene compilarlo (`npx tailwindcss -o assets/tailwind.css --minify`) e togliere lo script CDN.
 - Sostituisci il numero WhatsApp di prova in `assets/data.js`.
+
+## Novità: foto, modifica servizi, prenotazione WhatsApp
+
+- **Foto**: dalla dashboard puoi caricare, sostituire e rimuovere la foto di ogni servizio e la foto di copertina (Profilo → Foto di copertina). Le immagini vengono ridimensionate nel browser e salvate nel bucket `service-images` (richiede `supabase/schema.sql`; facoltativo: `supabase/storage-limits.sql` per limitare peso e formato).
+- **Modifica servizio**: icona ✎ accanto a ogni servizio (nome, categoria, prezzo, durata, descrizione, foto).
+- **Prenota su WhatsApp**: inserisci il numero in Profilo; accanto a ogni servizio compare il pulsante verde "Prenota" con il simbolo WhatsApp. Senza numero il pulsante non viene mostrato ai clienti.
+- **Piano PRO**: al lancio il sito è gratuito e il PRO **non è acquistabile** (pagina prezzi, demo PRO e dashboard lo indicano). La demo PRO resta visibile.

@@ -64,8 +64,14 @@
   function renderListino(el, opts) {
     const o = Object.assign({ pro: false, lang: 'it', data: DATA }, opts || {});
     const d = o.data, t = T[o.lang] || T.it, lang = T[o.lang] ? o.lang : 'it';
-    const wa = (name) => `https://wa.me/${d.business.whatsapp}?text=${encodeURIComponent((lang === 'en' ? 'Hi, I would like to book: ' : lang === 'fr' ? 'Bonjour, je souhaite réserver : ' : 'Ciao, vorrei prenotare: ') + name)}`;
+    const wa = (name) => `https://wa.me/${String(d.business.whatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent((lang === 'en' ? 'Hi, I would like to book: ' : lang === 'fr' ? 'Bonjour, je souhaite réserver : ' : 'Ciao, vorrei prenotare: ') + name)}`;
     const nm = (x) => (x && (x[lang] || x.it)) || '';
+    const WA_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-2.9-.4-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>';
+    const hasWa = String(d.business.whatsapp || '').replace(/\D/g, '').length >= 8;
+    // Pulsante "Prenota" con simbolo WhatsApp. Senza numero: nascosto ai clienti, visibile ma spento in anteprima.
+    const waBtn = (it, name) => hasWa
+      ? `<a href="${wa(name)}" target="_blank" rel="noopener" data-book="${esc(it.id)}" title="${esc(t.book)}" aria-label="${esc(t.book)}: ${esc(name)}" class="wa-btn inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-slate-950 hover:bg-emerald-400">${WA_ICON}${esc(t.short)}</a>`
+      : (o.preview ? `<span title="Aggiungi il numero WhatsApp nel Profilo" class="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-dashed border-slate-600 px-2.5 py-1 text-[11px] font-semibold text-slate-500">${WA_ICON}${esc(t.short)}</span>` : '');
 
     // I servizi "proOnly" compaiono solo nel piano PRO (il Free ne mostra max 10)
     const cats = d.categories
@@ -101,7 +107,7 @@
             <p class="mt-0.5 text-[11px] text-slate-400 leading-snug line-clamp-2">${esc(nm(it.desc))}</p>
             <div class="mt-1.5 flex items-center justify-between">
               <span class="whitespace-nowrap text-[11px] text-slate-500">${esc(it.min)} ${t.min}</span>
-              <a href="${wa(nm(it.name))}" target="_blank" rel="noopener" data-book="${esc(it.id)}" title="${esc(t.book)}" class="whitespace-nowrap text-[11px] font-semibold text-emerald-400 hover:text-emerald-300">${esc(t.short)} →</a>
+              ${waBtn(it, nm(it.name))}
             </div>
           </div>
         </div>`;

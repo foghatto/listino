@@ -142,9 +142,9 @@ create policy page_views_owner_read on public.page_views for select to authentic
 -- ───────────────────────── Storage immagini servizi ─────────────────────────
 -- Struttura file: service-images/<user_id>/<nome-file>
 
-insert into storage.buckets (id, name, public)
-values ('service-images', 'service-images', true)
-on conflict (id) do nothing;
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('service-images', 'service-images', true, 5242880, array['image/jpeg','image/png','image/webp'])
+on conflict (id) do update set file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists service_images_public_read  on storage.objects;
 drop policy if exists service_images_owner_insert on storage.objects;

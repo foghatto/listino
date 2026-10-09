@@ -1,10 +1,10 @@
 /* ListinoRapido — livello dati della dashboard.
  *
- * Modalità demo     (assets/config.js vuoto):    dati di prova nel localStorage del browser.
- * Modalità Supabase (assets/config.js compilato): account, attività, categorie e servizi reali.
+ * Modalità demo     (assets/config.js vuoto, oppure dashboard.html?demo=1): dati di prova nel localStorage.
+ * Modalità Supabase (assets/config.js compilato): account, attività, categorie, servizi e foto reali.
  *
  * La dashboard lavora sempre sullo stesso oggetto di stato:
- *   { mode, plan, email, business:{ id, slug, name, tagline:{it}, whatsapp, cover },
+ *   { mode, plan, email, userId, business:{ id, slug, name, tagline:{it}, whatsapp, cover },
  *     categories:[ { id, name:{it}, items:[ { id, name:{it}, desc:{it}, price, min, img } ] } ] }
  * e chiama le funzioni qui sotto per salvare ogni modifica.
  */
@@ -16,7 +16,9 @@
   const sb = live ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
 
   const KEY = 'lr_demo_data_v1';
-  const COVER = (window.LR && LR.DATA.business.cover) || '';
+  const BUCKET = 'service-images';
+  const MAX_INPUT = 15 * 1024 * 1024;
+  const COVER = (window.LR && LR.DATA.business.cover) || '';   // foto di esempio mostrata finché non ne carichi una tua
   let S = null;
 
   const uuid = () => (crypto.randomUUID
@@ -51,7 +53,40 @@
     visible: r.visible !== false
   });
 
-  const demoSave = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+  const demoSave = () => {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); }
+    catch (e) { throw new Error('Spazio del browser esaurito: usa foto più piccole o ripristina i dati di prova.'); }
+  };
+
+  // ---------- Foto: ridimensionamento nel browser (JPEG) ----------
+  async function toBlob(file, maxSide, quality) {
+    if (!file || !/^image\//.test(file.type)) throw new Error('Scegli un file immagine (JPG, PNG o WebP).');
+    if (file.size > MAX_INPUT) throw new Error('La foto è troppo pesante (massimo 15 MB).');
+    let bmp;
+    try { bmp = await createImageBitmap(file); }
+    catch (e) {
+      bmp = await new Promise((res, rej) => {
+        const i = new Image();
+        i.onload = () => res(i);
+        i.onerror = () => rej(new Error('Impossibile leggere questa immagine. Prova con un JPG o un PNG.'));
+        i.src = URL.createObjectURL(file);
+      });
+    }
+    const w = bmp.width || bmp.naturalWidth, h = bmp.height || bmp.naturalHeight;
+    const k = Math.min(1, maxSide / Math.max(w, h));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);   // sfondo per i PNG trasparenti
+    ctx.drawImage(bmp, 0, 0, c.width, c.height);
+    return new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error('Impossibile elaborare la foto.'))), 'image/jpeg', quality));
+  }
+  const toDataUrl = (blob) => new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = () => rej(new Error('Lettura della foto non riuscita.'));
+    r.readAsDataURL(blob);
+  });
 
   async function init() {
     // Configurato ma libreria non caricata: errore, mai demo silenziosa con dati finti
@@ -61,7 +96,7 @@
       try { saved = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
       const base = saved && saved.categories ? saved : LR.freeData();
       S = {
-        mode: 'demo', plan: 'free', email: localStorage.getItem('lr_user') || '',
+        mode: 'demo', plan: 'free', email: localStorage.getItem('lr_user') || '', userId: 'demo',
         business: Object.assign({ slug: 'demo' }, base.business),
         categories: base.categories
       };
@@ -88,7 +123,7 @@
     fail(c.error); fail(s.error);
 
     S = {
-      mode: 'supabase', plan: venue.plan, email: user.email,
+      mode: 'supabase', plan: venue.plan, email: user.email, userId: user.id,
       business: {
         id: venue.id, slug: venue.slug, name: venue.name,
         tagline: { it: venue.tagline || '' }, whatsapp: venue.whatsapp || '', cover: venue.cover_url || COVER
@@ -103,7 +138,7 @@
   }
 
   const Store = {
-    live, uuid, init,
+    live, uuid, init, defaultCover: COVER,
 
     async addCategory(cat, position) {
       if (!live) return demoSave();
@@ -127,11 +162,13 @@
         duration_min: it.min || null, image_url: it.img || null, position
       })).error);
     },
-    async updateService(it) {
+    // Aggiorna tutti i campi modificabili: nome, descrizione, prezzo, durata, foto, categoria
+    async updateService(it, catId) {
       if (!live) return demoSave();
       fail((await sb.from('services').update({
         name: it.name.it, description: it.desc.it || null,
-        price_cents: cents(it.price), duration_min: it.min || null
+        price_cents: cents(it.price), duration_min: it.min || null,
+        image_url: it.img || null, category_id: catId
       }).eq('id', it.id)).error);
     },
     async deleteService(id) {
@@ -143,8 +180,29 @@
       if (!live) return demoSave();
       const b = S.business;
       fail((await sb.from('venues').update({
-        name: b.name, tagline: b.tagline.it || null, whatsapp: b.whatsapp || null, slug: b.slug
+        name: b.name, tagline: b.tagline.it || null, whatsapp: b.whatsapp || null, slug: b.slug,
+        cover_url: b.cover && b.cover !== COVER ? b.cover : null
       }).eq('id', b.id)).error);
+    },
+
+    // Carica una foto (kind: 'service' | 'cover') e restituisce l'indirizzo da salvare.
+    // Supabase: file ridimensionato e caricato nel bucket "service-images", cartella dell'utente.
+    // Demo: foto piccola salvata come testo nel browser.
+    async uploadImage(file, kind) {
+      const cover = kind === 'cover';
+      if (!live) return toDataUrl(await toBlob(file, cover ? 900 : 480, 0.72));
+      const blob = await toBlob(file, cover ? 1600 : 1000, 0.82);
+      const path = `${S.userId}/${kind}-${uuid()}.jpg`;
+      const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
+      if (error) throw new Error('Caricamento foto non riuscito: ' + (error.message || 'riprova.'));
+      return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+    },
+    // Elimina dal bucket la vecchia foto (se è una nostra): errori ignorati, non blocca nulla
+    async removeImage(url) {
+      if (!live || !url) return;
+      const m = String(url).match(/\/object\/public\/service-images\/(.+)$/);
+      if (!m) return;
+      try { await sb.storage.from(BUCKET).remove([decodeURIComponent(m[1])]); } catch (e) {}
     },
 
     // Statistiche reali (piano PRO): visite e click WhatsApp registrati dalla pagina pubblica
