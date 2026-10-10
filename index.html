@@ -32,9 +32,13 @@
         <a href="#prezzi" class="text-slate-300 transition hover:text-emerald-400">Prezzi</a>
         <a href="#esempio" class="text-slate-300 transition hover:text-emerald-400">Esempio live</a>
       </div>
-      <div class="hidden items-center gap-3 md:flex">
+      <div id="auth-out" class="hidden items-center gap-3 md:flex">
         <a href="accedi.html" class="btn btn-ghost !py-2 text-sm">Accedi</a>
         <a href="accedi.html?signup=1" class="btn btn-primary !py-2 text-sm">Inizia gratis</a>
+      </div>
+      <div id="auth-in" class="hidden items-center gap-3">
+        <a href="dashboard.html" class="flex max-w-[220px] items-center gap-2 text-sm font-medium text-slate-200 hover:text-emerald-400" title="Vai alla dashboard"><span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-emerald-500 text-xs font-bold text-slate-950" data-user-initial></span><span class="truncate" data-user-name></span></a>
+        <button type="button" data-logout class="btn btn-ghost !py-2 text-sm">Esci</button>
       </div>
       <button id="menu-btn" class="grid h-10 w-10 place-items-center rounded-lg border border-slate-800 md:hidden" aria-label="Apri menu" aria-expanded="false">
         <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -47,9 +51,13 @@
         <a href="#prezzi" class="rounded-lg px-3 py-2 hover:bg-slate-900">Prezzi</a>
         <a href="#esempio" class="rounded-lg px-3 py-2 hover:bg-slate-900">Esempio live</a>
       </div>
-      <div class="grid grid-cols-2 gap-2">
+      <div id="auth-out-m" class="grid grid-cols-2 gap-2">
         <a href="accedi.html" class="btn btn-ghost text-sm">Accedi</a>
         <a href="accedi.html?signup=1" class="btn btn-primary text-sm">Inizia gratis</a>
+      </div>
+      <div id="auth-in-m" class="hidden grid-cols-2 gap-2">
+        <a href="dashboard.html" class="btn btn-ghost truncate text-sm" data-user-name></a>
+        <button type="button" data-logout class="btn btn-primary text-sm">Esci</button>
       </div>
     </div>
   </header>
@@ -237,6 +245,15 @@
             </ul>
             <button type="button" disabled aria-disabled="true" class="btn mt-8 w-full cursor-not-allowed border border-slate-700 bg-slate-800 text-slate-400">Non ancora acquistabile</button>
             <p class="mt-3 text-center text-xs text-slate-400">Il piano Professionale non è ancora disponibile all'acquisto. Per ora usa il piano Free.</p>
+            <form id="notify-form" class="mt-5 rounded-xl border border-slate-800 bg-slate-950/60 p-4" novalidate>
+              <label for="notify-email" class="text-sm font-semibold text-white">🔔 Avvisami quando è disponibile</label>
+              <div class="mt-2 flex gap-2">
+                <input id="notify-email" type="email" required autocomplete="email" class="input min-w-0 flex-1 text-sm" placeholder="la-tua@email.it">
+                <button id="notify-btn" type="submit" class="btn btn-primary shrink-0 !px-4 text-sm">Avvisami</button>
+              </div>
+              <p id="notify-msg" class="mt-2 hidden text-xs" role="status"></p>
+              <p class="mt-2 text-[11px] text-slate-500">Useremo la tua email solo per avvisarti dell'uscita del piano PRO. Nessuno spam.</p>
+            </form>
             <a href="demo-pro.html" class="mt-2 text-center text-xs text-emerald-400 hover:underline">Prova la demo PRO →</a>
           </div>
         </div>
@@ -273,6 +290,8 @@
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="assets/config.js?v=2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/data.js"></script>
   <script>
     // Listino nel mockup (piano Free: con badge piattaforma)
@@ -294,6 +313,68 @@
       const url = new URL('listino.html?demo=pro', location.href).href;
       new QRCode(document.getElementById('qr-demo'), { text: url, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
     } catch (e) { document.getElementById('qr-demo').textContent = 'QR'; }
+
+    // Accesso: se sei loggato mostra nome + Esci al posto di Accedi / Inizia gratis
+    (function () {
+      const cfg = window.LR_CONFIG || {};
+      const configured = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY);
+      const sb = configured && window.supabase ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
+      const q = (sel) => [...document.querySelectorAll(sel)];
+      function paint(name) {
+        const on = !!name;
+        const d = document.getElementById('auth-out'), di = document.getElementById('auth-in'), m = document.getElementById('auth-out-m'), mi = document.getElementById('auth-in-m');
+        d.classList.toggle('md:flex', !on);
+        di.classList.toggle('md:flex', on);
+        m.classList.toggle('hidden', on); mi.classList.toggle('hidden', !on); mi.classList.toggle('grid', on);
+        if (on) {
+          q('[data-user-name]').forEach((e) => { e.textContent = name; });
+          q('[data-user-initial]').forEach((e) => { e.textContent = name.trim().charAt(0).toUpperCase(); });
+        }
+      }
+      const nice = (email) => { const l = String(email || '').split('@')[0].replace(/[._-]+/g, ' ').trim(); return l ? l.charAt(0).toUpperCase() + l.slice(1) : 'Il mio account'; };
+      async function check() {
+        if (!configured) { let u = ''; try { u = localStorage.getItem('lr_user') || ''; } catch (e) {} return paint(u ? nice(u) : ''); }
+        if (!sb) return paint('');
+        try {
+          const { data } = await sb.auth.getSession();
+          const user = data && data.session && data.session.user;
+          if (!user) return paint('');
+          paint(nice(user.email));                                      // subito, poi il nome dell'attività
+          const r = await sb.from('venues').select('name').eq('owner_id', user.id).order('created_at').limit(1).maybeSingle();
+          const n = r && r.data && r.data.name;
+          if (n && n !== 'La mia attività') paint(n);
+        } catch (e) { paint(''); }
+      }
+      q('[data-logout]').forEach((b) => b.addEventListener('click', async () => {
+        try { if (sb) await sb.auth.signOut(); } catch (e) {}
+        try { localStorage.removeItem('lr_user'); } catch (e) {}
+        paint('');
+      }));
+      check();
+      window.addEventListener('pageshow', (e) => { if (e.persisted) check(); });   // tasto "indietro" dalla dashboard
+
+      // Avvisami: iscrizione alla lista d'attesa del piano PRO
+      const f = document.getElementById('notify-form');
+      const say = (t, ok) => { const m = document.getElementById('notify-msg'); m.textContent = t; m.className = 'mt-2 text-xs ' + (ok ? 'text-emerald-300' : 'text-red-300'); };
+      f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('notify-email').value.trim().toLowerCase();
+        if (!/^\S+@\S+\.\S+$/.test(email)) return say('Inserisci un indirizzo email valido.', false);
+        const btn = document.getElementById('notify-btn'); btn.disabled = true;
+        try {
+          if (configured && !sb) throw new Error('Servizio non raggiungibile. Ricarica la pagina e riprova.');
+          if (sb) {
+            const { error } = await sb.from('waitlist').insert({ email });
+            if (error && error.code !== '23505') throw new Error('Non sono riuscito a salvare l\'email. Riprova tra poco.');   // 23505 = già iscritto
+          } else {
+            const l = JSON.parse(localStorage.getItem('lr_waitlist') || '[]'); if (!l.includes(email)) l.push(email); localStorage.setItem('lr_waitlist', JSON.stringify(l));
+          }
+          say('Fatto! Ti scriveremo appena il piano PRO sarà disponibile.', true);
+          f.reset();
+        } catch (err) { say(err.message, false); }
+        finally { btn.disabled = false; }
+      });
+    })();
 
     // Come funziona: passaggi cliccabili
     (function () {

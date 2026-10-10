@@ -77,3 +77,5 @@ Per un sito in produzione scarica le foto che vuoi usare, mettile in `assets/img
 - **Modifica servizio**: icona ✎ accanto a ogni servizio (nome, categoria, prezzo, durata, descrizione, foto).
 - **Prenota su WhatsApp**: inserisci il numero in Profilo; accanto a ogni servizio compare il pulsante verde "Prenota" con il simbolo WhatsApp. Senza numero il pulsante non viene mostrato ai clienti.
 - **Piano PRO**: al lancio il sito è gratuito e il PRO **non è acquistabile** (pagina prezzi, demo PRO e dashboard lo indicano). La demo PRO resta visibile.
+- **Avvisami (lista d'attesa PRO)**: il box nella card PRO salva le email nella tabella `waitlist` (`supabase/waitlist.sql`, già in `schema.sql`). Le leggi da Supabase → Table Editor → `waitlist`.
+- **Barra in alto**: se sei loggato la homepage mostra il tuo nome e il pulsante Esci; dopo Esci tornano Accedi e Inizia gratis.
