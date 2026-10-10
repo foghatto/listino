@@ -79,3 +79,4 @@ Per un sito in produzione scarica le foto che vuoi usare, mettile in `assets/img
 - **Piano PRO**: al lancio il sito è gratuito e il PRO **non è acquistabile** (pagina prezzi, demo PRO e dashboard lo indicano). La demo PRO resta visibile.
 - **Avvisami (lista d'attesa PRO)**: il box nella card PRO salva le email nella tabella `waitlist` (`supabase/waitlist.sql`, già in `schema.sql`). Le leggi da Supabase → Table Editor → `waitlist`.
 - **Barra in alto**: se sei loggato la homepage mostra il tuo nome e il pulsante Esci; dopo Esci tornano Accedi e Inizia gratis.
+- **Descrizioni lunghe**: fino a 1000 caratteri con a capo. Nel listino si vede un'anteprima di 2 righe e il pulsante "Leggi tutto" apre una scheda dal basso con foto, descrizione completa e il pulsante Prenota.

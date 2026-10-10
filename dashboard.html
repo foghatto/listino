@@ -74,7 +74,7 @@
               <select id="svc-cat" class="input col-span-2" aria-label="Categoria"></select>
               <input id="svc-price" class="input" type="number" min="0" step="0.5" placeholder="Prezzo €" required>
               <input id="svc-min" class="input" type="number" min="5" step="5" placeholder="Durata (min)" required>
-              <input id="svc-desc" class="input col-span-2" placeholder="Descrizione breve (facoltativa)" maxlength="120">
+              <textarea id="svc-desc" class="input col-span-2" rows="2" maxlength="1000" placeholder="Descrizione (facoltativa): come si svolge, cosa serve, durata effetti…"></textarea>
               <button class="btn btn-primary col-span-2" type="submit">Aggiungi servizio</button>
             </div>
           </form>
@@ -205,7 +205,8 @@
         <div><label for="ed-price" class="mb-1 block text-sm font-medium">Prezzo €</label><input id="ed-price" class="input" type="number" min="0" step="0.5" required></div>
         <div><label for="ed-min" class="mb-1 block text-sm font-medium">Durata (min)</label><input id="ed-min" class="input" type="number" min="5" step="5"></div>
       </div>
-      <div><label for="ed-desc" class="mb-1 block text-sm font-medium">Descrizione</label><textarea id="ed-desc" class="input" rows="3" maxlength="120"></textarea></div>
+      <div><label for="ed-desc" class="mb-1 block text-sm font-medium">Descrizione completa</label><textarea id="ed-desc" class="input" rows="7" maxlength="1000" placeholder="Come si svolge, cosa serve portare, cosa aspettarsi…"></textarea>
+        <p class="mt-1 flex justify-between text-xs text-slate-500"><span>Se è lunga, il cliente vede un'anteprima e tocca "Leggi tutto" per aprire la scheda. Vai a capo per separare i paragrafi.</span><span id="ed-count" class="shrink-0 pl-2"></span></p></div>
       <p id="ed-msg" class="hidden rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300" role="alert"></p>
       <div class="flex justify-end gap-2 pt-1">
         <button type="button" id="ed-cancel" class="btn btn-ghost !px-4 !py-2 text-sm">Annulla</button>
@@ -294,7 +295,7 @@
                 </button>
                 <div class="min-w-0 flex-1">
                   <input class="row-input text-sm font-semibold text-white" data-edit="name" value="${esc(it.name.it)}" aria-label="Nome servizio">
-                  <p class="px-1 text-xs text-slate-500">${esc(it.min)} min${it.desc.it ? ' · ' + esc(it.desc.it) : ''}</p>
+                  <p class="truncate px-1 text-xs text-slate-500">${esc(it.min)} min${it.desc.it ? ' · ' + esc(it.desc.it.replace(/\s*\n+\s*/g, ' ')) : ''}</p>
                 </div>
                 <div class="flex items-center gap-1">
                   <input type="number" min="0" step="0.5" class="row-input w-20 text-right text-sm font-bold text-emerald-400" data-edit="price" value="${esc(it.price)}" aria-label="Prezzo">
@@ -452,11 +453,13 @@
       $('ed-cat').innerHTML = S.categories.map((c) => `<option value="${esc(c.id)}"${c.id === f.cat.id ? ' selected' : ''}>${esc(c.name.it)}</option>`).join('');
       $('ed-price').value = f.it.price;
       $('ed-min').value = f.it.min || '';
-      $('ed-desc').value = f.it.desc.it || '';
+      $('ed-desc').value = f.it.desc.it || ''; cnt();
       $('ed-msg').classList.add('hidden');
       edThumb();
       $('svc-dialog').showModal();
     }
+    const cnt = () => { $('ed-count').textContent = $('ed-desc').value.length + ' / 1000'; };
+    $('ed-desc').addEventListener('input', cnt);
     $('ed-cancel').addEventListener('click', () => $('svc-dialog').close());
     $('ed-photo').addEventListener('click', async () => {
       const file = await chooseFile(); if (!file) return;

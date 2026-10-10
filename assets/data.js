@@ -52,9 +52,9 @@
   });
 
   const T = {
-    it: { book: 'Prenota su WhatsApp', short: 'Prenota', min: 'min', powered: 'Creato con ListinoRapido', free: 'Piano Free', all: 'Tutti' },
-    en: { book: 'Book on WhatsApp', short: 'Book', min: 'min', powered: 'Made with ListinoRapido', free: 'Free plan', all: 'All' },
-    fr: { book: 'Réserver sur WhatsApp', short: 'Réserver', min: 'min', powered: 'Créé avec ListinoRapido', free: 'Offre Free', all: 'Tous' }
+    it: { book: 'Prenota su WhatsApp', short: 'Prenota', more: 'Leggi tutto', close: 'Chiudi', min: 'min', powered: 'Creato con ListinoRapido', free: 'Piano Free', all: 'Tutti' },
+    en: { book: 'Book on WhatsApp', short: 'Book', more: 'Read more', close: 'Close', min: 'min', powered: 'Made with ListinoRapido', free: 'Free plan', all: 'All' },
+    fr: { book: 'Réserver sur WhatsApp', short: 'Réserver', more: 'Lire la suite', close: 'Fermer', min: 'min', powered: 'Créé avec ListinoRapido', free: 'Offre Free', all: 'Tous' }
   };
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -66,11 +66,12 @@
     const d = o.data, t = T[o.lang] || T.it, lang = T[o.lang] ? o.lang : 'it';
     const wa = (name) => `https://wa.me/${String(d.business.whatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent((lang === 'en' ? 'Hi, I would like to book: ' : lang === 'fr' ? 'Bonjour, je souhaite réserver : ' : 'Ciao, vorrei prenotare: ') + name)}`;
     const nm = (x) => (x && (x[lang] || x.it)) || '';
+    const isLong = (txt) => String(txt || '').length > 85 || /\n/.test(txt || '');   // oltre ~2 righe: apre la scheda completa
     const WA_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-2.9-.4-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>';
     const hasWa = String(d.business.whatsapp || '').replace(/\D/g, '').length >= 8;
     // Pulsante "Prenota" con simbolo WhatsApp. Senza numero: nascosto ai clienti, visibile ma spento in anteprima.
-    const waBtn = (it, name) => hasWa
-      ? `<a href="${wa(name)}" target="_blank" rel="noopener" data-book="${esc(it.id)}" title="${esc(t.book)}" aria-label="${esc(t.book)}: ${esc(name)}" class="wa-btn inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-slate-950 hover:bg-emerald-400">${WA_ICON}${esc(t.short)}</a>`
+    const waBtn = (it, name, big) => hasWa
+      ? `<a href="${wa(name)}" target="_blank" rel="noopener" data-book="${esc(it.id)}" title="${esc(t.book)}" aria-label="${esc(t.book)}: ${esc(name)}" class="wa-btn ${big ? 'flex w-full justify-center gap-2 rounded-xl py-3 text-sm' : 'inline-flex gap-1 rounded-full px-2.5 py-1 text-[11px]'} items-center whitespace-nowrap bg-emerald-500 font-bold text-slate-950 hover:bg-emerald-400">${WA_ICON}${esc(big ? t.book : t.short)}</a>`
       : (o.preview ? `<span title="Aggiungi il numero WhatsApp nel Profilo" class="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-dashed border-slate-600 px-2.5 py-1 text-[11px] font-semibold text-slate-500">${WA_ICON}${esc(t.short)}</span>` : '');
 
     // I servizi "proOnly" compaiono solo nel piano PRO (il Free ne mostra max 10)
@@ -104,7 +105,8 @@
               <p class="text-[13px] font-semibold text-white leading-tight">${esc(nm(it.name))}</p>
               <p class="text-sm font-bold text-emerald-400 whitespace-nowrap">${eur(it.price)}</p>
             </div>
-            <p class="mt-0.5 text-[11px] text-slate-400 leading-snug line-clamp-2">${esc(nm(it.desc))}</p>
+            <p class="mt-0.5 text-[11px] text-slate-400 leading-snug line-clamp-2">${esc(nm(it.desc)).replace(/\n+/g, ' ')}</p>
+            ${isLong(nm(it.desc)) ? `<button type="button" data-more="${esc(it.id)}" class="mt-0.5 text-[11px] font-semibold text-emerald-400 hover:text-emerald-300">${esc(t.more)} ›</button>` : ''}
             <div class="mt-1.5 flex items-center justify-between">
               <span class="whitespace-nowrap text-[11px] text-slate-500">${esc(it.min)} ${t.min}</span>
               ${waBtn(it, nm(it.name))}
@@ -132,6 +134,43 @@
         a.className = a.className.replace('border-slate-700 text-slate-300', 'border-emerald-500 text-emerald-400');
       });
     });
+    // Scheda completa del servizio (descrizione lunga, come si svolge, occorrente…): pannello che sale dal basso
+    const host = el.parentElement;
+    const closeSheet = () => { const x = host.querySelector('.lr-sheet'); if (x) x.remove(); document.removeEventListener('keydown', onKey); };
+    const onKey = (e) => { if (e.key === 'Escape') closeSheet(); };
+    const openSheet = (it) => {
+      closeSheet();
+      if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+      const box = document.createElement('div');
+      box.className = 'lr-sheet absolute inset-0 z-30 flex items-end bg-slate-950/70 backdrop-blur-sm';
+      box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', nm(it.name));
+      box.innerHTML = `
+        <div class="flex max-h-[88%] w-full flex-col rounded-t-2xl border-t border-slate-700 bg-slate-900 shadow-2xl">
+          <div class="relative shrink-0">
+            ${it.img ? `<div class="h-36 overflow-hidden rounded-t-2xl img-fallback"><img src="${esc(it.img)}" alt="" class="h-full w-full object-cover" onerror="this.remove()"></div>` : '<div class="h-4"></div>'}
+            <button type="button" data-close class="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-slate-950/80 text-lg leading-none text-white" aria-label="${esc(t.close)}">×</button>
+          </div>
+          <div class="min-h-0 flex-1 overflow-y-auto px-4 pb-2 pt-3" style="scrollbar-width:thin">
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="text-base font-bold leading-tight text-white">${esc(nm(it.name))}</h3>
+              <p class="whitespace-nowrap text-base font-bold text-emerald-400">${eur(it.price)}</p>
+            </div>
+            ${it.min ? `<p class="mt-1 text-xs text-slate-500">${esc(it.min)} ${t.min}</p>` : ''}
+            <p class="mt-3 whitespace-pre-line break-words text-[13px] leading-relaxed text-slate-300">${esc(nm(it.desc))}</p>
+          </div>
+          <div class="shrink-0 border-t border-slate-800 p-3">${waBtn(it, nm(it.name), true) || `<button type="button" data-close class="w-full rounded-xl border border-slate-700 py-3 text-sm font-semibold text-slate-200">${esc(t.close)}</button>`}</div>
+        </div>`;
+      box.addEventListener('click', (e) => { if (e.target === box || e.target.closest('[data-close]')) closeSheet(); });
+      if (o.onView) box.querySelectorAll('[data-book]').forEach((b) => b.addEventListener('click', () => o.onView(b.dataset.book)));
+      host.appendChild(box);
+      document.addEventListener('keydown', onKey);
+      const c = box.querySelector('[data-close]'); if (c) c.focus();
+    };
+    closeSheet();
+    el.querySelectorAll('[data-more]').forEach((b) => b.addEventListener('click', () => {
+      const it = cats.reduce((f, c) => f || c.items.find((i) => String(i.id) === b.dataset.more), null);
+      if (it) openSheet(it);
+    }));
     if (o.onView) el.querySelectorAll('[data-book]').forEach((b) => b.addEventListener('click', () => o.onView(b.dataset.book)));
   }
 
