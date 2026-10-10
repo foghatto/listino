@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/s/:slug",
-      "destination": "/listino.html"
+      "destination": "/listino"
     }
   ],
   "headers": [

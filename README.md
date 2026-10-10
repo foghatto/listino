@@ -8,7 +8,7 @@ Sito statico multi-pagina (HTML + Tailwind + JS vanilla), pronto per **GitHub �
 | File | Cosa contiene |
 | --- | --- |
 | `index.html` | Landing: navbar, hero con splash e telefono scrollabile, scritte che scorrono, problema/soluzione, come funziona, esempio live (QR), prezzi, footer |
-| `listino.html` | **Pagina pubblica del listino** (solo il listino, a schermo intero): è ciò che apre il QR. Serve anche su `/s/nome-attivita`. `?demo=1` / `?demo=pro` per gli esempi |
+| `listino.html` | **Pagina pubblica del listino** (solo il listino, a schermo intero): è ciò che apre il QR. Il link pubblico è `/listino?s=nome-attivita` (funziona anche `/s/nome-attivita`). `?demo=1` / `?demo=pro` per gli esempi |
 | `dashboard.html` | Dashboard: categorie, servizi, prezzi, anteprima, QR e link, profilo (nome, WhatsApp, link), statistiche (PRO). Dati di prova senza Supabase, dati reali con Supabase |
 | `demo-pro.html` | Demo del piano Professionale: telefono scrollabile senza logo piattaforma, lingue IT/EN/FR, statistiche che reagiscono ai click |
 | `accedi.html` | Accesso / registrazione (demo oppure Supabase Auth reale) |
@@ -58,7 +58,7 @@ Per provare il piano PRO prima di avere i pagamenti, esegui nel SQL Editor di Su
 update public.venues set plan = 'pro' where slug = 'il-tuo-link';
 ```
 
-> Il link `/s/<link>` usa una riscrittura di Vercel (`vercel.json`). In locale con `python3 -m http.server` usa `listino.html?s=<link>`.
+> Il QR usa `/listino?s=<link>`, che funziona ovunque (anche in locale con `listino.html?s=<link>`). La scorciatoia `/s/<link>` usa una riscrittura di Vercel (`vercel.json`).
 
 ## Immagini
 

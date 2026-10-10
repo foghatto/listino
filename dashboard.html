@@ -261,7 +261,7 @@
     // --- URL pubblico del listino (quello che apre il QR: solo il listino, mai la dashboard) ---
     function publicUrl() {
       return S.mode === 'supabase'
-        ? new URL('/s/' + S.business.slug, location.origin).href
+        ? new URL('/listino?s=' + encodeURIComponent(S.business.slug), location.origin).href
         : new URL('listino.html?demo=1', location.href).href;
     }
 
@@ -514,8 +514,7 @@
     }
     $('p-wa').addEventListener('input', waInfo);
     $('p-slug').addEventListener('input', () => {
-      const base = S.mode === 'supabase' ? new URL('/s/', location.origin).href : '';
-      $('p-url').textContent = S.mode === 'supabase' ? base + $('p-slug').value : publicUrl();
+      $('p-url').textContent = S.mode === 'supabase' ? new URL('/listino?s=', location.origin).href + $('p-slug').value : publicUrl();
     });
     $('profile-form').addEventListener('submit', async (e) => {
       e.preventDefault();
