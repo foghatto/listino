@@ -105,7 +105,7 @@
               <p class="text-[13px] font-semibold text-white leading-tight">${esc(nm(it.name))}</p>
               <p class="text-sm font-bold text-emerald-400 whitespace-nowrap">${eur(it.price)}</p>
             </div>
-            <p class="mt-0.5 text-[11px] text-slate-400 leading-snug line-clamp-2">${esc(nm(it.desc)).replace(/\n+/g, ' ')}</p>
+            <p class="mt-0.5 text-[11px] text-slate-400 leading-snug line-clamp-2 break-words">${esc(nm(it.desc)).replace(/\n+/g, ' ')}</p>
             ${isLong(nm(it.desc)) ? `<button type="button" data-more="${esc(it.id)}" class="mt-0.5 text-[11px] font-semibold text-emerald-400 hover:text-emerald-300">${esc(t.more)} ›</button>` : ''}
             <div class="mt-1.5 flex items-center justify-between">
               <span class="whitespace-nowrap text-[11px] text-slate-500">${esc(it.min)} ${t.min}</span>

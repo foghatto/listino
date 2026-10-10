@@ -28,7 +28,7 @@
 
   <p id="loading" class="p-10 text-center text-slate-400">Caricamento…</p>
 
-  <div id="app" class="mx-auto hidden max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[220px_1fr]">
+  <div id="app" class="mx-auto hidden max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[220px_minmax(0,1fr)]">
     <!-- Navigazione -->
     <nav class="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible" aria-label="Sezioni dashboard">
       <button data-view="servizi" class="navbtn active">Servizi</button>
@@ -38,7 +38,7 @@
       <button data-view="stats" class="navbtn">Statistiche <span class="ml-1 rounded bg-emerald-500/15 px-1.5 text-[10px] font-bold text-emerald-400">PRO</span></button>
     </nav>
 
-    <main>
+    <main class="min-w-0">
       <!-- Benvenuto -->
       <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -59,28 +59,32 @@
           <p id="limit-msg" class="mt-2 hidden text-xs text-amber-300">Hai raggiunto il limite di 10 servizi del piano Free. Il piano PRO (servizi illimitati) non è ancora acquistabile: <a id="limit-link" href="demo-pro.html" class="underline">guarda la demo PRO</a>.</p>
         </div>
 
-        <div class="grid items-start gap-4 md:grid-cols-2">
-          <form id="cat-form" class="card p-5">
-            <h2 class="font-bold text-white">Nuova categoria</h2>
-            <div class="mt-3 flex gap-2">
-              <input id="cat-name" class="input" placeholder="Es. Massaggi" maxlength="40" required>
-              <button class="btn btn-primary shrink-0 !px-4" type="submit">Aggiungi</button>
-            </div>
-          </form>
-          <form id="svc-form" class="card p-5">
-            <h2 class="font-bold text-white">Nuovo servizio</h2>
-            <div class="mt-3 grid grid-cols-2 gap-2">
-              <input id="svc-name" class="input col-span-2" placeholder="Nome trattamento" maxlength="60" required>
-              <select id="svc-cat" class="input col-span-2" aria-label="Categoria"></select>
-              <input id="svc-price" class="input" type="number" min="0" step="0.5" placeholder="Prezzo €" required>
-              <input id="svc-min" class="input" type="number" min="5" step="5" placeholder="Durata (min)" required>
-              <textarea id="svc-desc" class="input col-span-2" rows="2" maxlength="1000" placeholder="Descrizione (facoltativa): come si svolge, cosa serve, durata effetti…"></textarea>
-              <button class="btn btn-primary col-span-2" type="submit">Aggiungi servizio</button>
-            </div>
+        <!-- Categorie -->
+        <div class="card p-4">
+          <div id="chips" class="flex flex-wrap items-center gap-2"></div>
+          <form id="cat-form" class="mt-3 hidden gap-2 sm:flex-row" novalidate>
+            <input id="cat-name" class="input min-w-0 flex-1" placeholder="Nome categoria, es. Massaggi" maxlength="40" required aria-label="Nome nuova categoria">
+            <button class="btn btn-primary shrink-0 !px-4" type="submit">Aggiungi categoria</button>
           </form>
         </div>
 
-        <div id="list" class="space-y-4"></div>
+        <!-- Servizi: ricerca, vista, nuovo -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="flex items-center gap-2 text-lg font-bold text-white">Servizi <span id="svc-total" class="rounded-full bg-slate-800 px-2 py-0.5 text-xs font-semibold text-slate-300">0</span></h2>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="relative">
+              <span class="sr-only">Cerca servizio</span>
+              <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input id="svc-search" type="search" class="input !py-2 !pl-9 text-sm sm:w-56" placeholder="Cerca servizio...">
+            </label>
+            <div class="flex rounded-lg border border-slate-800 bg-slate-900 p-1" role="group" aria-label="Vista">
+              <button type="button" data-layout="grid" class="layout-btn rounded-md p-1.5" aria-label="Schede" title="Schede"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+              <button type="button" data-layout="list" class="layout-btn rounded-md p-1.5" aria-label="Elenco" title="Elenco"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+            </div>
+            <button id="svc-new" type="button" class="btn btn-primary !px-4 !py-2 text-sm">+ Nuovo servizio</button>
+          </div>
+        </div>
+        <div id="list"></div>
       </section>
 
       <!-- VISTA ANTEPRIMA -->
@@ -191,7 +195,7 @@
   <!-- Modifica servizio -->
   <dialog id="svc-dialog" class="w-[min(30rem,92vw)] rounded-2xl border border-slate-700 bg-slate-900 p-0 text-slate-300 backdrop:bg-black/70">
     <form id="edit-form" class="space-y-3 p-6" novalidate>
-      <h2 class="text-lg font-bold text-white">Modifica servizio</h2>
+      <h2 id="ed-title" class="text-lg font-bold text-white">Modifica servizio</h2>
       <div class="flex items-center gap-3">
         <div id="ed-thumb" class="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-slate-700 img-fallback"></div>
         <div class="flex flex-wrap gap-2">
@@ -210,7 +214,7 @@
       <p id="ed-msg" class="hidden rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300" role="alert"></p>
       <div class="flex justify-end gap-2 pt-1">
         <button type="button" id="ed-cancel" class="btn btn-ghost !px-4 !py-2 text-sm">Annulla</button>
-        <button type="submit" class="btn btn-primary !px-4 !py-2 text-sm">Salva modifiche</button>
+        <button id="ed-submit" type="submit" class="btn btn-primary !px-4 !py-2 text-sm">Salva modifiche</button>
       </div>
     </form>
   </dialog>
@@ -222,6 +226,10 @@
     .navbtn { white-space: nowrap; text-align: left; padding: .6rem .9rem; border-radius: .65rem; font-size: .9rem; font-weight: 500; color: #cbd5e1; border: 1px solid transparent; }
     .navbtn:hover { background: #0f172a; }
     .navbtn.active { background: rgba(16,185,129,.1); border-color: rgba(16,185,129,.35); color: #6ee7b7; }
+    .layout-btn { color: #94a3b8; } .layout-btn[aria-pressed="true"] { background: #10b981; color: #022c22; }
+    .chip { display: inline-flex; align-items: center; gap: .35rem; padding: .4rem .85rem; border-radius: .6rem; border: 1px solid #1e293b; background: #0f172a; font-size: .85rem; font-weight: 600; color: #e2e8f0; }
+    .chip:hover { border-color: #334155; } .chip[aria-pressed="true"] { background: #10b981; border-color: #10b981; color: #022c22; }
+    .icon-btn { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: .5rem; background: #1e293b; color: #cbd5e1; } .icon-btn:hover { background: #334155; color: #fff; } .icon-btn.danger:hover { background: rgba(239,68,68,.2); color: #fca5a5; }
     .row-input { background: transparent; border: 1px solid transparent; border-radius: .4rem; padding: .2rem .4rem; color: inherit; width: 100%; }
     .row-input:hover, .row-input:focus { border-color: #334155; background: #0f172a; outline: none; }
   </style>
@@ -236,7 +244,9 @@
     const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/;
     const $ = (id) => document.getElementById(id);
     const { esc } = LR;
-    let S = null;                                   // stato corrente (vedi assets/store.js)
+    let S = null;
+    let catFilter = 'all', query = '', layout = 'grid';
+    try { layout = localStorage.getItem('lr_layout') === 'list' ? 'list' : 'grid'; } catch (e) {}                                   // stato corrente (vedi assets/store.js)
 
     const isPro = () => S.plan === 'pro';
     const limit = () => (isPro() ? Infinity : FREE_LIMIT);
@@ -278,38 +288,80 @@
       $('stats-locked').classList.toggle('hidden', isPro());
       $('stats-pro').classList.toggle('hidden', !isPro());
 
-      $('svc-cat').innerHTML = S.categories.map((c) => `<option value="${esc(c.id)}">${esc(c.name.it)}</option>`).join('');
-
-      $('list').innerHTML = S.categories.length ? S.categories.map((c) => `
-        <div class="card p-5" data-cat="${esc(c.id)}">
-          <div class="flex items-center justify-between gap-3">
-            <input class="row-input text-base font-bold text-white" data-edit="catname" value="${esc(c.name.it)}" aria-label="Nome categoria">
-            <button class="shrink-0 text-xs text-slate-500 hover:text-red-400" data-del-cat="${esc(c.id)}">Elimina categoria</button>
-          </div>
-          <div class="mt-3 divide-y divide-slate-800">
-            ${c.items.length ? c.items.map((it) => `
-              <div class="flex items-center gap-3 py-3" data-item="${esc(it.id)}">
-                <button type="button" class="group relative h-14 w-14 shrink-0 overflow-hidden rounded-lg img-fallback" data-photo="${esc(it.id)}" title="${it.img ? 'Sostituisci foto' : 'Aggiungi foto'}" aria-label="${it.img ? 'Sostituisci foto' : 'Aggiungi foto'}">
-                  ${it.img ? `<img src="${esc(it.img)}" alt="" class="h-full w-full object-cover" loading="lazy" onerror="this.remove()">` : ''}
-                  <span class="absolute inset-x-0 bottom-0 bg-slate-950/75 py-0.5 text-center text-[10px] font-semibold text-emerald-300">📷 ${it.img ? 'Cambia' : 'Aggiungi'}</span>
-                </button>
-                <div class="min-w-0 flex-1">
-                  <input class="row-input text-sm font-semibold text-white" data-edit="name" value="${esc(it.name.it)}" aria-label="Nome servizio">
-                  <p class="truncate px-1 text-xs text-slate-500">${esc(it.min)} min${it.desc.it ? ' · ' + esc(it.desc.it.replace(/\s*\n+\s*/g, ' ')) : ''}</p>
-                </div>
-                <div class="flex items-center gap-1">
-                  <input type="number" min="0" step="0.5" class="row-input w-20 text-right text-sm font-bold text-emerald-400" data-edit="price" value="${esc(it.price)}" aria-label="Prezzo">
-                  <span class="text-sm text-slate-500">€</span>
-                </div>
-                <button class="px-2 text-slate-400 hover:text-emerald-400" data-edit-item="${esc(it.id)}" title="Modifica servizio" aria-label="Modifica servizio">✎</button>
-                <button class="px-2 text-slate-500 hover:text-red-400" data-del-item="${esc(it.id)}" title="Elimina servizio" aria-label="Elimina servizio">✕</button>
-              </div>`).join('') : '<p class="py-3 text-sm text-slate-500">Nessun servizio in questa categoria.</p>'}
-          </div>
-        </div>`).join('') : '<p class="card p-8 text-center text-slate-400">Nessuna categoria. Creane una per iniziare.</p>';
-
+      renderServices();
       renderPreview();
       updateQR();
       fillProfile();
+    }
+
+    // --- Elenco servizi: categorie (chip), ricerca, schede / elenco ---
+    const IC = {
+      edit: '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+      del: '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>',
+      clock: '<svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+    };
+    const eurFmt = (n) => Number(n).toFixed(2) + ' €';
+    function svcCard(it, cat) {
+      const photoLabel = it.img ? 'Cambia foto' : 'Aggiungi foto';
+      const desc = (it.desc.it || '').replace(/\s*\n+\s*/g, ' ');
+      const btns = `<button type="button" class="icon-btn" data-edit-item="${esc(it.id)}" title="Modifica servizio" aria-label="Modifica servizio">${IC.edit}</button>
+                    <button type="button" class="icon-btn danger" data-del-item="${esc(it.id)}" title="Elimina servizio" aria-label="Elimina servizio">${IC.del}</button>`;
+      if (layout === 'list') return `
+        <article class="card flex min-w-0 items-center gap-3 p-3" data-item="${esc(it.id)}">
+          <button type="button" class="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg img-fallback" data-photo="${esc(it.id)}" title="${photoLabel}" aria-label="${photoLabel}">
+            ${it.img ? `<img src="${esc(it.img)}" alt="" class="h-full w-full object-cover" loading="lazy" onerror="this.remove()">` : '<span class="absolute inset-0 grid place-items-center text-lg">📷</span>'}
+          </button>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-xs text-emerald-400">${esc(cat.name.it)}</p>
+            <h3 class="truncate font-semibold text-white">${esc(it.name.it)}</h3>
+            <p class="truncate text-xs text-slate-500">${it.desc.it ? esc(desc) : 'Nessuna descrizione'}</p>
+          </div>
+          <div class="hidden shrink-0 items-center gap-1 text-xs text-slate-400 sm:flex">${IC.clock}${esc(it.min)} min</div>
+          <p class="shrink-0 font-bold text-emerald-400">${eurFmt(it.price)}</p>
+          <div class="flex shrink-0 gap-2">${btns}</div>
+        </article>`;
+      return `
+        <article class="card flex min-w-0 flex-col overflow-hidden" data-item="${esc(it.id)}">
+          <button type="button" class="group relative block h-40 w-full shrink-0 img-fallback" data-photo="${esc(it.id)}" title="${photoLabel}" aria-label="${photoLabel}">
+            ${it.img ? `<img src="${esc(it.img)}" alt="" class="absolute inset-0 h-full w-full object-cover" loading="lazy" onerror="this.remove()">` : '<span class="absolute inset-0 grid place-items-center text-sm text-slate-400">📷 Aggiungi foto</span>'}
+            ${it.img ? `<span class="absolute bottom-2 right-2 rounded-full bg-slate-950/80 px-2.5 py-1 text-[11px] font-semibold text-emerald-300 opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">📷 ${photoLabel}</span>` : ''}
+          </button>
+          <div class="flex min-w-0 flex-1 flex-col p-4">
+            <p class="truncate text-xs font-medium text-emerald-400">${esc(cat.name.it)}</p>
+            <h3 class="mt-0.5 break-words font-bold text-white">${esc(it.name.it)}</h3>
+            <p class="mt-1 line-clamp-2 break-words text-sm text-slate-400">${it.desc.it ? esc(desc) : '<span class="text-slate-600">Nessuna descrizione</span>'}</p>
+            <div class="mt-3 flex items-center justify-between gap-2">
+              <p class="text-lg font-bold text-emerald-400">${eurFmt(it.price)}</p>
+              <p class="flex items-center gap-1 text-xs text-slate-400">${IC.clock}${esc(it.min)} min</p>
+            </div>
+            <div class="mt-auto flex gap-2 pt-4">${btns}</div>
+          </div>
+        </article>`;
+    }
+    function renderServices() {
+      if (catFilter !== 'all' && !S.categories.some((c) => c.id === catFilter)) catFilter = 'all';
+      // chip categorie
+      const chip = (id, label, n) => `<button type="button" class="chip" data-filter="${esc(id)}" aria-pressed="${catFilter === id}">${esc(label)} <span class="opacity-70">(${n})</span></button>`;
+      const cur = S.categories.find((c) => c.id === catFilter);
+      $('chips').innerHTML = chip('all', 'Tutti', total()) + S.categories.map((c) => chip(c.id, c.name.it, c.items.length)).join('') +
+        (cur ? `<button type="button" class="icon-btn" data-ren-cat="${esc(cur.id)}" title="Rinomina categoria" aria-label="Rinomina categoria">${IC.edit}</button>
+                <button type="button" class="icon-btn danger" data-del-cat="${esc(cur.id)}" title="Elimina categoria" aria-label="Elimina categoria">${IC.del}</button>` : '') +
+        `<button type="button" id="cat-add" class="chip !border-dashed !text-emerald-400">+ Categoria</button>`;
+      document.querySelectorAll('.layout-btn').forEach((b) => b.setAttribute('aria-pressed', b.dataset.layout === layout));
+      // servizi filtrati
+      const q = query.trim().toLowerCase();
+      const rows = [];
+      S.categories.forEach((c) => {
+        if (catFilter !== 'all' && c.id !== catFilter) return;
+        c.items.forEach((it) => {
+          if (q && !(it.name.it + ' ' + (it.desc.it || '') + ' ' + c.name.it).toLowerCase().includes(q)) return;
+          rows.push(svcCard(it, c));
+        });
+      });
+      $('svc-total').textContent = rows.length;
+      $('list').className = layout === 'list' ? 'space-y-3' : 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3';
+      $('list').innerHTML = rows.length ? rows.join('')
+        : `<p class="card p-8 text-center text-slate-400 ${layout === 'list' ? '' : 'sm:col-span-2 xl:col-span-3'}">${!S.categories.length ? 'Nessuna categoria: creane una con "+ Categoria" per iniziare.' : q ? 'Nessun servizio corrisponde alla ricerca.' : 'Nessun servizio qui. Premi "+ Nuovo servizio".'}</p>`;
     }
 
     function renderPreview() {
@@ -324,56 +376,45 @@
       if (!name) return;
       const cat = { id: LRStore.uuid(), name: { it: name }, items: [] };
       S.categories.push(cat);
-      $('cat-name').value = '';
+      catFilter = cat.id;
+      $('cat-name').value = ''; $('cat-form').classList.add('hidden'); $('cat-form').classList.remove('flex');
       render();
       run(() => LRStore.addCategory(cat, S.categories.length - 1));
     });
+    $('svc-search').addEventListener('input', (e) => { query = e.target.value; renderServices(); });
+    document.querySelectorAll('.layout-btn').forEach((b) => b.addEventListener('click', () => {
+      layout = b.dataset.layout; try { localStorage.setItem('lr_layout', layout); } catch (e) {}
+      renderServices();
+    }));
+    $('svc-new').addEventListener('click', () => openEdit(null));
 
-    $('svc-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (total() >= limit()) { $('limit-msg').classList.remove('hidden'); toast('Limite del piano Free raggiunto.', true); return; }
-      const cat = S.categories.find((c) => c.id === $('svc-cat').value);
-      if (!cat) { toast('Crea prima una categoria.', true); return; }
-      const price = parseFloat($('svc-price').value), min = parseInt($('svc-min').value, 10);
-      if (!(price >= 0) || !(min > 0)) return;
-      const item = { id: LRStore.uuid(), name: { it: $('svc-name').value.trim() }, desc: { it: $('svc-desc').value.trim() }, price, min, img: '' };
-      cat.items.push(item);
-      e.target.reset();
-      render();
-      run(() => LRStore.addService(cat.id, item, cat.items.length - 1), 'Servizio aggiunto: i clienti lo vedono subito.');
+    $('chips').addEventListener('click', (e) => {
+      const f = e.target.closest('[data-filter]'), add = e.target.closest('#cat-add'), ren = e.target.closest('[data-ren-cat]'), dc = e.target.closest('[data-del-cat]');
+      if (f) { catFilter = f.dataset.filter; renderServices(); }
+      if (add) { const fm = $('cat-form'); fm.classList.toggle('hidden'); fm.classList.toggle('flex'); if (!fm.classList.contains('hidden')) $('cat-name').focus(); }
+      if (ren) {
+        const cat = S.categories.find((c) => c.id === ren.dataset.renCat);
+        const v = prompt('Nuovo nome della categoria:', cat.name.it);
+        if (v && v.trim() && v.trim() !== cat.name.it) { cat.name.it = v.trim().slice(0, 40); render(); run(() => LRStore.renameCategory(cat), 'Categoria rinominata.'); }
+      }
+      if (dc && confirm('Eliminare la categoria e tutti i suoi servizi?')) {
+        const cat = S.categories.find((c) => c.id === dc.dataset.delCat), olds = cat.items.map((i) => i.img);
+        S.categories = S.categories.filter((c) => c.id !== cat.id);
+        catFilter = 'all'; render();
+        run(async () => { await LRStore.deleteCategory(cat.id); for (const u of olds) await LRStore.removeImage(u); });
+      }
     });
 
     $('list').addEventListener('click', (e) => {
-      const dc = e.target.closest('[data-del-cat]'), di = e.target.closest('[data-del-item]');
-      const ph = e.target.closest('[data-photo]'), ed = e.target.closest('[data-edit-item]');
+      const di = e.target.closest('[data-del-item]'), ph = e.target.closest('[data-photo]'), ed = e.target.closest('[data-edit-item]');
       if (ph) { const f = findItem(ph.dataset.photo); if (f) changePhoto(f.it, f.cat); }
       if (ed) openEdit(ed.dataset.editItem);
-      if (dc && confirm('Eliminare la categoria e i suoi servizi?')) {
-        S.categories = S.categories.filter((c) => c.id !== dc.dataset.delCat);
-        render();
-        run(() => LRStore.deleteCategory(dc.dataset.delCat));
-      }
-      if (di) {
+      if (di && confirm('Eliminare questo servizio?')) {
         const f = findItem(di.dataset.delItem), old = f && f.it.img;
         S.categories.forEach((c) => { c.items = c.items.filter((i) => i.id !== di.dataset.delItem); });
         render();
         run(async () => { await LRStore.deleteService(di.dataset.delItem); await LRStore.removeImage(old); });
       }
-    });
-
-    $('list').addEventListener('change', (e) => {
-      const f = e.target.dataset.edit; if (!f) return;
-      const cat = S.categories.find((c) => c.id === e.target.closest('[data-cat]').dataset.cat);
-      if (f === 'catname') {
-        const v = e.target.value.trim();
-        if (v) { cat.name.it = v; render(); run(() => LRStore.renameCategory(cat)); }
-        return;
-      }
-      const it = cat.items.find((i) => i.id === e.target.closest('[data-item]').dataset.item);
-      if (f === 'name') { const v = e.target.value.trim(); if (!v) return render(); it.name.it = v; }
-      if (f === 'price') { const p = parseFloat(e.target.value); if (!(p >= 0)) return render(); it.price = p; }
-      render();
-      run(() => LRStore.updateService(it, cat.id), 'Salvato: il listino è aggiornato per tutti i clienti.');
     });
 
     // --- Foto (servizi e copertina) ---
@@ -447,8 +488,17 @@
       $('ed-photo-rm').classList.toggle('hidden', !img);
     };
     function openEdit(id) {
-      const f = findItem(id); if (!f) return;
+      let f;
+      if (id) { f = findItem(id); if (!f) return; }
+      else {                                          // nuovo servizio
+        if (!S.categories.length) { toast('Crea prima una categoria con "+ Categoria".', true); return; }
+        if (total() >= limit()) { $('limit-msg').classList.remove('hidden'); toast('Hai raggiunto il limite di 10 servizi del piano Free.', true); return; }
+        const cat = S.categories.find((c) => c.id === catFilter) || S.categories[0];
+        f = { it: { id: LRStore.uuid(), name: { it: '' }, desc: { it: '' }, price: '', min: '', img: '' }, cat, isNew: true };
+      }
       editing = f;
+      $('ed-title').textContent = f.isNew ? 'Nuovo servizio' : 'Modifica servizio';
+      $('ed-submit').textContent = f.isNew ? 'Aggiungi servizio' : 'Salva modifiche';
       $('ed-name').value = f.it.name.it;
       $('ed-cat').innerHTML = S.categories.map((c) => `<option value="${esc(c.id)}"${c.id === f.cat.id ? ' selected' : ''}>${esc(c.name.it)}</option>`).join('');
       $('ed-price').value = f.it.price;
@@ -468,17 +518,27 @@
     });
     $('ed-photo-rm').addEventListener('click', () => { editing.old = (editing.old || []).concat(editing.it.img || []); editing.it.img = ''; edThumb(); });
     $('svc-dialog').addEventListener('cancel', () => {});
-    $('svc-dialog').addEventListener('close', () => { if (editing && !editing.saved) reload(); editing = null; });   // annullato: ripristina lo stato salvato
+    $('svc-dialog').addEventListener('close', () => {
+      if (editing && !editing.saved) { if (editing.isNew) LRStore.removeImage(editing.it.img); else reload(); }
+      editing = null;
+    });   // annullato: ripristina lo stato salvato
     $('edit-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const err = (t) => { $('ed-msg').textContent = t; $('ed-msg').classList.remove('hidden'); };
       const name = $('ed-name').value.trim(), price = parseFloat($('ed-price').value), min = parseInt($('ed-min').value, 10) || 0;
       if (!name) return err('Inserisci il nome del servizio.');
       if (!(price >= 0)) return err('Inserisci un prezzo valido.');
-      const { it, cat } = editing, newCat = S.categories.find((c) => c.id === $('ed-cat').value) || cat;
+      const { it, cat, isNew } = editing, newCat = S.categories.find((c) => c.id === $('ed-cat').value) || cat;
+      if (isNew && !(min > 0)) return err('Inserisci la durata in minuti.');
       it.name.it = name; it.price = price; it.min = min; it.desc.it = $('ed-desc').value.trim();
-      if (newCat !== cat) { cat.items = cat.items.filter((i) => i.id !== it.id); newCat.items.push(it); }
       editing.saved = true;
+      if (isNew) {
+        newCat.items.push(it); catFilter = newCat.id;
+        $('svc-dialog').close(); render();
+        run(() => LRStore.addService(newCat.id, it, newCat.items.length - 1), 'Servizio aggiunto: i clienti lo vedono subito.');
+        return;
+      }
+      if (newCat !== cat) { cat.items = cat.items.filter((i) => i.id !== it.id); newCat.items.push(it); }
       const olds = (editing.old || []).filter((u) => u && u !== it.img);
       $('svc-dialog').close();
       render();
