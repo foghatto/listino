@@ -171,3 +171,8 @@ drop policy if exists waitlist_insert on public.waitlist;
 -- Chiunque può iscriversi, ma nessuno può leggere la lista dal sito (la vedi tu da Table Editor).
 create policy waitlist_insert on public.waitlist for insert to anon, authenticated with check (true);
 grant insert on public.waitlist to anon, authenticated;
+
+-- Descrizione dell'attività ("Chi siamo"), mostrata in alto nel listino.
+-- Eseguila una volta nello SQL Editor di Supabase (è inclusa anche in schema.sql).
+alter table public.venues add column if not exists about text;
+grant update (about) on public.venues to authenticated;

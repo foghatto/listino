@@ -44,7 +44,7 @@
           // Listino reale: letto da Supabase (policy RLS: lettura pubblica)
           if (!live) return show(configured ? 'Impossibile caricare il listino. Ricarica la pagina.' : 'Listino non disponibile.');
           const { data: v, error } = await sb.from('venues')
-            .select('id,name,tagline,whatsapp,cover_url,plan').eq('slug', slug).maybeSingle();
+            .select('*').eq('slug', slug).maybeSingle();
           if (error) throw error;
           if (!v) return show('Questo listino non esiste o è stato rimosso.');
           const [c, s] = await Promise.all([
@@ -54,7 +54,7 @@
           if (c.error) throw c.error;
           if (s.error) throw s.error;
           data = {
-            business: { name: v.name, tagline: { it: v.tagline || '' }, whatsapp: v.whatsapp || '', cover: v.cover_url || LR.DATA.business.cover },
+            business: { name: v.name, tagline: { it: v.tagline || '' }, whatsapp: v.whatsapp || '', about: v.about || '', cover: v.cover_url || LR.DATA.business.cover },
             categories: c.data.map((x) => ({
               id: x.id,
               name: Object.assign({}, x.name_i18n, { it: x.name }),

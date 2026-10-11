@@ -4,7 +4,7 @@
  * Modalità Supabase (assets/config.js compilato): account, attività, categorie, servizi e foto reali.
  *
  * La dashboard lavora sempre sullo stesso oggetto di stato:
- *   { mode, plan, email, userId, business:{ id, slug, name, tagline:{it}, whatsapp, cover },
+ *   { mode, plan, email, userId, business:{ id, slug, name, tagline:{it}, whatsapp, about, cover },
  *     categories:[ { id, name:{it}, items:[ { id, name:{it}, desc:{it}, price, min, img } ] } ] }
  * e chiama le funzioni qui sotto per salvare ogni modifica.
  */
@@ -123,10 +123,10 @@
     fail(c.error); fail(s.error);
 
     S = {
-      mode: 'supabase', plan: venue.plan, email: user.email, userId: user.id,
+      mode: 'supabase', plan: venue.plan, hasAbout: 'about' in venue, email: user.email, userId: user.id,
       business: {
         id: venue.id, slug: venue.slug, name: venue.name,
-        tagline: { it: venue.tagline || '' }, whatsapp: venue.whatsapp || '', cover: venue.cover_url || COVER
+        tagline: { it: venue.tagline || '' }, whatsapp: venue.whatsapp || '', about: venue.about || '', cover: venue.cover_url || COVER
       },
       categories: c.data.map((x) => ({
         id: x.id,
@@ -179,10 +179,13 @@
     async updateBusiness() {
       if (!live) return demoSave();
       const b = S.business;
-      fail((await sb.from('venues').update({
+      const row = {
         name: b.name, tagline: b.tagline.it || null, whatsapp: b.whatsapp || null, slug: b.slug,
         cover_url: b.cover && b.cover !== COVER ? b.cover : null
-      }).eq('id', b.id)).error);
+      };
+      if (S.hasAbout) row.about = b.about || null;            // colonna creata da supabase/about.sql
+      else if (b.about) throw new Error('Per salvare la descrizione esegui una volta supabase/about.sql nello SQL Editor di Supabase.');
+      fail((await sb.from('venues').update(row).eq('id', b.id)).error);
     },
 
     // Carica una foto (kind: 'service' | 'cover') e restituisce l'indirizzo da salvare.

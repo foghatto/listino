@@ -5,6 +5,7 @@
   const DATA = {
     business: {
       name: 'Studio Aurora',
+      about: 'Da oltre dieci anni ci prendiamo cura di viso, mani e capelli in un ambiente tranquillo e accogliente.\n\nLavoriamo solo su appuntamento, con prodotti selezionati e tecniche personalizzate: ogni trattamento è pensato su misura per te. Scrivici su WhatsApp per prenotare o chiedere un consiglio.',
       tagline: { it: 'Estetica & Benessere', en: 'Beauty & Wellness', fr: 'Beauté & Bien-être' },
       whatsapp: '393331234567',
       cover: IMG('photo-1560066984-138dadb4c035', 800)
@@ -52,9 +53,9 @@
   });
 
   const T = {
-    it: { book: 'Prenota su WhatsApp', short: 'Prenota', more: 'Leggi tutto', close: 'Chiudi', min: 'min', powered: 'Creato con ListinoRapido', free: 'Piano Free', all: 'Tutti' },
-    en: { book: 'Book on WhatsApp', short: 'Book', more: 'Read more', close: 'Close', min: 'min', powered: 'Made with ListinoRapido', free: 'Free plan', all: 'All' },
-    fr: { book: 'Réserver sur WhatsApp', short: 'Réserver', more: 'Lire la suite', close: 'Fermer', min: 'min', powered: 'Créé avec ListinoRapido', free: 'Offre Free', all: 'Tous' }
+    it: { book: 'Prenota su WhatsApp', short: 'Prenota', about: 'Chi siamo', more: 'Leggi tutto', close: 'Chiudi', min: 'min', powered: 'Creato con ListinoRapido', free: 'Piano Free', all: 'Tutti' },
+    en: { book: 'Book on WhatsApp', short: 'Book', about: 'About us', more: 'Read more', close: 'Close', min: 'min', powered: 'Made with ListinoRapido', free: 'Free plan', all: 'All' },
+    fr: { book: 'Réserver sur WhatsApp', short: 'Réserver', about: 'À propos', more: 'Lire la suite', close: 'Fermer', min: 'min', powered: 'Créé avec ListinoRapido', free: 'Offre Free', all: 'Tous' }
   };
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -66,7 +67,8 @@
     const d = o.data, t = T[o.lang] || T.it, lang = T[o.lang] ? o.lang : 'it';
     const wa = (name) => `https://wa.me/${String(d.business.whatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent((lang === 'en' ? 'Hi, I would like to book: ' : lang === 'fr' ? 'Bonjour, je souhaite réserver : ' : 'Ciao, vorrei prenotare: ') + name)}`;
     const nm = (x) => (x && (x[lang] || x.it)) || '';
-    const isLong = (txt) => String(txt || '').length > 85 || /\n/.test(txt || '');   // oltre ~2 righe: apre la scheda completa
+    const isLong = (txt, n) => String(txt || '').length > (n || 85) || /\n/.test(txt || '');
+    const about = String(d.business.about || '').trim();   // oltre ~2 righe: apre la scheda completa
     const WA_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-2.9-.4-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>';
     const hasWa = String(d.business.whatsapp || '').replace(/\D/g, '').length >= 8;
     // Pulsante "Prenota" con simbolo WhatsApp. Senza numero: nascosto ai clienti, visibile ma spento in anteprima.
@@ -87,6 +89,11 @@
           <h3 class="text-xl font-bold text-white">${esc(d.business.name)}</h3>
         </div>
       </div>
+      ${about ? `<div class="px-4 pt-3">
+        <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">${esc(t.about)}</p>
+        <p class="mt-1 line-clamp-3 whitespace-pre-line break-words text-[12px] leading-relaxed text-slate-300">${esc(about)}</p>
+        ${isLong(about, 140) ? `<button type="button" data-about class="mt-1 text-[11px] font-semibold text-emerald-400 hover:text-emerald-300">${esc(t.more)} ›</button>` : ''}
+      </div>` : ''}
       <div class="sticky top-0 z-10 bg-slate-950/95 backdrop-blur px-3 py-2 flex gap-2 overflow-x-auto border-b border-slate-800" style="scrollbar-width:none">
         ${cats.map((c, i) => `<a href="#" data-cat="${esc(c.id)}" class="cat-pill shrink-0 text-xs px-3 py-1.5 rounded-full border ${i === 0 ? 'border-emerald-500 text-emerald-400' : 'border-slate-700 text-slate-300'}">${esc(nm(c.name))}</a>`).join('')}
       </div>
@@ -166,7 +173,26 @@
       document.addEventListener('keydown', onKey);
       const c = box.querySelector('[data-close]'); if (c) c.focus();
     };
+    const openAbout = () => {
+      closeSheet();
+      if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+      const box = document.createElement('div');
+      box.className = 'lr-sheet absolute inset-0 z-30 flex items-end bg-slate-950/70 backdrop-blur-sm';
+      box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', t.about);
+      box.innerHTML = `
+        <div class="flex max-h-[88%] w-full flex-col rounded-t-2xl border-t border-slate-700 bg-slate-900 shadow-2xl">
+          <div class="flex shrink-0 items-start justify-between gap-3 px-4 pt-4">
+            <div><p class="text-[10px] font-semibold uppercase tracking-widest text-emerald-400">${esc(t.about)}</p><h3 class="text-base font-bold text-white">${esc(d.business.name)}</h3></div>
+            <button type="button" data-close class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-slate-800 text-lg leading-none text-white" aria-label="${esc(t.close)}">×</button>
+          </div>
+          <div class="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-3"><p class="whitespace-pre-line break-words text-[13px] leading-relaxed text-slate-300">${esc(about)}</p></div>
+          ${hasWa ? `<div class="shrink-0 border-t border-slate-800 p-3"><a href="https://wa.me/${String(d.business.whatsapp).replace(/\D/g, '')}" target="_blank" rel="noopener" class="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400">${WA_ICON}${esc(t.book)}</a></div>` : ''}
+        </div>`;
+      box.addEventListener('click', (e) => { if (e.target === box || e.target.closest('[data-close]')) closeSheet(); });
+      host.appendChild(box); document.addEventListener('keydown', onKey);
+    };
     closeSheet();
+    el.querySelectorAll('[data-about]').forEach((b) => b.addEventListener('click', openAbout));
     el.querySelectorAll('[data-more]').forEach((b) => b.addEventListener('click', () => {
       const it = cats.reduce((f, c) => f || c.items.find((i) => String(i.id) === b.dataset.more), null);
       if (it) openSheet(it);

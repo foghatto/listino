@@ -128,6 +128,11 @@
             <label for="p-tagline" class="mb-1.5 block text-sm font-medium">Sottotitolo</label>
             <input id="p-tagline" class="input" maxlength="60" placeholder="Es. Estetica & Benessere">
           </div>
+ <div>
+            <label for="p-about" class="mb-1.5 block text-sm font-medium">Chi siamo · descrizione dell'attività</label>
+            <textarea id="p-about" class="input" rows="6" maxlength="1000" placeholder="Racconta la tua attività: chi sei, da quanto lavori, il tuo stile, dove ti trovi, orari…"></textarea>
+            <p class="mt-1 flex justify-between text-xs text-slate-500"><span>Compare in alto nel listino, sotto la foto. Se è lunga i clienti toccano "Leggi tutto". Vai a capo per separare i paragrafi.</span><span id="p-about-count" class="shrink-0 pl-2"></span></p>
+          </div>
           <div>
             <label for="p-wa" class="mb-1.5 block text-sm font-medium">Numero WhatsApp per le prenotazioni</label>
             <input id="p-wa" class="input" inputmode="tel" autocomplete="tel" placeholder="Es. 333 123 4567">
@@ -566,6 +571,7 @@
       if (document.activeElement && document.activeElement.closest('#profile-form')) return;   // non sovrascrivere mentre scrivi
       $('p-name').value = S.business.name || '';
       $('p-tagline').value = (S.business.tagline && S.business.tagline.it) || '';
+      $('p-about').value = S.business.about || ''; aboutCount();
       $('p-wa').value = S.business.whatsapp || '';
       $('p-slug').value = S.business.slug || '';
       $('p-url').textContent = publicUrl();
@@ -576,6 +582,8 @@
       el.innerHTML = n ? `Link di prenotazione: <a class="text-emerald-400 underline" target="_blank" rel="noopener" href="https://wa.me/${n}">wa.me/${n}</a> (provalo)` : 'Nessun numero: i clienti non vedranno il pulsante Prenota.';
     }
     $('p-wa').addEventListener('input', waInfo);
+    function aboutCount() { $('p-about-count').textContent = $('p-about').value.length + ' / 1000'; }
+    $('p-about').addEventListener('input', aboutCount);
     $('p-slug').addEventListener('input', () => {
       $('p-url').textContent = S.mode === 'supabase' ? new URL('/listino?s=', location.origin).href + $('p-slug').value : publicUrl();
     });
@@ -592,6 +600,7 @@
       const before = JSON.stringify(S.business);
       S.business.name = name;
       S.business.tagline = { it: $('p-tagline').value.trim() };
+      S.business.about = $('p-about').value.trim();
       S.business.whatsapp = wa;
       if (S.mode === 'supabase') S.business.slug = slug;
       try { await LRStore.updateBusiness(); msg(wa ? 'Salvato. Il pulsante Prenota (WhatsApp) è attivo accanto ai servizi.' : 'Salvato. Senza numero WhatsApp il pulsante Prenota non viene mostrato.'); $('p-wa').value = wa; render(); }
