@@ -365,7 +365,14 @@
           if (configured && !sb) throw new Error('Servizio non raggiungibile. Ricarica la pagina e riprova.');
           if (sb) {
             const { error } = await sb.from('waitlist').insert({ email });
-            if (error && error.code !== '23505') throw new Error('Non sono riuscito a salvare l\'email. Riprova tra poco.');   // 23505 = già iscritto
+            if (error && error.code !== '23505') {                         // 23505 = già iscritto: va bene
+              console.error('waitlist', error);
+              const miss = error.code === 'PGRST205' || error.code === '42P01';
+              const perm = error.code === '42501';
+              throw new Error(miss ? 'Lista d\'attesa non ancora attiva (manca la tabella "waitlist" su Supabase).'
+                : perm ? 'Lista d\'attesa non ancora attiva (permessi mancanti su Supabase).'
+                : 'Non sono riuscito a salvare l\'email (codice ' + (error.code || error.status || 'rete') + '). Riprova tra poco.');
+            }
           } else {
             const l = JSON.parse(localStorage.getItem('lr_waitlist') || '[]'); if (!l.includes(email)) l.push(email); localStorage.setItem('lr_waitlist', JSON.stringify(l));
           }
