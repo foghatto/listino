@@ -27,6 +27,14 @@
         (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)));
 
   const cents = (p) => Math.round(Number(p) * 100);
+  const SQL_EXT = 'Per salvare orari, contatti, promozioni ed etichette esegui una volta supabase/hours-promo.sql nello SQL Editor di Supabase.';
+  // Campi extra del servizio (promozione ed etichetta): scritti solo se le colonne esistono
+  const svcExt = (it) => {
+    const promo = Number(it.oldPrice) > Number(it.price) ? cents(it.oldPrice) : null;
+    if (S.extS) return { old_price_cents: promo, badge: it.badge || null };
+    if (promo || it.badge) throw new Error(SQL_EXT);
+    return {};
+  };
 
   // Traduce gli errori del database in messaggi comprensibili
   function fail(error) {
@@ -49,6 +57,8 @@
     desc: Object.assign({}, r.description_i18n, { it: r.description || '' }),
     price: r.price_cents / 100,
     min: r.duration_min || 0,
+    oldPrice: r.old_price_cents ? r.old_price_cents / 100 : null,
+    badge: r.badge || '',
     img: r.image_url || '',
     visible: r.visible !== false
   });
@@ -116,6 +126,13 @@
       fail(error);
     }
 
+    // Colonne aggiunte da supabase/hours-promo.sql: se mancano, l'app funziona comunque
+    const [pv, ps] = await Promise.all([
+      sb.from('venues').select('hours,address,phone,instagram').limit(1),
+      sb.from('services').select('badge,old_price_cents').limit(1)
+    ]);
+    const extV = !pv.error, extS = !ps.error;
+
     const [c, s] = await Promise.all([
       sb.from('categories').select('*').eq('venue_id', venue.id).order('position'),
       sb.from('services').select('*').eq('venue_id', venue.id).order('position')
@@ -123,10 +140,10 @@
     fail(c.error); fail(s.error);
 
     S = {
-      mode: 'supabase', plan: venue.plan, hasAbout: 'about' in venue, email: user.email, userId: user.id,
+      mode: 'supabase', plan: venue.plan, hasAbout: 'about' in venue, extV, extS, email: user.email, userId: user.id,
       business: {
         id: venue.id, slug: venue.slug, name: venue.name,
-        tagline: { it: venue.tagline || '' }, whatsapp: venue.whatsapp || '', about: venue.about || '', cover: venue.cover_url || COVER
+        tagline: { it: venue.tagline || '' }, whatsapp: venue.whatsapp || '', about: venue.about || '', address: venue.address || '', phone: venue.phone || '', instagram: venue.instagram || '', hours: venue.hours || [], cover: venue.cover_url || COVER
       },
       categories: c.data.map((x) => ({
         id: x.id,
@@ -156,20 +173,20 @@
     // INSERT esplicito (mai upsert): il limite Free sul database scatta a ogni INSERT
     async addService(catId, it, position) {
       if (!live) return demoSave();
-      fail((await sb.from('services').insert({
+      fail((await sb.from('services').insert(Object.assign({
         id: it.id, venue_id: S.business.id, category_id: catId, name: it.name.it,
         description: it.desc.it || null, price_cents: cents(it.price),
-        duration_min: it.min || null, image_url: it.img || null, position
-      })).error);
+        duration_min: it.min || null, image_url: it.img || null, visible: it.visible !== false, position
+      }, svcExt(it)))).error);
     },
     // Aggiorna tutti i campi modificabili: nome, descrizione, prezzo, durata, foto, categoria
     async updateService(it, catId) {
       if (!live) return demoSave();
-      fail((await sb.from('services').update({
+      fail((await sb.from('services').update(Object.assign({
         name: it.name.it, description: it.desc.it || null,
         price_cents: cents(it.price), duration_min: it.min || null,
-        image_url: it.img || null, category_id: catId
-      }).eq('id', it.id)).error);
+        image_url: it.img || null, category_id: catId, visible: it.visible !== false
+      }, svcExt(it))).eq('id', it.id)).error);
     },
     async deleteService(id) {
       if (!live) return demoSave();
@@ -183,6 +200,9 @@
         name: b.name, tagline: b.tagline.it || null, whatsapp: b.whatsapp || null, slug: b.slug,
         cover_url: b.cover && b.cover !== COVER ? b.cover : null
       };
+      const hasHrs = (b.hours || []).some((h) => h && h.r && h.r.length);
+      if (S.extV) Object.assign(row, { address: b.address || null, phone: b.phone || null, instagram: b.instagram || null, hours: hasHrs ? b.hours : null });
+      else if (b.address || b.phone || b.instagram || hasHrs) throw new Error(SQL_EXT);
       if (S.hasAbout) row.about = b.about || null;            // colonna creata da supabase/about.sql
       else if (b.about) throw new Error('Per salvare la descrizione esegui una volta supabase/about.sql nello SQL Editor di Supabase.');
       fail((await sb.from('venues').update(row).eq('id', b.id)).error);

@@ -118,7 +118,7 @@
 
       <!-- VISTA PROFILO -->
       <section id="view-profilo" class="view hidden">
-        <form id="profile-form" class="card max-w-xl space-y-4 p-6" novalidate>
+        <form id="profile-form" class="card max-w-2xl space-y-4 p-6" novalidate>
           <h2 class="text-lg font-bold text-white">Dati dell'attività</h2>
           <div>
             <label for="p-name" class="mb-1.5 block text-sm font-medium">Nome attività</label>
@@ -139,6 +139,23 @@
             <p class="mt-1 text-xs text-slate-500">Accanto a ogni servizio i clienti vedranno il pulsante verde <span class="font-semibold text-emerald-400">Prenota</span> con il simbolo di WhatsApp: toccandolo ti scrivono già con il nome del trattamento. Se non inserisci il prefisso aggiungiamo il 39 (Italia).</p>
             <p id="p-wa-info" class="mt-1 text-xs text-slate-400"></p>
           </div>
+          <fieldset class="space-y-3 rounded-xl border border-slate-800 p-4">
+            <legend class="px-2 text-sm font-semibold text-white">Orari e contatti</legend>
+            <div><label for="p-address" class="mb-1.5 block text-sm font-medium">Indirizzo</label><input id="p-address" class="input" maxlength="120" autocomplete="street-address" placeholder="Via Roma 12, Napoli"><p class="mt-1 text-xs text-slate-500">I clienti vedranno il pulsante "Indicazioni" che apre Google Maps.</p></div>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div><label for="p-phone" class="mb-1.5 block text-sm font-medium">Telefono</label><input id="p-phone" class="input" type="tel" maxlength="25" placeholder="+39 081 123 4567"></div>
+              <div><label for="p-insta" class="mb-1.5 block text-sm font-medium">Instagram</label><input id="p-insta" class="input" maxlength="60" placeholder="@nomeprofilo"></div>
+            </div>
+            <div>
+              <p class="mb-2 text-sm font-medium">Orari di apertura</p>
+              <div id="hours-box" class="space-y-2"></div>
+              <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                <button type="button" id="hours-copy" class="text-xs text-emerald-400 underline">Copia gli orari del lunedì su tutti i giorni</button>
+                <button type="button" id="hours-clear" class="text-xs text-slate-500 underline hover:text-slate-300">Cancella tutti gli orari</button>
+              </div>
+              <p class="mt-2 text-xs text-slate-500">Il secondo turno è facoltativo (pausa pranzo). Nel listino compare "Aperto ora" o "Chiuso · riapre …" in automatico.</p>
+            </div>
+          </fieldset>
           <div>
             <label for="p-slug" class="mb-1.5 block text-sm font-medium">Link personalizzato</label>
             <input id="p-slug" class="input" maxlength="40" placeholder="studio-aurora">
@@ -214,6 +231,12 @@
         <div><label for="ed-price" class="mb-1 block text-sm font-medium">Prezzo €</label><input id="ed-price" class="input" type="number" min="0" step="0.5" required></div>
         <div><label for="ed-min" class="mb-1 block text-sm font-medium">Durata (min)</label><input id="ed-min" class="input" type="number" min="5" step="5"></div>
       </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label for="ed-old" class="mb-1 block text-sm font-medium">Prezzo prima della promo €</label><input id="ed-old" class="input" type="number" min="0" step="0.5" placeholder="Facoltativo, es. 80"></div>
+        <div><label for="ed-badge" class="mb-1 block text-sm font-medium">Etichetta</label><select id="ed-badge" class="input"><option value="">Nessuna</option><option value="new">Novità</option><option value="top">★ Consigliato</option></select></div>
+      </div>
+      <p class="-mt-1 text-xs text-slate-500">Promozione: nel campo "Prezzo €" scrivi il prezzo scontato e qui il vecchio prezzo. Nel listino compaiono il vecchio prezzo barrato e la percentuale di sconto.</p>
+      <label class="flex items-start gap-2 text-sm"><input id="ed-visible" type="checkbox" class="mt-1 h-4 w-4 accent-emerald-500"><span>Mostra nel listino <span class="text-slate-500">(togli la spunta per nasconderlo senza cancellarlo)</span></span></label>
       <div><label for="ed-desc" class="mb-1 block text-sm font-medium">Descrizione completa</label><textarea id="ed-desc" class="input" rows="7" maxlength="1000" placeholder="Come si svolge, cosa serve portare, cosa aspettarsi…"></textarea>
         <p class="mt-1 flex justify-between text-xs text-slate-500"><span>Se è lunga, il cliente vede un'anteprima e tocca "Leggi tutto" per aprire la scheda. Vai a capo per separare i paragrafi.</span><span id="ed-count" class="shrink-0 pl-2"></span></p></div>
       <p id="ed-msg" class="hidden rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300" role="alert"></p>
@@ -303,40 +326,53 @@
     const IC = {
       edit: '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
       del: '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>',
+      eye: '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+      eyeoff: '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.9 17.9A10.5 10.5 0 0 1 12 19c-6.5 0-10-7-10-7a17 17 0 0 1 4.1-4.9M9.9 5.2A9.7 9.7 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-2.2 3.2M3 3l18 18"/></svg>',
       clock: '<svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
     };
     const eurFmt = (n) => Number(n).toFixed(2) + ' €';
+    const isPromo = (it) => Number(it.oldPrice) > Number(it.price);
+    const priceBlock = (it, cls) => `<div class="leading-tight">${isPromo(it) ? `<p class="text-xs text-slate-500 line-through">${eurFmt(it.oldPrice)}</p>` : ''}<p class="${cls} font-bold text-emerald-400">${eurFmt(it.price)}</p></div>`;
+    const pillsHtml = (it) => [
+      it.visible === false ? '<span class="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] font-bold uppercase text-slate-200">Nascosto</span>' : '',
+      isPromo(it) ? `<span class="rounded bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-300">-${Math.round((1 - it.price / it.oldPrice) * 100)}%</span>` : '',
+      it.badge === 'new' ? '<span class="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-emerald-300">Novità</span>' : '',
+      it.badge === 'top' ? '<span class="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-emerald-300">★ Consigliato</span>' : ''
+    ].join('');
     function svcCard(it, cat) {
       const photoLabel = it.img ? 'Cambia foto' : 'Aggiungi foto';
       const desc = (it.desc.it || '').replace(/\s*\n+\s*/g, ' ');
-      const btns = `<button type="button" class="icon-btn" data-edit-item="${esc(it.id)}" title="Modifica servizio" aria-label="Modifica servizio">${IC.edit}</button>
+      const hidden = it.visible === false;
+      const btns = `<button type="button" class="icon-btn" data-toggle-vis="${esc(it.id)}" title="${hidden ? 'Mostra nel listino' : 'Nascondi dal listino'}" aria-label="${hidden ? 'Mostra nel listino' : 'Nascondi dal listino'}">${hidden ? IC.eyeoff : IC.eye}</button>
+                    <button type="button" class="icon-btn" data-edit-item="${esc(it.id)}" title="Modifica servizio" aria-label="Modifica servizio">${IC.edit}</button>
                     <button type="button" class="icon-btn danger" data-del-item="${esc(it.id)}" title="Elimina servizio" aria-label="Elimina servizio">${IC.del}</button>`;
       if (layout === 'list') return `
-        <article class="card flex min-w-0 items-center gap-3 p-3" data-item="${esc(it.id)}">
+        <article class="card flex min-w-0 items-center gap-3 p-3 ${hidden ? 'opacity-60' : ''}" data-item="${esc(it.id)}">
           <button type="button" class="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg img-fallback" data-photo="${esc(it.id)}" title="${photoLabel}" aria-label="${photoLabel}">
             ${it.img ? `<img src="${esc(it.img)}" alt="" class="h-full w-full object-cover" loading="lazy" onerror="this.remove()">` : '<span class="absolute inset-0 grid place-items-center text-lg">📷</span>'}
           </button>
           <div class="min-w-0 flex-1">
             <p class="truncate text-xs text-emerald-400">${esc(cat.name.it)}</p>
-            <h3 class="truncate font-semibold text-white">${esc(it.name.it)}</h3>
+            <h3 class="truncate font-semibold text-white">${esc(it.name.it)} <span class="ml-1 inline-flex gap-1 align-middle">${pillsHtml(it)}</span></h3>
             <p class="truncate text-xs text-slate-500">${it.desc.it ? esc(desc) : 'Nessuna descrizione'}</p>
           </div>
           <div class="hidden shrink-0 items-center gap-1 text-xs text-slate-400 sm:flex">${IC.clock}${esc(it.min)} min</div>
-          <p class="shrink-0 font-bold text-emerald-400">${eurFmt(it.price)}</p>
+          <div class="shrink-0 text-right">${priceBlock(it, '')}</div>
           <div class="flex shrink-0 gap-2">${btns}</div>
         </article>`;
       return `
-        <article class="card flex min-w-0 flex-col overflow-hidden" data-item="${esc(it.id)}">
+        <article class="card flex min-w-0 flex-col overflow-hidden ${hidden ? 'opacity-60' : ''}" data-item="${esc(it.id)}">
           <button type="button" class="group relative block h-40 w-full shrink-0 img-fallback" data-photo="${esc(it.id)}" title="${photoLabel}" aria-label="${photoLabel}">
             ${it.img ? `<img src="${esc(it.img)}" alt="" class="absolute inset-0 h-full w-full object-cover" loading="lazy" onerror="this.remove()">` : '<span class="absolute inset-0 grid place-items-center text-sm text-slate-400">📷 Aggiungi foto</span>'}
             ${it.img ? `<span class="absolute bottom-2 right-2 rounded-full bg-slate-950/80 px-2.5 py-1 text-[11px] font-semibold text-emerald-300 opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">📷 ${photoLabel}</span>` : ''}
+            ${pillsHtml(it) ? `<span class="absolute left-2 top-2 flex flex-wrap gap-1">${pillsHtml(it)}</span>` : ''}
           </button>
           <div class="flex min-w-0 flex-1 flex-col p-4">
             <p class="truncate text-xs font-medium text-emerald-400">${esc(cat.name.it)}</p>
             <h3 class="mt-0.5 break-words font-bold text-white">${esc(it.name.it)}</h3>
             <p class="mt-1 line-clamp-2 break-words text-sm text-slate-400">${it.desc.it ? esc(desc) : '<span class="text-slate-600">Nessuna descrizione</span>'}</p>
             <div class="mt-3 flex items-center justify-between gap-2">
-              <p class="text-lg font-bold text-emerald-400">${eurFmt(it.price)}</p>
+              ${priceBlock(it, 'text-lg')}
               <p class="flex items-center gap-1 text-xs text-slate-400">${IC.clock}${esc(it.min)} min</p>
             </div>
             <div class="mt-auto flex gap-2 pt-4">${btns}</div>
@@ -411,7 +447,11 @@
     });
 
     $('list').addEventListener('click', (e) => {
-      const di = e.target.closest('[data-del-item]'), ph = e.target.closest('[data-photo]'), ed = e.target.closest('[data-edit-item]');
+      const di = e.target.closest('[data-del-item]'), ph = e.target.closest('[data-photo]'), ed = e.target.closest('[data-edit-item]'), tv = e.target.closest('[data-toggle-vis]');
+      if (tv) {
+        const f = findItem(tv.dataset.toggleVis);
+        if (f) { f.it.visible = f.it.visible === false; render(); run(() => LRStore.updateService(f.it, f.cat.id), f.it.visible ? 'Servizio di nuovo visibile nel listino.' : 'Servizio nascosto: i clienti non lo vedono.'); }
+      }
       if (ph) { const f = findItem(ph.dataset.photo); if (f) changePhoto(f.it, f.cat); }
       if (ed) openEdit(ed.dataset.editItem);
       if (di && confirm('Eliminare questo servizio?')) {
@@ -499,7 +539,7 @@
         if (!S.categories.length) { toast('Crea prima una categoria con "+ Categoria".', true); return; }
         if (total() >= limit()) { $('limit-msg').classList.remove('hidden'); toast('Hai raggiunto il limite di 10 servizi del piano Free.', true); return; }
         const cat = S.categories.find((c) => c.id === catFilter) || S.categories[0];
-        f = { it: { id: LRStore.uuid(), name: { it: '' }, desc: { it: '' }, price: '', min: '', img: '' }, cat, isNew: true };
+        f = { it: { id: LRStore.uuid(), name: { it: '' }, desc: { it: '' }, price: '', min: '', img: '', oldPrice: null, badge: '', visible: true }, cat, isNew: true };
       }
       editing = f;
       $('ed-title').textContent = f.isNew ? 'Nuovo servizio' : 'Modifica servizio';
@@ -508,6 +548,7 @@
       $('ed-cat').innerHTML = S.categories.map((c) => `<option value="${esc(c.id)}"${c.id === f.cat.id ? ' selected' : ''}>${esc(c.name.it)}</option>`).join('');
       $('ed-price').value = f.it.price;
       $('ed-min').value = f.it.min || '';
+      $('ed-old').value = f.it.oldPrice || ''; $('ed-badge').value = f.it.badge || ''; $('ed-visible').checked = f.it.visible !== false;
       $('ed-desc').value = f.it.desc.it || ''; cnt();
       $('ed-msg').classList.add('hidden');
       edThumb();
@@ -535,7 +576,10 @@
       if (!(price >= 0)) return err('Inserisci un prezzo valido.');
       const { it, cat, isNew } = editing, newCat = S.categories.find((c) => c.id === $('ed-cat').value) || cat;
       if (isNew && !(min > 0)) return err('Inserisci la durata in minuti.');
+      const oldRaw = $('ed-old').value.trim(), oldP = oldRaw === '' ? null : parseFloat(oldRaw);
+      if (oldP !== null && !(oldP > price)) return err('Il prezzo prima della promozione deve essere più alto del prezzo attuale (oppure lascia il campo vuoto).');
       it.name.it = name; it.price = price; it.min = min; it.desc.it = $('ed-desc').value.trim();
+      it.oldPrice = oldP; it.badge = $('ed-badge').value; it.visible = $('ed-visible').checked;
       editing.saved = true;
       if (isNew) {
         newCat.items.push(it); catFilter = newCat.id;
@@ -572,6 +616,8 @@
       $('p-name').value = S.business.name || '';
       $('p-tagline').value = (S.business.tagline && S.business.tagline.it) || '';
       $('p-about').value = S.business.about || ''; aboutCount();
+      $('p-address').value = S.business.address || ''; $('p-phone').value = S.business.phone || ''; $('p-insta').value = S.business.instagram ? '@' + S.business.instagram : '';
+      fillHours();
       $('p-wa').value = S.business.whatsapp || '';
       $('p-slug').value = S.business.slug || '';
       $('p-url').textContent = publicUrl();
@@ -582,6 +628,61 @@
       el.innerHTML = n ? `Link di prenotazione: <a class="text-emerald-400 underline" target="_blank" rel="noopener" href="https://wa.me/${n}">wa.me/${n}</a> (provalo)` : 'Nessun numero: i clienti non vedranno il pulsante Prenota.';
     }
     $('p-wa').addEventListener('input', waInfo);
+    // --- Orari di apertura ---
+    const DAYS = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+    $('hours-box').innerHTML = DAYS.map((d, k) => `
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg bg-slate-950/50 px-3 py-2" data-day="${k}">
+        <span class="w-20 text-sm font-medium text-slate-200">${d}</span>
+        <label class="flex items-center gap-1.5 text-xs text-slate-300"><input type="checkbox" data-open class="h-4 w-4 accent-emerald-500"> Aperto</label>
+        <div class="flex flex-wrap items-center gap-1.5" data-times>
+          <input type="time" data-t="0" class="input !w-[6.3rem] !px-2 !py-1.5 text-sm" aria-label="${d} apre"><span class="text-slate-500">–</span><input type="time" data-t="1" class="input !w-[6.3rem] !px-2 !py-1.5 text-sm" aria-label="${d} chiude">
+          <span class="px-1 text-xs text-slate-500">e</span>
+          <input type="time" data-t="2" class="input !w-[6.3rem] !px-2 !py-1.5 text-sm" aria-label="${d} riapre"><span class="text-slate-500">–</span><input type="time" data-t="3" class="input !w-[6.3rem] !px-2 !py-1.5 text-sm" aria-label="${d} richiude">
+        </div>
+        <span data-closed class="text-xs text-slate-500">Chiuso</span>
+      </div>`).join('');
+    const hRow = (k) => document.querySelector(`#hours-box [data-day="${k}"]`);
+    function hSync(k) {
+      const r = hRow(k), on = r.querySelector('[data-open]').checked;
+      r.querySelector('[data-times]').classList.toggle('hidden', !on);
+      r.querySelector('[data-closed]').classList.toggle('hidden', on);
+    }
+    function hSet(k, day) {
+      const r = hRow(k), rr = (day && day.r) || [];
+      r.querySelector('[data-open]').checked = rr.length > 0;
+      [0, 1, 2, 3].forEach((n) => { r.querySelector(`[data-t="${n}"]`).value = (rr[n >> 1] && rr[n >> 1][n & 1]) || ''; });
+      hSync(k);
+    }
+    function fillHours() { const h = S.business.hours || []; for (let k = 0; k < 7; k++) hSet(k, h[k]); }
+    function readHours() {
+      const out = [];
+      for (let k = 0; k < 7; k++) {
+        const r = hRow(k);
+        if (!r.querySelector('[data-open]').checked) { out.push({ c: 1 }); continue; }
+        const v = [0, 1, 2, 3].map((n) => r.querySelector(`[data-t="${n}"]`).value);
+        if (!v[0] || !v[1]) return { error: DAYS[k] + ': inserisci l\'orario di apertura e di chiusura (oppure togli la spunta "Aperto").' };
+        if (v[0] >= v[1]) return { error: DAYS[k] + ': la chiusura deve essere dopo l\'apertura.' };
+        const ranges = [[v[0], v[1]]];
+        if (v[2] || v[3]) {
+          if (!v[2] || !v[3]) return { error: DAYS[k] + ': completa il secondo turno (apertura e chiusura) o lascialo vuoto.' };
+          if (v[2] <= v[1] || v[2] >= v[3]) return { error: DAYS[k] + ': il secondo turno deve iniziare dopo la chiusura del primo e finire dopo il suo inizio.' };
+          ranges.push([v[2], v[3]]);
+        }
+        out.push({ r: ranges });
+      }
+      return { hours: out };
+    }
+    $('hours-box').addEventListener('change', (e) => { const r = e.target.closest('[data-day]'); if (r && e.target.matches('[data-open]')) hSync(+r.dataset.day); });
+    $('hours-copy').addEventListener('click', () => {
+      const r0 = hRow(0), day = { r: [] };
+      if (r0.querySelector('[data-open]').checked) {
+        const v = [0, 1, 2, 3].map((n) => r0.querySelector(`[data-t="${n}"]`).value);
+        if (v[0] && v[1]) day.r.push([v[0], v[1]]);
+        if (v[2] && v[3]) day.r.push([v[2], v[3]]);
+      }
+      for (let k = 1; k < 7; k++) hSet(k, day);
+    });
+    $('hours-clear').addEventListener('click', () => { for (let k = 0; k < 7; k++) hSet(k, null); });
     function aboutCount() { $('p-about-count').textContent = $('p-about').value.length + ' / 1000'; }
     $('p-about').addEventListener('input', aboutCount);
     $('p-slug').addEventListener('input', () => {
@@ -597,7 +698,12 @@
       if (wa && (wa.length < 8 || wa.length > 15)) return msg('Numero WhatsApp non valido: controlla le cifre e il prefisso (es. 39 per l\'Italia).', true);
       if (S.mode === 'supabase' && !SLUG_RE.test(slug)) return msg('Il link può contenere solo lettere minuscole, numeri e trattini (da 3 a 40 caratteri).', true);
 
+      const phone = $('p-phone').value.trim(), insta = $('p-insta').value.trim().replace(/^.*instagram\.com\//i, '').replace(/[@\/?#].*$/, '').replace(/[^A-Za-z0-9._]/g, '');
+      if (phone && phone.replace(/\D/g, '').length < 6) return msg('Numero di telefono non valido.', true);
+      const hr = readHours(); if (hr.error) return msg(hr.error, true);
+
       const before = JSON.stringify(S.business);
+      S.business.address = $('p-address').value.trim(); S.business.phone = phone; S.business.instagram = insta; S.business.hours = hr.hours;
       S.business.name = name;
       S.business.tagline = { it: $('p-tagline').value.trim() };
       S.business.about = $('p-about').value.trim();

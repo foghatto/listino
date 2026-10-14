@@ -8,6 +8,14 @@
       about: 'Da oltre dieci anni ci prendiamo cura di viso, mani e capelli in un ambiente tranquillo e accogliente.\n\nLavoriamo solo su appuntamento, con prodotti selezionati e tecniche personalizzate: ogni trattamento è pensato su misura per te. Scrivici su WhatsApp per prenotare o chiedere un consiglio.',
       tagline: { it: 'Estetica & Benessere', en: 'Beauty & Wellness', fr: 'Beauté & Bien-être' },
       whatsapp: '393331234567',
+      address: 'Via Roma 12, Napoli',
+      phone: '+39 081 123 4567',
+      instagram: 'studioaurora',
+      hours: [
+        { r: [['09:00', '13:00'], ['15:00', '19:30']] }, { r: [['09:00', '13:00'], ['15:00', '19:30']] },
+        { r: [['09:00', '13:00'], ['15:00', '19:30']] }, { r: [['09:00', '13:00'], ['15:00', '19:30']] },
+        { r: [['09:00', '19:30']] }, { r: [['09:00', '13:00']] }, { c: 1 }
+      ],
       cover: IMG('photo-1560066984-138dadb4c035', 800)
     },
     categories: [
@@ -15,8 +23,8 @@
         id: 'viso',
         name: { it: 'Viso', en: 'Face', fr: 'Visage' },
         items: [
-          { id: 's1', name: { it: 'Pulizia del viso profonda', en: 'Deep facial cleansing', fr: 'Nettoyage de peau profond' }, desc: { it: 'Detersione, vapore, estrazione e maschera idratante.', en: 'Cleansing, steam, extraction and hydrating mask.', fr: 'Nettoyage, vapeur, extraction et masque hydratant.' }, price: 45, min: 60, img: IMG('photo-1570172619644-dfd03ed5d881', 300) },
-          { id: 's2', name: { it: 'Trattamento anti-età', en: 'Anti-aging treatment', fr: 'Soin anti-âge' }, desc: { it: 'Siero attivo, massaggio lifting e maschera rassodante.', en: 'Active serum, lifting massage and firming mask.', fr: 'Sérum actif, massage liftant et masque raffermissant.' }, price: 65, min: 75, img: IMG('photo-1519823551278-64ac92734fb1', 300) },
+          { id: 's1', badge: 'top', name: { it: 'Pulizia del viso profonda', en: 'Deep facial cleansing', fr: 'Nettoyage de peau profond' }, desc: { it: 'Detersione, vapore, estrazione e maschera idratante.', en: 'Cleansing, steam, extraction and hydrating mask.', fr: 'Nettoyage, vapeur, extraction et masque hydratant.' }, price: 45, min: 60, img: IMG('photo-1570172619644-dfd03ed5d881', 300) },
+          { id: 's2', oldPrice: 80, name: { it: 'Trattamento anti-età', en: 'Anti-aging treatment', fr: 'Soin anti-âge' }, desc: { it: 'Siero attivo, massaggio lifting e maschera rassodante.', en: 'Active serum, lifting massage and firming mask.', fr: 'Sérum actif, massage liftant et masque raffermissant.' }, price: 65, min: 75, img: IMG('photo-1519823551278-64ac92734fb1', 300) },
           { id: 's7', proOnly: true, name: { it: 'Maschera illuminante', en: 'Brightening mask', fr: 'Masque éclat' }, desc: { it: 'Luminosità immediata prima di un evento.', en: 'Instant glow before a special event.', fr: 'Éclat immédiat avant un événement.' }, price: 35, min: 40, img: IMG('photo-1570172619644-dfd03ed5d881', 300) }
         ]
       },
@@ -24,7 +32,7 @@
         id: 'mani',
         name: { it: 'Mani & Piedi', en: 'Hands & Feet', fr: 'Mains & Pieds' },
         items: [
-          { id: 's3', name: { it: 'Manicure semipermanente', en: 'Gel manicure', fr: 'Manucure semi-permanente' }, desc: { it: 'Cura delle cuticole, forma e smalto semipermanente.', en: 'Cuticle care, shaping and gel polish.', fr: 'Soin des cuticules, forme et vernis semi-permanent.' }, price: 28, min: 45, img: IMG('photo-1604654894610-df63bc536371', 300) },
+          { id: 's3', badge: 'new', name: { it: 'Manicure semipermanente', en: 'Gel manicure', fr: 'Manucure semi-permanente' }, desc: { it: 'Cura delle cuticole, forma e smalto semipermanente.', en: 'Cuticle care, shaping and gel polish.', fr: 'Soin des cuticules, forme et vernis semi-permanent.' }, price: 28, min: 45, img: IMG('photo-1604654894610-df63bc536371', 300) },
           { id: 's4', name: { it: 'Pedicure estetica', en: 'Classic pedicure', fr: 'Pédicure esthétique' }, desc: { it: 'Bagno rilassante, scrub, cura e smalto.', en: 'Relaxing soak, scrub, care and polish.', fr: 'Bain relaxant, gommage, soin et vernis.' }, price: 35, min: 50, img: IMG('photo-1519823551278-64ac92734fb1', 300) },
           { id: 's8', proOnly: true, name: { it: 'Ricostruzione unghie', en: 'Nail extensions', fr: "Pose d'ongles" }, desc: { it: 'Gel o acrilico, forma su misura.', en: 'Gel or acrylic, custom shape.', fr: 'Gel ou acrylique, forme sur mesure.' }, price: 55, min: 90, img: IMG('photo-1604654894610-df63bc536371', 300) }
         ]
@@ -53,9 +61,9 @@
   });
 
   const T = {
-    it: { book: 'Prenota su WhatsApp', short: 'Prenota', about: 'Chi siamo', more: 'Leggi tutto', close: 'Chiudi', min: 'min', powered: 'Creato con ListinoRapido', free: 'Piano Free', all: 'Tutti' },
-    en: { book: 'Book on WhatsApp', short: 'Book', about: 'About us', more: 'Read more', close: 'Close', min: 'min', powered: 'Made with ListinoRapido', free: 'Free plan', all: 'All' },
-    fr: { book: 'Réserver sur WhatsApp', short: 'Réserver', about: 'À propos', more: 'Lire la suite', close: 'Fermer', min: 'min', powered: 'Créé avec ListinoRapido', free: 'Offre Free', all: 'Tous' }
+    it: { book: 'Prenota su WhatsApp', short: 'Prenota', hoursTitle: 'Orari e contatti', directions: 'Indicazioni', call: 'Chiama', open: 'Aperto ora', closedNow: 'Chiuso', until: 'fino alle', opensAt: 'apre alle', reopens: 'riapre', tomorrow: 'domani', at: 'alle', closedDay: 'Chiuso', bNew: 'Novità', bTop: 'Consigliato', days: ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'], about: 'Chi siamo', more: 'Leggi tutto', close: 'Chiudi', min: 'min', powered: 'Creato con ListinoRapido', free: 'Piano Free', all: 'Tutti' },
+    en: { book: 'Book on WhatsApp', short: 'Book', hoursTitle: 'Hours & contact', directions: 'Directions', call: 'Call', open: 'Open now', closedNow: 'Closed', until: 'until', opensAt: 'opens at', reopens: 'reopens', tomorrow: 'tomorrow', at: 'at', closedDay: 'Closed', bNew: 'New', bTop: 'Recommended', days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], about: 'About us', more: 'Read more', close: 'Close', min: 'min', powered: 'Made with ListinoRapido', free: 'Free plan', all: 'All' },
+    fr: { book: 'Réserver sur WhatsApp', short: 'Réserver', hoursTitle: 'Horaires et contact', directions: 'Itinéraire', call: 'Appeler', open: 'Ouvert', closedNow: 'Fermé', until: "jusqu'à", opensAt: 'ouvre à', reopens: 'rouvre', tomorrow: 'demain', at: 'à', closedDay: 'Fermé', bNew: 'Nouveau', bTop: 'Conseillé', days: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'], about: 'À propos', more: 'Lire la suite', close: 'Fermer', min: 'min', powered: 'Créé avec ListinoRapido', free: 'Offre Free', all: 'Tous' }
   };
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -68,7 +76,42 @@
     const wa = (name) => `https://wa.me/${String(d.business.whatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent((lang === 'en' ? 'Hi, I would like to book: ' : lang === 'fr' ? 'Bonjour, je souhaite réserver : ' : 'Ciao, vorrei prenotare: ') + name)}`;
     const nm = (x) => (x && (x[lang] || x.it)) || '';
     const isLong = (txt, n) => String(txt || '').length > (n || 85) || /\n/.test(txt || '');
-    const about = String(d.business.about || '').trim();   // oltre ~2 righe: apre la scheda completa
+    const about = String(d.business.about || '').trim();
+
+    // ----- Orari e contatti -----
+    const B = d.business, hrs = Array.isArray(B.hours) ? B.hours : [];
+    const rangesOf = (k) => ((hrs[k] && hrs[k].r) || []).filter((r) => r && r[0] && r[1]);
+    const hasHours = [0, 1, 2, 3, 4, 5, 6].some((k) => rangesOf(k).length);
+    const toMin = (x) => { const p = String(x).split(':'); return (+p[0]) * 60 + (+p[1] || 0); };
+    const todayIdx = (new Date().getDay() + 6) % 7;
+    const status = () => {
+      if (!hasHours) return null;
+      const now = new Date(), i = (now.getDay() + 6) % 7, cur = now.getHours() * 60 + now.getMinutes();
+      for (const r of rangesOf(i)) if (cur >= toMin(r[0]) && cur < toMin(r[1])) return { open: true, text: `${t.open} · ${t.until} ${r[1]}` };
+      for (const r of rangesOf(i)) if (cur < toMin(r[0])) return { open: false, text: `${t.closedNow} · ${t.opensAt} ${r[0]}` };
+      for (let k = 1; k <= 7; k++) { const j = (i + k) % 7, r = rangesOf(j); if (r.length) return { open: false, text: `${t.closedNow} · ${t.reopens} ${k === 1 ? t.tomorrow : (lang === 'en' ? t.days[j] : t.days[j].toLowerCase())} ${t.at} ${r[0][0]}` }; }
+      return null;
+    };
+    const address = String(B.address || '').trim();
+    const phone = String(B.phone || '').replace(/[^\d+]/g, '');
+    const insta = String(B.instagram || '').replace(/^.*instagram\.com\//i, '').replace(/[@\/?#].*$/, '').replace(/[^A-Za-z0-9._]/g, '');
+    const mapsUrl = address ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address) : '';
+    const st = status();
+    const pill = 'inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/70 px-2.5 py-1 text-[11px] font-medium text-slate-200 hover:border-emerald-500/60';
+    const infoBar = (st || address || phone.length >= 6 || insta) ? `<div class="flex flex-wrap gap-1.5 px-4 pt-3">
+        ${st ? `<button type="button" data-info class="${pill}"><span class="h-1.5 w-1.5 rounded-full ${st.open ? 'bg-emerald-400' : 'bg-slate-500'}"></span>${esc(st.text)} ›</button>` : (address || phone.length >= 6 ? `<button type="button" data-info class="${pill}">${esc(t.hoursTitle)} ›</button>` : '')}
+        ${address ? `<a href="${mapsUrl}" target="_blank" rel="noopener" class="${pill}">📍 ${esc(t.directions)}</a>` : ''}
+        ${phone.length >= 6 ? `<a href="tel:${phone}" class="${pill}">📞 ${esc(t.call)}</a>` : ''}
+        ${insta ? `<a href="https://instagram.com/${insta}" target="_blank" rel="noopener" class="${pill}">@${esc(insta)}</a>` : ''}
+      </div>` : '';
+    const priceHtml = (it, big) => `<div class="whitespace-nowrap text-right leading-tight">${it.oldPrice > it.price ? `<p class="text-[10px] text-slate-500 line-through">${eur(it.oldPrice)}</p>` : ''}<p class="${big ? 'text-base' : 'text-sm'} font-bold text-emerald-400">${eur(it.price)}</p></div>`;
+    const badgesHtml = (it) => {
+      const b = [];
+      if (it.oldPrice > it.price) b.push(`<span class="rounded bg-amber-400/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-300">-${Math.round((1 - it.price / it.oldPrice) * 100)}%</span>`);
+      if (it.badge === 'new') b.push(`<span class="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-300">${esc(t.bNew)}</span>`);
+      if (it.badge === 'top') b.push(`<span class="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-300">★ ${esc(t.bTop)}</span>`);
+      return b.length ? `<div class="mb-1 flex flex-wrap gap-1">${b.join('')}</div>` : '';
+    };   // oltre ~2 righe: apre la scheda completa
     const WA_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6l.4-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-2.9-.4-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>';
     const hasWa = String(d.business.whatsapp || '').replace(/\D/g, '').length >= 8;
     // Pulsante "Prenota" con simbolo WhatsApp. Senza numero: nascosto ai clienti, visibile ma spento in anteprima.
@@ -78,7 +121,7 @@
 
     // I servizi "proOnly" compaiono solo nel piano PRO (il Free ne mostra max 10)
     const cats = d.categories
-      .map((c) => Object.assign({}, c, { items: c.items.filter((i) => o.pro || !i.proOnly) }))
+      .map((c) => Object.assign({}, c, { items: c.items.filter((i) => (o.pro || !i.proOnly) && i.visible !== false) }))
       .filter((c) => c.items.length);
     let html = `
       <div class="relative h-36 img-fallback">
@@ -94,6 +137,7 @@
         <p class="mt-1 line-clamp-3 whitespace-pre-line break-words text-[12px] leading-relaxed text-slate-300">${esc(about)}</p>
         ${isLong(about, 140) ? `<button type="button" data-about class="mt-1 text-[11px] font-semibold text-emerald-400 hover:text-emerald-300">${esc(t.more)} ›</button>` : ''}
       </div>` : ''}
+      ${infoBar}
       <div class="sticky top-0 z-10 bg-slate-950/95 backdrop-blur px-3 py-2 flex gap-2 overflow-x-auto border-b border-slate-800" style="scrollbar-width:none">
         ${cats.map((c, i) => `<a href="#" data-cat="${esc(c.id)}" class="cat-pill shrink-0 text-xs px-3 py-1.5 rounded-full border ${i === 0 ? 'border-emerald-500 text-emerald-400' : 'border-slate-700 text-slate-300'}">${esc(nm(c.name))}</a>`).join('')}
       </div>
@@ -108,9 +152,10 @@
             ${it.img ? `<img src="${esc(it.img)}" alt="${esc(nm(it.name))}" class="w-full h-full object-cover" loading="lazy" onerror="this.remove()">` : ''}
           </div>
           <div class="min-w-0 flex-1">
+            ${badgesHtml(it)}
             <div class="flex items-start justify-between gap-2">
               <p class="text-[13px] font-semibold text-white leading-tight">${esc(nm(it.name))}</p>
-              <p class="text-sm font-bold text-emerald-400 whitespace-nowrap">${eur(it.price)}</p>
+              ${priceHtml(it)}
             </div>
             <p class="mt-0.5 text-[11px] text-slate-400 leading-snug line-clamp-2 break-words">${esc(nm(it.desc)).replace(/\n+/g, ' ')}</p>
             ${isLong(nm(it.desc)) ? `<button type="button" data-more="${esc(it.id)}" class="mt-0.5 text-[11px] font-semibold text-emerald-400 hover:text-emerald-300">${esc(t.more)} ›</button>` : ''}
@@ -160,8 +205,9 @@
           <div class="min-h-0 flex-1 overflow-y-auto px-4 pb-2 pt-3" style="scrollbar-width:thin">
             <div class="flex items-start justify-between gap-3">
               <h3 class="text-base font-bold leading-tight text-white">${esc(nm(it.name))}</h3>
-              <p class="whitespace-nowrap text-base font-bold text-emerald-400">${eur(it.price)}</p>
+              ${priceHtml(it, true)}
             </div>
+            ${badgesHtml(it) ? `<div class="mt-2">${badgesHtml(it)}</div>` : ''}
             ${it.min ? `<p class="mt-1 text-xs text-slate-500">${esc(it.min)} ${t.min}</p>` : ''}
             <p class="mt-3 whitespace-pre-line break-words text-[13px] leading-relaxed text-slate-300">${esc(nm(it.desc))}</p>
           </div>
@@ -191,7 +237,37 @@
       box.addEventListener('click', (e) => { if (e.target === box || e.target.closest('[data-close]')) closeSheet(); });
       host.appendChild(box); document.addEventListener('keydown', onKey);
     };
+    const openInfo = () => {
+      closeSheet();
+      if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+      const box = document.createElement('div');
+      box.className = 'lr-sheet absolute inset-0 z-30 flex items-end bg-slate-950/70 backdrop-blur-sm';
+      box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', t.hoursTitle);
+      const rows = hasHours ? t.days.map((dn, k) => {
+        const r = rangesOf(k);
+        return `<div class="flex justify-between gap-4 py-1.5 text-[13px] ${k === todayIdx ? 'font-semibold text-white' : 'text-slate-300'}"><span>${esc(dn)}</span><span class="text-right">${r.length ? r.map((x) => esc(x[0] + ' – ' + x[1])).join(' · ') : `<span class="text-slate-500">${esc(t.closedDay)}</span>`}</span></div>`;
+      }).join('') : '';
+      box.innerHTML = `
+        <div class="flex max-h-[88%] w-full flex-col rounded-t-2xl border-t border-slate-700 bg-slate-900 shadow-2xl">
+          <div class="flex shrink-0 items-start justify-between gap-3 px-4 pt-4">
+            <div><p class="text-[10px] font-semibold uppercase tracking-widest text-emerald-400">${esc(B.name)}</p><h3 class="text-base font-bold text-white">${esc(t.hoursTitle)}</h3></div>
+            <button type="button" data-close class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-slate-800 text-lg leading-none text-white" aria-label="${esc(t.close)}">×</button>
+          </div>
+          <div class="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-3">
+            ${rows ? `<div class="divide-y divide-slate-800">${rows}</div>` : ''}
+            ${address ? `<p class="mt-3 break-words text-[13px] text-slate-300">📍 ${esc(address)}</p>` : ''}
+            ${phone.length >= 6 ? `<p class="mt-1 text-[13px] text-slate-300">📞 ${esc(B.phone)}</p>` : ''}
+          </div>
+          <div class="grid shrink-0 gap-2 border-t border-slate-800 p-3 ${address && phone.length >= 6 ? 'grid-cols-2' : ''}">
+            ${address ? `<a href="${mapsUrl}" target="_blank" rel="noopener" class="flex items-center justify-center rounded-xl bg-emerald-500 py-3 text-sm font-bold text-slate-950">📍 ${esc(t.directions)}</a>` : ''}
+            ${phone.length >= 6 ? `<a href="tel:${phone}" class="flex items-center justify-center rounded-xl ${address ? 'border border-slate-700 text-slate-200' : 'bg-emerald-500 text-slate-950'} py-3 text-sm font-bold">📞 ${esc(t.call)}</a>` : ''}
+          </div>
+        </div>`;
+      box.addEventListener('click', (e) => { if (e.target === box || e.target.closest('[data-close]')) closeSheet(); });
+      host.appendChild(box); document.addEventListener('keydown', onKey);
+    };
     closeSheet();
+    el.querySelectorAll('[data-info]').forEach((b) => b.addEventListener('click', openInfo));
     el.querySelectorAll('[data-about]').forEach((b) => b.addEventListener('click', openAbout));
     el.querySelectorAll('[data-more]').forEach((b) => b.addEventListener('click', () => {
       const it = cats.reduce((f, c) => f || c.items.find((i) => String(i.id) === b.dataset.more), null);

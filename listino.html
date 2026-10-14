@@ -54,7 +54,7 @@
           if (c.error) throw c.error;
           if (s.error) throw s.error;
           data = {
-            business: { name: v.name, tagline: { it: v.tagline || '' }, whatsapp: v.whatsapp || '', about: v.about || '', cover: v.cover_url || LR.DATA.business.cover },
+            business: { name: v.name, tagline: { it: v.tagline || '' }, whatsapp: v.whatsapp || '', about: v.about || '', address: v.address || '', phone: v.phone || '', instagram: v.instagram || '', hours: v.hours || [], cover: v.cover_url || LR.DATA.business.cover },
             categories: c.data.map((x) => ({
               id: x.id,
               name: Object.assign({}, x.name_i18n, { it: x.name }),
@@ -62,7 +62,8 @@
                 id: y.id,
                 name: Object.assign({}, y.name_i18n, { it: y.name }),
                 desc: Object.assign({}, y.description_i18n, { it: y.description || '' }),
-                price: y.price_cents / 100, min: y.duration_min || 0, img: y.image_url || ''
+                price: y.price_cents / 100, min: y.duration_min || 0, img: y.image_url || '',
+                oldPrice: y.old_price_cents ? y.old_price_cents / 100 : null, badge: y.badge || ''
               }))
             }))
           };
