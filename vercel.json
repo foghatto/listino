@@ -4,7 +4,17 @@
   "rewrites": [
     {
       "source": "/s/:slug",
-      "destination": "/listino"
+      "destination": "/api/listino?s=:slug"
+    },
+    {
+      "source": "/listino",
+      "has": [
+        {
+          "type": "query",
+          "key": "s"
+        }
+      ],
+      "destination": "/api/listino"
     }
   ],
   "headers": [

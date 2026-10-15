@@ -84,3 +84,9 @@ Per un sito in produzione scarica le foto che vuoi usare, mettile in `assets/img
 - **Chi siamo**: descrizione dell'attività (fino a 1000 caratteri) in Profilo; compare sotto la foto di copertina del listino con "Leggi tutto". Richiede `supabase/about.sql` (colonna `venues.about`).
 - **Orari e contatti**: in Profilo indirizzo, telefono, Instagram e orari per giorno (2 turni). Nel listino: "Aperto ora / Chiuso · riapre…", Indicazioni (Google Maps), Chiama, Instagram e scheda con gli orari. Richiede `supabase/hours-promo.sql`.
 - **Servizi nascosti, promozioni, etichette**: occhio per nascondere un servizio senza cancellarlo; nella modifica "Prezzo prima della promo" (vecchio prezzo barrato e  0i sconto) ed etichette Novità / Consigliato. Stesso file SQL.
+
+## Anteprima nelle chat (Open Graph)
+
+I link `/listino?s=<link>[&servizio=<id>]` e `/s/<link>` passano da `api/listino.js`, che restituisce la pagina `listino` con i meta tag Open Graph:
+con `servizio` l'anteprima mostra foto, nome e prezzo (con promo) del servizio; senza, nome e cover del listino. Usa solo la anon key pubblica
+(da `SUPABASE_URL`/`SUPABASE_ANON_KEY` su Vercel, oppure da `assets/config.js`). WhatsApp mette in cache le anteprime: prova con un link mai condiviso prima.
