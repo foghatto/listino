@@ -88,9 +88,11 @@
       } catch (e) { track('view'); }
 
       const el = $('menu');
+      let opened = false;                    // la scheda del servizio si apre solo la prima volta
       const draw = () => {
         const keep = el.scrollTop;
-        LR.renderListino(el, { pro, lang, data, onView: (id) => track('whatsapp_click', id) });
+        LR.renderListino(el, { pro, lang, data, openService: opened ? null : qs.get('servizio'), onView: (id) => track('whatsapp_click', id) });
+        opened = true;
         el.scrollTop = keep;
       };
 

@@ -61,9 +61,9 @@
   });
 
   const T = {
-    it: { book: 'Prenota su WhatsApp', short: 'Prenota', hoursTitle: 'Orari e contatti', directions: 'Indicazioni', call: 'Chiama', open: 'Aperto ora', closedNow: 'Chiuso', until: 'fino alle', opensAt: 'apre alle', reopens: 'riapre', tomorrow: 'domani', at: 'alle', closedDay: 'Chiuso', bNew: 'Novità', bTop: 'Consigliato', days: ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'], about: 'Chi siamo', more: 'Leggi tutto', close: 'Chiudi', min: 'min', powered: 'Creato con ListinoRapido', free: 'Piano Free', all: 'Tutti' },
-    en: { book: 'Book on WhatsApp', short: 'Book', hoursTitle: 'Hours & contact', directions: 'Directions', call: 'Call', open: 'Open now', closedNow: 'Closed', until: 'until', opensAt: 'opens at', reopens: 'reopens', tomorrow: 'tomorrow', at: 'at', closedDay: 'Closed', bNew: 'New', bTop: 'Recommended', days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], about: 'About us', more: 'Read more', close: 'Close', min: 'min', powered: 'Made with ListinoRapido', free: 'Free plan', all: 'All' },
-    fr: { book: 'Réserver sur WhatsApp', short: 'Réserver', hoursTitle: 'Horaires et contact', directions: 'Itinéraire', call: 'Appeler', open: 'Ouvert', closedNow: 'Fermé', until: "jusqu'à", opensAt: 'ouvre à', reopens: 'rouvre', tomorrow: 'demain', at: 'à', closedDay: 'Fermé', bNew: 'Nouveau', bTop: 'Conseillé', days: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'], about: 'À propos', more: 'Lire la suite', close: 'Fermer', min: 'min', powered: 'Créé avec ListinoRapido', free: 'Offre Free', all: 'Tous' }
+    it: { book: 'Prenota su WhatsApp', short: 'Prenota', fullList: 'Vedi tutto il listino', gone: 'Questo servizio non è più disponibile. Ecco il listino completo.', hoursTitle: 'Orari e contatti', directions: 'Indicazioni', call: 'Chiama', open: 'Aperto ora', closedNow: 'Chiuso', until: 'fino alle', opensAt: 'apre alle', reopens: 'riapre', tomorrow: 'domani', at: 'alle', closedDay: 'Chiuso', bNew: 'Novità', bTop: 'Consigliato', days: ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'], about: 'Chi siamo', more: 'Leggi tutto', close: 'Chiudi', min: 'min', powered: 'Creato con ListinoRapido', free: 'Piano Free', all: 'Tutti' },
+    en: { book: 'Book on WhatsApp', short: 'Book', fullList: 'See the full menu', gone: 'This service is no longer available. Here is the full menu.', hoursTitle: 'Hours & contact', directions: 'Directions', call: 'Call', open: 'Open now', closedNow: 'Closed', until: 'until', opensAt: 'opens at', reopens: 'reopens', tomorrow: 'tomorrow', at: 'at', closedDay: 'Closed', bNew: 'New', bTop: 'Recommended', days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], about: 'About us', more: 'Read more', close: 'Close', min: 'min', powered: 'Made with ListinoRapido', free: 'Free plan', all: 'All' },
+    fr: { book: 'Réserver sur WhatsApp', short: 'Réserver', fullList: 'Voir toute la carte', gone: "Ce service n'est plus disponible. Voici la carte complète.", hoursTitle: 'Horaires et contact', directions: 'Itinéraire', call: 'Appeler', open: 'Ouvert', closedNow: 'Fermé', until: "jusqu'à", opensAt: 'ouvre à', reopens: 'rouvre', tomorrow: 'demain', at: 'à', closedDay: 'Fermé', bNew: 'Nouveau', bTop: 'Conseillé', days: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'], about: 'À propos', more: 'Lire la suite', close: 'Fermer', min: 'min', powered: 'Créé avec ListinoRapido', free: 'Offre Free', all: 'Tous' }
   };
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -123,6 +123,9 @@
     const cats = d.categories
       .map((c) => Object.assign({}, c, { items: c.items.filter((i) => (o.pro || !i.proOnly) && i.visible !== false) }))
       .filter((c) => c.items.length);
+    // Link a un singolo servizio (?servizio=ID): la scheda si apre da sola sopra il listino
+    const target = o.openService ? cats.reduce((f, c) => f || c.items.find((i) => String(i.id) === String(o.openService)), null) : null;
+    const gone = !!o.openService && !target;
     let html = `
       <div class="relative h-36 img-fallback">
         <img src="${esc(d.business.cover)}" alt="" class="absolute inset-0 w-full h-full object-cover opacity-70" loading="lazy" onerror="this.remove()">
@@ -137,6 +140,7 @@
         <p class="mt-1 line-clamp-3 whitespace-pre-line break-words text-[12px] leading-relaxed text-slate-300">${esc(about)}</p>
         ${isLong(about, 140) ? `<button type="button" data-about class="mt-1 text-[11px] font-semibold text-emerald-400 hover:text-emerald-300">${esc(t.more)} ›</button>` : ''}
       </div>` : ''}
+      ${gone ? `<p class="mx-4 mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">${esc(t.gone)}</p>` : ''}
       ${infoBar}
       <div class="sticky top-0 z-10 bg-slate-950/95 backdrop-blur px-3 py-2 flex gap-2 overflow-x-auto border-b border-slate-800" style="scrollbar-width:none">
         ${cats.map((c, i) => `<a href="#" data-cat="${esc(c.id)}" class="cat-pill shrink-0 text-xs px-3 py-1.5 rounded-full border ${i === 0 ? 'border-emerald-500 text-emerald-400' : 'border-slate-700 text-slate-300'}">${esc(nm(c.name))}</a>`).join('')}
@@ -211,7 +215,7 @@
             ${it.min ? `<p class="mt-1 text-xs text-slate-500">${esc(it.min)} ${t.min}</p>` : ''}
             <p class="mt-3 whitespace-pre-line break-words text-[13px] leading-relaxed text-slate-300">${esc(nm(it.desc))}</p>
           </div>
-          <div class="shrink-0 border-t border-slate-800 p-3">${waBtn(it, nm(it.name), true) || `<button type="button" data-close class="w-full rounded-xl border border-slate-700 py-3 text-sm font-semibold text-slate-200">${esc(t.close)}</button>`}</div>
+          <div class="grid shrink-0 gap-2 border-t border-slate-800 p-3">${waBtn(it, nm(it.name), true) || ''}${o.openService || !hasWa ? `<button type="button" data-close class="w-full rounded-xl border border-slate-700 py-3 text-sm font-semibold text-slate-200">${esc(o.openService ? t.fullList : t.close)}</button>` : ''}</div>
         </div>`;
       box.addEventListener('click', (e) => { if (e.target === box || e.target.closest('[data-close]')) closeSheet(); });
       if (o.onView) box.querySelectorAll('[data-book]').forEach((b) => b.addEventListener('click', () => o.onView(b.dataset.book)));
@@ -273,6 +277,7 @@
       const it = cats.reduce((f, c) => f || c.items.find((i) => String(i.id) === b.dataset.more), null);
       if (it) openSheet(it);
     }));
+    if (target) openSheet(target);
     if (o.onView) el.querySelectorAll('[data-book]').forEach((b) => b.addEventListener('click', () => o.onView(b.dataset.book)));
   }
 
