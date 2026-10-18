@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Locandina QR — ListinoRapido</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };</script>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    :root { --s: 1; }
+    body { font-family: Inter, system-ui, sans-serif; }
+
+    /* Foglio A4: le misure sono in millimetri, così quello che vedi è quello che esce dalla stampante */
+    .stage { width: calc(210mm * var(--s)); height: calc(297mm * var(--s)); margin: 0 auto; }
+    .sheet { width: 210mm; height: 297mm; transform: scale(var(--s)); transform-origin: top left; background: #fff; color: #0f172a;
+             box-shadow: 0 10px 40px rgba(0,0,0,.5); overflow: hidden; position: relative; font-family: Inter, system-ui, sans-serif;
+             -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .qrbox canvas, .qrbox img { width: 100% !important; height: auto !important; display: block; image-rendering: pixelated; }
+    .qrbox { background: #fff; line-height: 0; }
+
+    /* Locandina A4 */
+    .poster { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 18mm 16mm; gap: 7mm; }
+    .poster .name { font-size: 15mm; font-weight: 800; line-height: 1.05; letter-spacing: -.02em; overflow-wrap: anywhere; }
+    .poster .tag { font-size: 5.5mm; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; opacity: .7; }
+    .poster .qrbox { width: 112mm; padding: 7mm; border-radius: 8mm; }
+    .poster .head { font-size: 9mm; font-weight: 800; line-height: 1.1; }
+    .poster .sub { font-size: 5.2mm; opacity: .8; max-width: 150mm; }
+    .poster .url { font-size: 4.6mm; font-weight: 600; opacity: .9; }
+    .poster .made { position: absolute; bottom: 8mm; left: 0; right: 0; font-size: 3.4mm; opacity: .55; }
+
+    /* Cartellini A6 (4 per foglio A4, da ritagliare) */
+    .cards { display: grid; grid-template-columns: 105mm 105mm; grid-template-rows: 148.5mm 148.5mm; height: 100%; }
+    .card6 { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8mm; gap: 3.5mm;
+             outline: .2mm dashed rgba(100,116,139,.7); outline-offset: -.1mm; }
+    .card6 .name { font-size: 7mm; font-weight: 800; line-height: 1.1; overflow-wrap: anywhere; }
+    .card6 .tag { font-size: 3mm; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; opacity: .7; }
+    .card6 .qrbox { width: 58mm; padding: 3.5mm; border-radius: 4mm; }
+    .card6 .head { font-size: 5.2mm; font-weight: 800; line-height: 1.1; }
+    .card6 .sub { font-size: 3.2mm; opacity: .8; }
+    .card6 .url { font-size: 2.9mm; font-weight: 600; opacity: .9; overflow-wrap: anywhere; }
+    .card6 .made { font-size: 2.3mm; opacity: .5; }
+
+    /* Temi */
+    .t-light { background: #fff; color: #0f172a; }
+    .t-light .qrbox { border: .5mm solid #0f172a; }
+    .t-light .accent { color: #047857; }
+    .t-dark { background: #020617; color: #f1f5f9; }
+    .t-dark .accent { color: #34d399; }
+    .t-dark .qrbox { border: .5mm solid #10b981; }
+
+    @page { size: A4; margin: 0; }
+    @media print {
+      html, body { background: #fff !important; }
+      .noprint { display: none !important; }
+      :root { --s: 1 !important; }
+      .pgrid { display: block !important; padding: 0 !important; margin: 0 !important; max-width: none !important; }
+      .stage { margin: 0; width: 210mm; height: 297mm; }
+      .sheet { box-shadow: none; }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-300">
+
+  <div>
+    <header class="noprint border-b border-slate-800/80 bg-slate-950/85">
+      <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
+        <a href="dashboard.html" id="back" class="text-sm text-slate-300 hover:text-emerald-400">← Torna alla dashboard</a>
+        <button id="print" type="button" class="btn btn-primary !py-2 text-sm">Stampa / Salva PDF</button>
+      </div>
+    </header>
+
+    <div class="pgrid mx-auto grid max-w-5xl gap-6 px-4 py-6 lg:grid-cols-[19rem_1fr]">
+      <aside class="noprint space-y-5">
+        <div>
+          <h1 class="text-xl font-bold text-white">Locandina con il tuo QR</h1>
+          <p class="mt-1 text-sm text-slate-400">Scegli il formato, personalizza i testi e stampa. Da "Stampa" puoi anche scegliere <b class="text-slate-200">Salva come PDF</b>.</p>
+        </div>
+
+        <fieldset>
+          <legend class="mb-1.5 text-sm font-medium text-white">Formato</legend>
+          <div class="grid gap-2">
+            <label class="fmt flex cursor-pointer items-center gap-3 rounded-xl border border-slate-700 p-3 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10"><input type="radio" name="fmt" value="poster" class="accent-emerald-500" checked><span><b class="block text-sm text-white">Locandina A4</b><span class="text-xs text-slate-400">Da appendere in vetrina o alla parete</span></span></label>
+            <label class="fmt flex cursor-pointer items-center gap-3 rounded-xl border border-slate-700 p-3 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10"><input type="radio" name="fmt" value="cards" class="accent-emerald-500"><span><b class="block text-sm text-white">4 cartellini da banco</b><span class="text-xs text-slate-400">Un foglio A4 da ritagliare (formato A6)</span></span></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend class="mb-1.5 text-sm font-medium text-white">Colori</legend>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-700 p-3 text-sm has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10"><input type="radio" name="theme" value="light" class="accent-emerald-500" checked> Chiaro</label>
+            <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-700 p-3 text-sm has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10"><input type="radio" name="theme" value="dark" class="accent-emerald-500"> Scuro</label>
+          </div>
+          <p class="mt-1 text-xs text-slate-500">Il chiaro consuma meno inchiostro. Lo scuro si legge bene anche in vetrina.</p>
+        </fieldset>
+
+        <div class="space-y-3">
+          <div><label for="f-name" class="mb-1 block text-sm font-medium text-white">Nome dell'attività</label><input id="f-name" class="input text-sm" maxlength="60"></div>
+          <div><label for="f-tag" class="mb-1 block text-sm font-medium text-white">Sottotitolo <span class="font-normal text-slate-500">(facoltativo)</span></label><input id="f-tag" class="input text-sm" maxlength="50" placeholder="Es. Estetica &amp; Benessere"></div>
+          <div><label for="f-head" class="mb-1 block text-sm font-medium text-white">Titolo</label><input id="f-head" class="input text-sm" maxlength="60"></div>
+          <div><label for="f-sub" class="mb-1 block text-sm font-medium text-white">Testo sotto il QR</label><input id="f-sub" class="input text-sm" maxlength="90"></div>
+          <label class="flex items-center gap-2 text-sm"><input id="f-made" type="checkbox" class="h-4 w-4 accent-emerald-500" checked> Mostra "Creato con ListinoRapido"</label>
+        </div>
+        <p id="note" class="hidden rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200"></p>
+        <p class="text-xs text-slate-500">Consiglio: stampa a grandezza reale (100%, senza "adatta alla pagina") e prova il QR con il tuo telefono prima di appenderlo.</p>
+      </aside>
+
+      <main>
+        <div id="stage" class="stage"><div id="sheet" class="sheet t-light"></div></div>
+      </main>
+    </div>
+  </div>
+
+  <script src="assets/config.js?v=2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const qs = new URLSearchParams(location.search);
+      const demo = qs.has('demo');
+      const slug = (qs.get('s') || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+      const cfg = window.LR_CONFIG || {};
+      const configured = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY);
+      const sb = configured && window.supabase ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
+      const key = 'lr_poster_' + (slug || 'demo');
+
+      // Indirizzo che apre il QR: breve (/s/slug) per un codice più semplice da inquadrare
+      const url = slug && !demo ? location.origin + '/s/' + slug : new URL('listino.html?demo=1', location.href).href;
+      const shown = url.replace(/^https?:\/\//, '');
+
+      const st = { fmt: 'poster', theme: 'light', name: qs.get('n') || 'La mia attività', tag: '', head: 'Scansiona per vedere il listino', sub: 'Servizi, prezzi e prenotazione su WhatsApp', made: true };
+      let ed = {};                                    // solo ciò che hai cambiato tu (il resto arriva dal listino)
+      try { ed = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (e) {}
+      Object.assign(st, ed);
+      const saveLocal = () => { try { localStorage.setItem(key, JSON.stringify(ed)); } catch (e) {} };
+
+      if (demo || !slug) { $('note').textContent = 'Modalità prova: il QR porta a un listino di esempio. Accedi e apri questa pagina dalla dashboard per avere il QR del tuo listino reale.'; $('note').classList.remove('hidden'); }
+      if (slug && !demo) $('back').href = 'dashboard.html';
+      else if (demo) $('back').href = 'dashboard.html?demo=1';
+
+      // QR: una sola volta, poi clonato nei cartellini
+      function qrHtml() {
+        const holder = document.createElement('div');
+        try { new QRCode(holder, { text: url, width: 720, height: 720, correctLevel: QRCode.CorrectLevel.Q }); }
+        catch (e) { return '<div style="padding:10mm;color:#000;font:14px sans-serif">QR non disponibile: controlla la connessione.</div>'; }
+        const c = holder.querySelector('canvas');
+        return c ? '<img alt="QR code del listino" src="' + c.toDataURL('image/png') + '">' : holder.innerHTML;
+      }
+      let qr = '';
+
+      function draw() {
+        if (!qr) qr = qrHtml();
+        const sheet = $('sheet');
+        sheet.className = 'sheet t-' + st.theme;
+        const made = st.made ? '<div class="made">Creato con ListinoRapido</div>' : '';
+        const tag = st.tag.trim() ? '<div class="tag accent">' + esc(st.tag) + '</div>' : '';
+        if (st.fmt === 'poster') {
+          sheet.innerHTML = '<div class="poster">' + tag + '<div class="name">' + esc(st.name) + '</div>' +
+            '<div class="qrbox">' + qr + '</div><div class="head accent">' + esc(st.head) + '</div>' +
+            (st.sub.trim() ? '<div class="sub">' + esc(st.sub) + '</div>' : '') + '<div class="url">' + esc(shown) + '</div>' + made + '</div>';
+        } else {
+          const one = '<div class="card6">' + tag + '<div class="name">' + esc(st.name) + '</div><div class="qrbox">' + qr + '</div><div class="head accent">' + esc(st.head) + '</div>' +
+            (st.sub.trim() ? '<div class="sub">' + esc(st.sub) + '</div>' : '') + '<div class="url">' + esc(shown) + '</div>' + (st.made ? '<div class="made">Creato con ListinoRapido</div>' : '') + '</div>';
+          sheet.innerHTML = '<div class="cards">' + one + one + one + one + '</div>';
+        }
+      }
+
+      // Anteprima in scala sugli schermi stretti
+      function fit() {
+        const avail = Math.min(window.innerWidth, 1100) - (window.innerWidth >= 1024 ? 19 * 16 + 24 + 32 : 32);
+        const s = Math.max(.3, Math.min(1, avail / (210 * 96 / 25.4)));
+        document.documentElement.style.setProperty('--s', s.toFixed(3));
+      }
+      window.addEventListener('resize', fit); fit();
+
+      // Campi
+      const bind = (id, k) => { $(id).value = st[k]; $(id).addEventListener('input', () => { st[k] = ed[k] = $(id).value; saveLocal(); draw(); }); };
+      bind('f-name', 'name'); bind('f-tag', 'tag'); bind('f-head', 'head'); bind('f-sub', 'sub');
+      $('f-made').checked = !!st.made; $('f-made').addEventListener('change', () => { st.made = ed.made = $('f-made').checked; saveLocal(); draw(); });
+      document.querySelectorAll('input[name=fmt]').forEach((r) => { r.checked = r.value === st.fmt; r.addEventListener('change', () => { st.fmt = ed.fmt = r.value; saveLocal(); draw(); }); });
+      document.querySelectorAll('input[name=theme]').forEach((r) => { r.checked = r.value === st.theme; r.addEventListener('change', () => { st.theme = ed.theme = r.value; saveLocal(); draw(); }); });
+      $('print').addEventListener('click', () => window.print());
+
+      draw();
+
+      // Nome e sottotitolo reali dal listino pubblicato (se non li hai già cambiati qui)
+      (async () => {
+        if (!slug || demo || !sb) return;
+        try {
+          const { data: v } = await sb.from('venues').select('name,tagline').eq('slug', slug).maybeSingle();
+          if (!v) return;
+          if (!('name' in ed)) { st.name = v.name || st.name; $('f-name').value = st.name; }
+          if (!('tag' in ed) && v.tagline) { st.tag = v.tagline; $('f-tag').value = st.tag; }
+          draw();
+        } catch (e) { /* resta il nome di default */ }
+      })();
+    })();
+  </script>
+</body>
+</html>

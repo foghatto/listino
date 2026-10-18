@@ -2,6 +2,25 @@
 (function () {
   const IMG = (id, w) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w || 400}&q=70`;
 
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const ymd = (d) => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  const inDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return ymd(d); };
+
+  /* Promozione con scadenza: l'ultimo giorno incluso è promoUntil (YYYY-MM-DD, ora locale).
+     Scaduta: il servizio torna al prezzo pieno (oldPrice) e la promo sparisce da sola. */
+  function promoInfo(it, today) {
+    if (!(Number(it.oldPrice) > Number(it.price))) return { active: false, expired: false, days: null };
+    const u = String(it.promoUntil || '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(u)) return { active: true, expired: false, days: null };
+    const days = Math.round((Date.parse(u + 'T00:00:00Z') - Date.parse((today || ymd(new Date())) + 'T00:00:00Z')) / 86400000);
+    return days < 0 ? { active: false, expired: true, days } : { active: true, expired: false, days };
+  }
+  function effective(it, today) {
+    const p = promoInfo(it, today);
+    if (p.expired) return Object.assign({}, it, { price: it.oldPrice, oldPrice: null, promoDays: null, promoExpired: true });
+    return Object.assign({}, it, { promoDays: p.active ? p.days : null });
+  }
+
   const DATA = {
     business: {
       name: 'Studio Aurora',
@@ -24,7 +43,7 @@
         name: { it: 'Viso', en: 'Face', fr: 'Visage' },
         items: [
           { id: 's1', badge: 'top', name: { it: 'Pulizia del viso profonda', en: 'Deep facial cleansing', fr: 'Nettoyage de peau profond' }, desc: { it: 'Detersione, vapore, estrazione e maschera idratante.', en: 'Cleansing, steam, extraction and hydrating mask.', fr: 'Nettoyage, vapeur, extraction et masque hydratant.' }, price: 45, min: 60, img: IMG('photo-1570172619644-dfd03ed5d881', 300) },
-          { id: 's2', oldPrice: 80, name: { it: 'Trattamento anti-età', en: 'Anti-aging treatment', fr: 'Soin anti-âge' }, desc: { it: 'Siero attivo, massaggio lifting e maschera rassodante.', en: 'Active serum, lifting massage and firming mask.', fr: 'Sérum actif, massage liftant et masque raffermissant.' }, price: 65, min: 75, img: IMG('photo-1519823551278-64ac92734fb1', 300) },
+          { id: 's2', oldPrice: 80, promoUntil: inDays(6), name: { it: 'Trattamento anti-età', en: 'Anti-aging treatment', fr: 'Soin anti-âge' }, desc: { it: 'Siero attivo, massaggio lifting e maschera rassodante.', en: 'Active serum, lifting massage and firming mask.', fr: 'Sérum actif, massage liftant et masque raffermissant.' }, price: 65, min: 75, img: IMG('photo-1519823551278-64ac92734fb1', 300) },
           { id: 's7', proOnly: true, name: { it: 'Maschera illuminante', en: 'Brightening mask', fr: 'Masque éclat' }, desc: { it: 'Luminosità immediata prima di un evento.', en: 'Instant glow before a special event.', fr: 'Éclat immédiat avant un événement.' }, price: 35, min: 40, img: IMG('photo-1570172619644-dfd03ed5d881', 300) }
         ]
       },
@@ -61,9 +80,9 @@
   });
 
   const T = {
-    it: { book: 'Prenota su WhatsApp', short: 'Prenota', fullList: 'Vedi tutto il listino', gone: 'Questo servizio non è più disponibile. Ecco il listino completo.', hoursTitle: 'Orari e contatti', directions: 'Indicazioni', call: 'Chiama', open: 'Aperto ora', closedNow: 'Chiuso', until: 'fino alle', opensAt: 'apre alle', reopens: 'riapre', tomorrow: 'domani', at: 'alle', closedDay: 'Chiuso', bNew: 'Novità', bTop: 'Consigliato', days: ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'], about: 'Chi siamo', more: 'Leggi tutto', close: 'Chiudi', min: 'min', powered: 'Creato con ListinoRapido', free: 'Piano Free', all: 'Tutti' },
-    en: { book: 'Book on WhatsApp', short: 'Book', fullList: 'See the full menu', gone: 'This service is no longer available. Here is the full menu.', hoursTitle: 'Hours & contact', directions: 'Directions', call: 'Call', open: 'Open now', closedNow: 'Closed', until: 'until', opensAt: 'opens at', reopens: 'reopens', tomorrow: 'tomorrow', at: 'at', closedDay: 'Closed', bNew: 'New', bTop: 'Recommended', days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], about: 'About us', more: 'Read more', close: 'Close', min: 'min', powered: 'Made with ListinoRapido', free: 'Free plan', all: 'All' },
-    fr: { book: 'Réserver sur WhatsApp', short: 'Réserver', fullList: 'Voir toute la carte', gone: "Ce service n'est plus disponible. Voici la carte complète.", hoursTitle: 'Horaires et contact', directions: 'Itinéraire', call: 'Appeler', open: 'Ouvert', closedNow: 'Fermé', until: "jusqu'à", opensAt: 'ouvre à', reopens: 'rouvre', tomorrow: 'demain', at: 'à', closedDay: 'Fermé', bNew: 'Nouveau', bTop: 'Conseillé', days: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'], about: 'À propos', more: 'Lire la suite', close: 'Fermer', min: 'min', powered: 'Créé avec ListinoRapido', free: 'Offre Free', all: 'Tous' }
+    it: { promoLast: 'Ultimo giorno', promoOne: 'Ancora 1 giorno', promoLeft: 'Ancora {n} giorni', book: 'Prenota su WhatsApp', short: 'Prenota', fullList: 'Vedi tutto il listino', gone: 'Questo servizio non è più disponibile. Ecco il listino completo.', hoursTitle: 'Orari e contatti', directions: 'Indicazioni', call: 'Chiama', open: 'Aperto ora', closedNow: 'Chiuso', until: 'fino alle', opensAt: 'apre alle', reopens: 'riapre', tomorrow: 'domani', at: 'alle', closedDay: 'Chiuso', bNew: 'Novità', bTop: 'Consigliato', days: ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'], about: 'Chi siamo', more: 'Leggi tutto', close: 'Chiudi', min: 'min', powered: 'Creato con ListinoRapido', free: 'Piano Free', all: 'Tutti' },
+    en: { promoLast: 'Last day', promoOne: '1 day left', promoLeft: '{n} days left', book: 'Book on WhatsApp', short: 'Book', fullList: 'See the full menu', gone: 'This service is no longer available. Here is the full menu.', hoursTitle: 'Hours & contact', directions: 'Directions', call: 'Call', open: 'Open now', closedNow: 'Closed', until: 'until', opensAt: 'opens at', reopens: 'reopens', tomorrow: 'tomorrow', at: 'at', closedDay: 'Closed', bNew: 'New', bTop: 'Recommended', days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], about: 'About us', more: 'Read more', close: 'Close', min: 'min', powered: 'Made with ListinoRapido', free: 'Free plan', all: 'All' },
+    fr: { promoLast: "Dernier jour", promoOne: "Plus qu'1 jour", promoLeft: "Encore {n} jours", book: 'Réserver sur WhatsApp', short: 'Réserver', fullList: 'Voir toute la carte', gone: "Ce service n'est plus disponible. Voici la carte complète.", hoursTitle: 'Horaires et contact', directions: 'Itinéraire', call: 'Appeler', open: 'Ouvert', closedNow: 'Fermé', until: "jusqu'à", opensAt: 'ouvre à', reopens: 'rouvre', tomorrow: 'demain', at: 'à', closedDay: 'Fermé', bNew: 'Nouveau', bTop: 'Conseillé', days: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'], about: 'À propos', more: 'Lire la suite', close: 'Fermer', min: 'min', powered: 'Créé avec ListinoRapido', free: 'Offre Free', all: 'Tous' }
   };
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -108,6 +127,7 @@
     const badgesHtml = (it) => {
       const b = [];
       if (it.oldPrice > it.price) b.push(`<span class="rounded bg-amber-400/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-300">-${Math.round((1 - it.price / it.oldPrice) * 100)}%</span>`);
+      if (it.promoDays != null) b.push(`<span class="rounded border border-amber-400/40 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-300">${esc(it.promoDays === 0 ? t.promoLast : it.promoDays === 1 ? t.promoOne : t.promoLeft.replace('{n}', it.promoDays))}</span>`);
       if (it.badge === 'new') b.push(`<span class="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-300">${esc(t.bNew)}</span>`);
       if (it.badge === 'top') b.push(`<span class="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-300">★ ${esc(t.bTop)}</span>`);
       return b.length ? `<div class="mb-1 flex flex-wrap gap-1">${b.join('')}</div>` : '';
@@ -121,7 +141,7 @@
 
     // I servizi "proOnly" compaiono solo nel piano PRO (il Free ne mostra max 10)
     const cats = d.categories
-      .map((c) => Object.assign({}, c, { items: c.items.filter((i) => (o.pro || !i.proOnly) && i.visible !== false) }))
+      .map((c) => Object.assign({}, c, { items: c.items.filter((i) => (o.pro || !i.proOnly) && i.visible !== false).map((i) => effective(i)) }))
       .filter((c) => c.items.length);
     // Link a un singolo servizio (?servizio=ID): la scheda si apre da sola sopra il listino
     const target = o.openService ? cats.reduce((f, c) => f || c.items.find((i) => String(i.id) === String(o.openService)), null) : null;
@@ -290,5 +310,5 @@
     return d;
   }
 
-  window.LR = { DATA, T, renderListino, esc, eur, IMG, freeData };
+  window.LR = { DATA, T, renderListino, esc, eur, IMG, freeData, promoInfo, effective, ymd };
 })();

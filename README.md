@@ -90,3 +90,9 @@ Per un sito in produzione scarica le foto che vuoi usare, mettile in `assets/img
 I link `/listino?s=<link>[&servizio=<id>]` e `/s/<link>` passano da `api/listino.js`, che restituisce la pagina `listino` con i meta tag Open Graph:
 con `servizio` l'anteprima mostra foto, nome e prezzo (con promo) del servizio; senza, nome e cover del listino. Usa solo la anon key pubblica
 (da `SUPABASE_URL`/`SUPABASE_ANON_KEY` su Vercel, oppure da `assets/config.js`). WhatsApp mette in cache le anteprime: prova con un link mai condiviso prima.
+
+## Locandina QR, modelli, promo a tempo
+
+- **Locandina QR** (`locandina.html`, dalla dashboard: *QR code e link → Stampa locandina*): locandina A4 o 4 cartellini A6 da ritagliare, tema chiaro/scuro, testi modificabili, "Stampa / Salva PDF". Il QR usa il link breve `/s/<link>`.
+- **Modelli per mestiere** (`assets/templates.js`): parrucchiere, estetista, nail artist, barbiere, massaggi. Dalla dashboard: *Parti da un modello*. Rispetta il limite di 10 servizi del Free; prezzi e durate sono esempi.
+- **Promozioni con scadenza**: esegui una volta `supabase/promo-scadenza.sql` (colonna `services.promo_until`). Con la data impostata compare "Ancora N giorni"; dal giorno dopo il servizio torna al prezzo pieno da solo (listino, dashboard, messaggio di condivisione e anteprima WhatsApp).

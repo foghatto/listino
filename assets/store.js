@@ -29,11 +29,16 @@
   const cents = (p) => Math.round(Number(p) * 100);
   const SQL_EXT = 'Per salvare orari, contatti, promozioni ed etichette esegui una volta supabase/hours-promo.sql nello SQL Editor di Supabase.';
   // Campi extra del servizio (promozione ed etichetta): scritti solo se le colonne esistono
+  const SQL_UNTIL = 'Per usare la scadenza delle promozioni esegui una volta supabase/promo-scadenza.sql nello SQL Editor di Supabase.';
   const svcExt = (it) => {
     const promo = Number(it.oldPrice) > Number(it.price) ? cents(it.oldPrice) : null;
-    if (S.extS) return { old_price_cents: promo, badge: it.badge || null };
-    if (promo || it.badge) throw new Error(SQL_EXT);
-    return {};
+    const out = {};
+    if (S.extS) { out.old_price_cents = promo; out.badge = it.badge || null; }
+    else if (promo || it.badge) throw new Error(SQL_EXT);
+    const until = promo && it.promoUntil ? it.promoUntil : null;
+    if (S.extP) out.promo_until = until;
+    else if (until) throw new Error(SQL_UNTIL);
+    return out;
   };
 
   // Traduce gli errori del database in messaggi comprensibili
@@ -59,6 +64,7 @@
     min: r.duration_min || 0,
     oldPrice: r.old_price_cents ? r.old_price_cents / 100 : null,
     badge: r.badge || '',
+    promoUntil: r.promo_until || '',
     img: r.image_url || '',
     visible: r.visible !== false
   });
@@ -127,11 +133,12 @@
     }
 
     // Colonne aggiunte da supabase/hours-promo.sql: se mancano, l'app funziona comunque
-    const [pv, ps] = await Promise.all([
+    const [pv, ps, pp] = await Promise.all([
       sb.from('venues').select('hours,address,phone,instagram').limit(1),
-      sb.from('services').select('badge,old_price_cents').limit(1)
+      sb.from('services').select('badge,old_price_cents').limit(1),
+      sb.from('services').select('promo_until').limit(1)
     ]);
-    const extV = !pv.error, extS = !ps.error;
+    const extV = !pv.error, extS = !ps.error, extP = !pp.error;
 
     const [c, s] = await Promise.all([
       sb.from('categories').select('*').eq('venue_id', venue.id).order('position'),
@@ -140,7 +147,7 @@
     fail(c.error); fail(s.error);
 
     S = {
-      mode: 'supabase', plan: venue.plan, hasAbout: 'about' in venue, extV, extS, email: user.email, userId: user.id,
+      mode: 'supabase', plan: venue.plan, hasAbout: 'about' in venue, extV, extS, extP, email: user.email, userId: user.id,
       business: {
         id: venue.id, slug: venue.slug, name: venue.name,
         tagline: { it: venue.tagline || '' }, whatsapp: venue.whatsapp || '', about: venue.about || '', address: venue.address || '', phone: venue.phone || '', instagram: venue.instagram || '', hours: venue.hours || [], cover: venue.cover_url || COVER

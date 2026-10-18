@@ -81,6 +81,7 @@
               <button type="button" data-layout="grid" class="layout-btn rounded-md p-1.5" aria-label="Schede" title="Schede"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
               <button type="button" data-layout="list" class="layout-btn rounded-md p-1.5" aria-label="Elenco" title="Elenco"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
             </div>
+            <button id="tpl-open" type="button" class="btn btn-ghost !px-4 !py-2 text-sm">Parti da un modello</button>
             <button id="svc-new" type="button" class="btn btn-primary !px-4 !py-2 text-sm">+ Nuovo servizio</button>
           </div>
         </div>
@@ -111,6 +112,7 @@
               <button id="qr-copy" class="btn btn-ghost">Copia link</button>
               <a id="qr-open" class="btn btn-ghost" target="_blank" rel="noopener">Apri listino ↗</a>
               <a id="qr-wa" class="btn btn-ghost" target="_blank" rel="noopener">Condividi su WhatsApp</a>
+              <a id="qr-poster" class="btn btn-ghost" target="_blank" rel="noopener">🖨️ Stampa locandina</a>
             </div>
           </div>
         </div>
@@ -230,6 +232,21 @@
     </div>
   </dialog>
 
+  <!-- Modelli di partenza -->
+  <dialog id="tpl-dialog" class="w-[min(34rem,94vw)] rounded-2xl border border-slate-700 bg-slate-900 p-0 text-slate-300 backdrop:bg-black/70">
+    <div class="space-y-3 p-6">
+      <h2 class="text-lg font-bold text-white">Parti da un modello</h2>
+      <p class="text-sm text-slate-400">Scegli il tuo mestiere: ti prepariamo categorie e servizi di esempio. I prezzi sono indicativi, poi cambi tutto con la matita.</p>
+      <div id="tpl-list" class="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Modelli"></div>
+      <div id="tpl-detail" class="max-h-56 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-sm"></div>
+      <p id="tpl-msg" class="hidden text-sm text-red-300" role="alert"></p>
+      <div class="flex flex-wrap justify-end gap-2 pt-1">
+        <button type="button" id="tpl-cancel" class="btn btn-ghost !px-4 !py-2 text-sm">Annulla</button>
+        <button type="button" id="tpl-apply" class="btn btn-primary !px-4 !py-2 text-sm" disabled>Usa questo modello</button>
+      </div>
+    </div>
+  </dialog>
+
   <input id="file" type="file" accept="image/jpeg,image/png,image/webp,image/*" class="hidden">
 
   <!-- Modifica servizio -->
@@ -253,7 +270,9 @@
         <div><label for="ed-old" class="mb-1 block text-sm font-medium">Prezzo prima della promo €</label><input id="ed-old" class="input" type="number" min="0" step="0.5" placeholder="Facoltativo, es. 80"></div>
         <div><label for="ed-badge" class="mb-1 block text-sm font-medium">Etichetta</label><select id="ed-badge" class="input"><option value="">Nessuna</option><option value="new">Novità</option><option value="top">★ Consigliato</option></select></div>
       </div>
-      <p class="-mt-1 text-xs text-slate-500">Promozione: nel campo "Prezzo €" scrivi il prezzo scontato e qui il vecchio prezzo. Nel listino compaiono il vecchio prezzo barrato e la percentuale di sconto.</p>
+      <div id="ed-until-box"><label for="ed-until" class="mb-1 block text-sm font-medium">La promo vale fino al <span class="font-normal text-slate-500">(facoltativo)</span></label><input id="ed-until" class="input" type="date">
+        <p id="ed-until-note" class="mt-1 hidden text-xs text-amber-300"></p></div>
+      <p class="-mt-1 text-xs text-slate-500">Promozione: nel campo "Prezzo €" scrivi il prezzo scontato e qui il vecchio prezzo. Nel listino compaiono il vecchio prezzo barrato e la percentuale di sconto. Se indichi una data, il giorno dopo il servizio torna da solo al prezzo pieno.</p>
       <label class="flex items-start gap-2 text-sm"><input id="ed-visible" type="checkbox" class="mt-1 h-4 w-4 accent-emerald-500"><span>Mostra nel listino <span class="text-slate-500">(togli la spunta per nasconderlo senza cancellarlo)</span></span></label>
       <div><label for="ed-desc" class="mb-1 block text-sm font-medium">Descrizione completa</label><textarea id="ed-desc" class="input" rows="7" maxlength="1000" placeholder="Come si svolge, cosa serve portare, cosa aspettarsi…"></textarea>
         <p class="mt-1 flex justify-between text-xs text-slate-500"><span>Se è lunga, il cliente vede un'anteprima e tocca "Leggi tutto" per aprire la scheda. Vai a capo per separare i paragrafi.</span><span id="ed-count" class="shrink-0 pl-2"></span></p></div>
@@ -284,6 +303,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="assets/data.js"></script>
+  <script src="assets/templates.js"></script>
   <script src="assets/store.js"></script>
   <script>
     const FREE_LIMIT = 10;
@@ -351,13 +371,16 @@
     };
     const eurFmt = (n) => Number(n).toFixed(2) + ' €';
     const isPromo = (it) => Number(it.oldPrice) > Number(it.price);
-    const priceBlock = (it, cls) => `<div class="leading-tight">${isPromo(it) ? `<p class="text-xs text-slate-500 line-through">${eurFmt(it.oldPrice)}</p>` : ''}<p class="${cls} font-bold text-emerald-400">${eurFmt(it.price)}</p></div>`;
-    const pillsHtml = (it) => [
+    const fmtDay = (d) => String(d).slice(0, 10).split('-').reverse().slice(0, 2).join('/');
+    const priceBlock = (raw, cls) => { const it = LR.effective(raw); return `<div class="leading-tight">${isPromo(it) ? `<p class="text-xs text-slate-500 line-through">${eurFmt(it.oldPrice)}</p>` : ''}<p class="${cls} font-bold text-emerald-400">${eurFmt(it.price)}</p></div>`; };
+    const pillsHtml = (raw) => { const it = LR.effective(raw); return [
       it.visible === false ? '<span class="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] font-bold uppercase text-slate-200">Nascosto</span>' : '',
       isPromo(it) ? `<span class="rounded bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-300">-${Math.round((1 - it.price / it.oldPrice) * 100)}%</span>` : '',
+      isPromo(it) && raw.promoUntil ? `<span class="rounded border border-amber-400/40 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-300">Fino al ${fmtDay(raw.promoUntil)}</span>` : '',
+      it.promoExpired ? '<span class="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] font-bold uppercase text-slate-200">Promo scaduta</span>' : '',
       it.badge === 'new' ? '<span class="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-emerald-300">Novità</span>' : '',
       it.badge === 'top' ? '<span class="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-emerald-300">★ Consigliato</span>' : ''
-    ].join('');
+    ].join(''); };
     function svcCard(it, cat) {
       const photoLabel = it.img ? 'Cambia foto' : 'Aggiungi foto';
       const desc = (it.desc.it || '').replace(/\s*\n+\s*/g, ' ');
@@ -422,7 +445,7 @@
       $('svc-total').textContent = rows.length;
       $('list').className = layout === 'list' ? 'space-y-3' : 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3';
       $('list').innerHTML = rows.length ? rows.join('')
-        : `<p class="card p-8 text-center text-slate-400 ${layout === 'list' ? '' : 'sm:col-span-2 xl:col-span-3'}">${!S.categories.length ? 'Nessuna categoria: creane una con "+ Categoria" per iniziare.' : q ? 'Nessun servizio corrisponde alla ricerca.' : 'Nessun servizio qui. Premi "+ Nuovo servizio".'}</p>`;
+        : `<p class="card p-8 text-center text-slate-400 ${layout === 'list' ? '' : 'sm:col-span-2 xl:col-span-3'}">${!S.categories.length ? 'Nessun servizio ancora. <button type="button" data-open-tpl class="font-semibold text-emerald-400 underline">Parti da un modello</button> per il tuo mestiere, oppure crea una categoria con "+ Categoria".' : q ? 'Nessun servizio corrisponde alla ricerca.' : 'Nessun servizio qui. Premi "+ Nuovo servizio".'}</p>`;
     }
 
     function renderPreview() {
@@ -448,6 +471,56 @@
       renderServices();
     }));
     $('svc-new').addEventListener('click', () => openEdit(null));
+
+    // --- Modelli di partenza ---
+    let tplSel = null;
+    const tplCount = (t) => t.categories.reduce((n, c) => n + c.items.length, 0);
+    function tplDetail() {
+      const t = window.LRTemplates.find((x) => x.id === tplSel), box = $('tpl-detail'), msg = $('tpl-msg');
+      msg.classList.add('hidden');
+      if (!t) { box.innerHTML = '<p class="text-slate-500">Scegli un modello per vedere cosa contiene.</p>'; $('tpl-apply').disabled = true; return; }
+      box.innerHTML = t.categories.map((c) => `<p class="mt-2 text-xs font-semibold uppercase tracking-wide text-emerald-400 first:mt-0">${esc(c.name)}</p>` +
+        c.items.map((i) => `<p class="flex justify-between gap-3 py-0.5"><span class="min-w-0 truncate">${esc(i.name)}</span><span class="shrink-0 text-slate-400">${money(i.price)}</span></p>`).join('')).join('');
+      const free = limit() - total(), n = tplCount(t);
+      if (n > free) { msg.textContent = `Il modello ha ${n} servizi ma nel piano Free ne puoi avere ${FREE_LIMIT} in tutto (ne hai già ${total()}). Elimina qualche servizio oppure scegli un modello più piccolo.`; msg.classList.remove('hidden'); }
+      $('tpl-apply').disabled = n > free;
+    }
+    function openTpl() {
+      tplSel = null;
+      $('tpl-list').innerHTML = window.LRTemplates.map((t) => `<button type="button" role="radio" aria-checked="false" data-tpl="${t.id}" class="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-left hover:border-emerald-500/60 aria-checked:border-emerald-500 aria-checked:bg-emerald-500/10"><span class="text-2xl" aria-hidden="true">${t.emoji}</span><span class="min-w-0"><span class="block truncate text-sm font-semibold text-white">${esc(t.name)}</span><span class="block text-xs text-slate-400">${tplCount(t)} servizi</span></span></button>`).join('');
+      tplDetail();
+      $('tpl-dialog').showModal();
+    }
+    $('tpl-open').addEventListener('click', openTpl);
+    $('list').addEventListener('click', (e) => { if (e.target.closest('[data-open-tpl]')) openTpl(); });
+    $('tpl-cancel').addEventListener('click', () => $('tpl-dialog').close());
+    $('tpl-list').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-tpl]'); if (!b) return;
+      tplSel = b.dataset.tpl;
+      $('tpl-list').querySelectorAll('[data-tpl]').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
+      tplDetail();
+    });
+    $('tpl-apply').addEventListener('click', () => {
+      const t = window.LRTemplates.find((x) => x.id === tplSel); if (!t) return;
+      if (tplCount(t) > limit() - total()) return tplDetail();
+      const same = (a, b) => a.trim().toLowerCase() === b.trim().toLowerCase();
+      const jobs = [];                                           // [categoria nuova?, categoria, servizi nuovi]
+      t.categories.forEach((tc) => {
+        let cat = S.categories.find((c) => same(c.name.it, tc.name)), isNew = false;
+        if (!cat) { cat = { id: LRStore.uuid(), name: { it: tc.name }, items: [] }; S.categories.push(cat); isNew = true; }
+        const items = tc.items.map((i) => ({ id: LRStore.uuid(), name: { it: i.name }, desc: { it: i.desc || '' }, price: i.price, min: i.min, img: '', oldPrice: null, promoUntil: '', badge: '', visible: true }));
+        const start = cat.items.length;
+        cat.items.push(...items);
+        jobs.push({ cat, isNew, items, start });
+      });
+      catFilter = 'all'; $('tpl-dialog').close(); render();
+      run(async () => {
+        for (const j of jobs) {
+          if (j.isNew) await LRStore.addCategory(j.cat, S.categories.indexOf(j.cat));
+          for (let k = 0; k < j.items.length; k++) await LRStore.addService(j.cat.id, j.items[k], j.start + k);
+        }
+      }, 'Modello aggiunto: ora controlla i prezzi e modificali con la matita.');
+    });
 
     $('chips').addEventListener('click', (e) => {
       const f = e.target.closest('[data-filter]'), add = e.target.closest('#cat-add'), ren = e.target.closest('[data-ren-cat]'), dc = e.target.closest('[data-del-cat]');
@@ -487,17 +560,17 @@
     // --- Condividi un singolo servizio (WhatsApp) ---
     const serviceUrl = (it) => publicUrl() + (publicUrl().includes('?') ? '&' : '?') + 'servizio=' + encodeURIComponent(it.id);
     const money = (n) => { const x = Number(n); return (Number.isInteger(x) ? String(x) : x.toFixed(2).replace('.', ',')) + ' €'; };
-    function shareText(it) {
-      const url = serviceUrl(it), promo = Number(it.oldPrice) > Number(it.price);
+    function shareText(raw) {
+      const it = LR.effective(raw), url = serviceUrl(it), promo = Number(it.oldPrice) > Number(it.price);
       const first = (it.desc.it || '').split(/\n/)[0].trim(), short = first.length > 110 ? first.slice(0, 107).trim() + '…' : first;
       const head = promo
-        ? `🔥 ${it.name.it} a ${money(it.price)} invece di ${money(it.oldPrice)} (-${Math.round((1 - it.price / it.oldPrice) * 100)}%)!`
+        ? `🔥 ${it.name.it} a ${money(it.price)} invece di ${money(it.oldPrice)} (-${Math.round((1 - it.price / it.oldPrice) * 100)}%)${raw.promoUntil ? ', fino al ' + fmtDay(raw.promoUntil) : ''}!`
         : `✨ ${it.name.it}: ${money(it.price)}`;
       return [head, short, `Scopri i dettagli e prenota qui:\n${url}`, `— ${S.business.name || ''}`].filter(Boolean).join('\n\n');
     }
     function openShare(it) {
       if (it.visible === false) { toast('Il servizio è nascosto: mostralo nel listino (icona occhio) per poterlo condividere.', true); return; }
-      $('sh-name').textContent = it.name.it + ' · ' + money(it.price);
+      $('sh-name').textContent = it.name.it + ' · ' + money(LR.effective(it).price);
       $('sh-text').value = shareText(it); $('sh-link').value = serviceUrl(it);
       syncShare();
       $('sh-native').classList.toggle('hidden', !navigator.share);
@@ -588,7 +661,7 @@
         if (!S.categories.length) { toast('Crea prima una categoria con "+ Categoria".', true); return; }
         if (total() >= limit()) { $('limit-msg').classList.remove('hidden'); toast('Hai raggiunto il limite di 10 servizi del piano Free.', true); return; }
         const cat = S.categories.find((c) => c.id === catFilter) || S.categories[0];
-        f = { it: { id: LRStore.uuid(), name: { it: '' }, desc: { it: '' }, price: '', min: '', img: '', oldPrice: null, badge: '', visible: true }, cat, isNew: true };
+        f = { it: { id: LRStore.uuid(), name: { it: '' }, desc: { it: '' }, price: '', min: '', img: '', oldPrice: null, promoUntil: '', badge: '', visible: true }, cat, isNew: true };
       }
       editing = f;
       $('ed-title').textContent = f.isNew ? 'Nuovo servizio' : 'Modifica servizio';
@@ -597,12 +670,20 @@
       $('ed-cat').innerHTML = S.categories.map((c) => `<option value="${esc(c.id)}"${c.id === f.cat.id ? ' selected' : ''}>${esc(c.name.it)}</option>`).join('');
       $('ed-price').value = f.it.price;
       $('ed-min').value = f.it.min || '';
-      $('ed-old').value = f.it.oldPrice || ''; $('ed-badge').value = f.it.badge || ''; $('ed-visible').checked = f.it.visible !== false;
+      $('ed-old').value = f.it.oldPrice || ''; $('ed-until').value = f.it.promoUntil || ''; untilNote(); $('ed-badge').value = f.it.badge || ''; $('ed-visible').checked = f.it.visible !== false;
       $('ed-desc').value = f.it.desc.it || ''; cnt();
       $('ed-msg').classList.add('hidden');
       edThumb();
       $('svc-dialog').showModal();
     }
+    function untilNote() {
+      const raw = { oldPrice: parseFloat($('ed-old').value), price: parseFloat($('ed-price').value) || 0, promoUntil: $('ed-until').value };
+      const n = $('ed-until-note'), p = LR.promoInfo(raw);
+      $('ed-until-box').classList.toggle('opacity-50', !(raw.oldPrice > 0));
+      if (p.expired) { n.textContent = 'Questa data è passata: nel listino il servizio è già tornato a ' + money(raw.oldPrice) + '.'; n.classList.remove('hidden'); }
+      else n.classList.add('hidden');
+    }
+    ['ed-old', 'ed-price', 'ed-until'].forEach((id) => $(id).addEventListener('input', untilNote));
     const cnt = () => { $('ed-count').textContent = $('ed-desc').value.length + ' / 1000'; };
     $('ed-desc').addEventListener('input', cnt);
     $('ed-cancel').addEventListener('click', () => $('svc-dialog').close());
@@ -627,8 +708,11 @@
       if (isNew && !(min > 0)) return err('Inserisci la durata in minuti.');
       const oldRaw = $('ed-old').value.trim(), oldP = oldRaw === '' ? null : parseFloat(oldRaw);
       if (oldP !== null && !(oldP > price)) return err('Il prezzo prima della promozione deve essere più alto del prezzo attuale (oppure lascia il campo vuoto).');
+      const until = $('ed-until').value;
+      if (until && oldP === null) return err('La data di fine serve solo per le promozioni: indica anche il prezzo prima della promo (oppure svuota la data).');
+      if (until && until < LR.ymd(new Date()) && (isNew || until !== (it.promoUntil || ''))) return err('La data di fine promo è già passata: scegli oggi o un giorno futuro.');
       it.name.it = name; it.price = price; it.min = min; it.desc.it = $('ed-desc').value.trim();
-      it.oldPrice = oldP; it.badge = $('ed-badge').value; it.visible = $('ed-visible').checked;
+      it.oldPrice = oldP; it.promoUntil = oldP === null ? '' : until; it.badge = $('ed-badge').value; it.visible = $('ed-visible').checked;
       editing.saved = true;
       if (isNew) {
         newCat.items.push(it); catFilter = newCat.id;
@@ -785,6 +869,7 @@
       $('qr-link').value = url;
       $('qr-open').href = url;
       $('open-public').href = url;
+      $('qr-poster').href = S.mode === 'supabase' ? 'locandina.html?s=' + encodeURIComponent(S.business.slug) : 'locandina.html?demo=1&n=' + encodeURIComponent(S.business.name || '');
       $('qr-wa').href = 'https://wa.me/?text=' + encodeURIComponent('Ecco il nostro listino: ' + url);
       const note = $('qr-note');
       if (S.mode === 'demo') { note.textContent = 'Modalità demo: il QR apre un listino di esempio. Con Supabase collegato aprirà il tuo listino reale.'; note.classList.remove('hidden'); }

@@ -38,8 +38,13 @@ async function buildMeta(cfg, slug, serviceId, pageUrl, origin) {
   if (serviceId) {
     const s = (await rest(cfg, 'services?id=eq.' + encodeURIComponent(serviceId) + '&venue_id=eq.' + v.id + '&visible=eq.true&select=*&limit=1') || [])[0];
     if (s) {
-      const promo = s.old_price_cents && s.old_price_cents > s.price_cents;
-      title = s.name + ' · ' + money(s.price_cents) + (promo ? ' (era ' + money(s.old_price_cents) + ')' : '');
+      const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });   // YYYY-MM-DD
+      const hasPromo = s.old_price_cents && s.old_price_cents > s.price_cents;
+      const expired = hasPromo && s.promo_until && String(s.promo_until).slice(0, 10) < today;
+      const price = expired ? s.old_price_cents : s.price_cents;                // promo scaduta: prezzo pieno
+      const promo = hasPromo && !expired;
+      const until = promo && s.promo_until ? String(s.promo_until).slice(0, 10).split('-').reverse().slice(0, 2).join('/') : '';
+      title = s.name + ' · ' + money(price) + (promo ? ' (era ' + money(s.old_price_cents) + ')' : '') + (until ? ' · fino al ' + until : '');
       desc = clip((s.description ? s.description + ' — ' : '') + v.name + '. Prenota su WhatsApp.', 180);
       image = s.image_url || image;
     }

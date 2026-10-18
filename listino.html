@@ -63,7 +63,7 @@
                 name: Object.assign({}, y.name_i18n, { it: y.name }),
                 desc: Object.assign({}, y.description_i18n, { it: y.description || '' }),
                 price: y.price_cents / 100, min: y.duration_min || 0, img: y.image_url || '',
-                oldPrice: y.old_price_cents ? y.old_price_cents / 100 : null, badge: y.badge || ''
+                oldPrice: y.old_price_cents ? y.old_price_cents / 100 : null, badge: y.badge || '', promoUntil: y.promo_until || ''
               }))
             }))
           };

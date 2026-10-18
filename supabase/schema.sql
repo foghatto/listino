@@ -187,3 +187,6 @@ grant update (address, phone, instagram, hours) on public.venues to authenticate
 
 alter table public.services add column if not exists old_price_cents integer check (old_price_cents is null or old_price_cents >= 0);
 alter table public.services add column if not exists badge text check (badge is null or badge in ('new','top'));
+
+-- Scadenza delle promozioni (vedi promo-scadenza.sql)
+alter table public.services add column if not exists promo_until date;
