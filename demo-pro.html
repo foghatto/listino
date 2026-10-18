@@ -73,6 +73,17 @@
         <li class="card flex gap-3 p-4 text-sm"><span class="text-emerald-400">✓</span><span><b class="text-white">Supporto prioritario</b><br><span class="text-slate-400">Risposte rapide quando ti servono.</span></span></li>
       </ul>
 
+      <form id="notify-form" class="mt-8 rounded-2xl border border-slate-800 bg-slate-900/60 p-5" novalidate>
+        <label for="notify-email" class="font-semibold text-white">🔔 Avvisami quando il piano PRO è disponibile</label>
+        <p class="mt-1 text-sm text-slate-400">Il piano PRO non è ancora acquistabile. Lascia la tua email e ti scriviamo appena esce.</p>
+        <div class="mt-3 flex gap-2">
+          <input id="notify-email" type="email" required autocomplete="email" class="input min-w-0 flex-1 text-sm" placeholder="la-tua@email.it">
+          <button id="notify-btn" type="submit" class="btn btn-primary shrink-0 !px-4 text-sm">Avvisami</button>
+        </div>
+        <p id="notify-msg" class="mt-2 hidden text-xs" role="status"></p>
+        <p class="mt-2 text-[11px] text-slate-500">Useremo la tua email solo per avvisarti dell'uscita del piano PRO. Nessuno spam.</p>
+      </form>
+
       <div class="mt-8 flex flex-col gap-3 sm:flex-row">
         <a href="accedi.html?signup=1" class="btn btn-primary px-6 py-3.5">Inizia con il piano gratuito</a>
         <button type="button" disabled aria-disabled="true" class="btn cursor-not-allowed border border-slate-700 bg-slate-800 px-6 py-3.5 text-slate-400">PRO: non ancora acquistabile</button>
@@ -126,6 +137,43 @@
     phone.addEventListener('scroll', () => { document.getElementById('hint').style.opacity = '0'; }, { once: true });
 
     draw(); refresh();
+  </script>
+  <script src="assets/config.js?v=2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Avvisami: iscrizione alla lista d'attesa del piano PRO (stessa tabella "waitlist" della home)
+    (function () {
+      const cfg = window.LR_CONFIG || {};
+      const configured = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY);
+      const sb = configured && window.supabase ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
+      const f = document.getElementById('notify-form');
+      const say = (t, ok) => { const m = document.getElementById('notify-msg'); m.textContent = t; m.className = 'mt-2 text-xs ' + (ok ? 'text-emerald-300' : 'text-red-300'); };
+      f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('notify-email').value.trim().toLowerCase();
+        if (!/^\S+@\S+\.\S+$/.test(email)) return say('Inserisci un indirizzo email valido.', false);
+        const btn = document.getElementById('notify-btn'); btn.disabled = true;
+        try {
+          if (configured && !sb) throw new Error('Servizio non raggiungibile. Ricarica la pagina e riprova.');
+          if (sb) {
+            const { error } = await sb.from('waitlist').insert({ email });
+            if (error && error.code !== '23505') {                         // 23505 = già iscritto: va bene
+              console.error('waitlist', error);
+              const miss = error.code === 'PGRST205' || error.code === '42P01';
+              const perm = error.code === '42501';
+              throw new Error(miss ? 'Lista d\'attesa non ancora attiva (manca la tabella "waitlist" su Supabase).'
+                : perm ? 'Lista d\'attesa non ancora attiva (permessi mancanti su Supabase).'
+                : 'Non sono riuscito a salvare l\'email (codice ' + (error.code || error.status || 'rete') + '). Riprova tra poco.');
+            }
+          } else {
+            const l = JSON.parse(localStorage.getItem('lr_waitlist') || '[]'); if (!l.includes(email)) l.push(email); localStorage.setItem('lr_waitlist', JSON.stringify(l));
+          }
+          say('Fatto! Ti scriveremo appena il piano PRO sarà disponibile.', true);
+          f.reset();
+        } catch (err) { say(err.message, false); }
+        finally { btn.disabled = false; }
+      });
+    })();
   </script>
 </body>
 </html>
