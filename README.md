@@ -93,6 +93,11 @@ con `servizio` l'anteprima mostra foto, nome e prezzo (con promo) del servizio; 
 
 ## Locandina QR, modelli, promo a tempo
 
-- **Locandina QR** (`locandina.html`, dalla dashboard: *QR code e link → Stampa locandina*): locandina A4 o 4 cartellini A6 da ritagliare, tema chiaro/scuro, testi modificabili, "Stampa / Salva PDF". Il QR usa il link breve `/s/<link>`.
+- **Locandina QR** (`locandina.html`, dalla dashboard: *QR code e link → Stampa locandina*): locandina A4 o 4 cartellini A6 da ritagliare, tema chiaro/scuro, testi modificabili, "Stampa / Salva PDF". Il QR usa il link breve `/<link>`.
 - **Modelli per mestiere** (`assets/templates.js`): parrucchiere, estetista, nail artist, barbiere, massaggi. Dalla dashboard: *Parti da un modello*. Rispetta il limite di 10 servizi del Free; prezzi e durate sono esempi.
 - **Promozioni con scadenza**: esegui una volta `supabase/promo-scadenza.sql` (colonna `services.promo_until`). Con la data impostata compare "Ancora N giorni"; dal giorno dopo il servizio torna al prezzo pieno da solo (listino, dashboard, messaggio di condivisione e anteprima WhatsApp).
+
+## Indirizzo del listino
+
+Il listino è raggiungibile su `https://<dominio>/<link>` (es. `/auroraestetic`), con `?servizio=<id>` per un singolo servizio. Restano validi i vecchi `/s/<link>` e `/listino?s=<link>`.
+Funziona con una rewrite in `vercel.json` (le pagine vere, come `/dashboard`, hanno la precedenza). I nomi riservati sono bloccati in dashboard e, con `supabase/slug-riservati.sql`, anche nel database.

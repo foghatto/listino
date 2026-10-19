@@ -161,6 +161,7 @@
           <div>
             <label for="p-slug" class="mb-1.5 block text-sm font-medium">Link personalizzato</label>
             <input id="p-slug" class="input" maxlength="40" placeholder="studio-aurora">
+            <p class="mt-1 text-xs text-slate-500">Solo lettere minuscole, numeri e trattini. Se cambi il link, i vecchi QR e link già condivisi smettono di funzionare: scegli quello definitivo prima di stampare la locandina.</p>
             <p id="p-url" class="mt-1 break-all text-xs text-slate-500"></p>
           </div>
           <p id="p-msg" class="hidden rounded-lg border px-3 py-2 text-sm" role="status"></p>
@@ -308,6 +309,8 @@
   <script>
     const FREE_LIMIT = 10;
     const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/;
+    // Nomi che coincidono con pagine del sito: il link /<nome> aprirebbe quelle e non il tuo listino
+    const RESERVED = ['index', 'accedi', 'dashboard', 'listino', 'demo-pro', 'locandina', 'note-legali', 'assets', 'api', 'supabase', 'admin', 'login', 'signup', 'registrati', 'www', 'app', 'robots', 'sitemap', 'favicon'];
     const $ = (id) => document.getElementById(id);
     const { esc } = LR;
     let S = null;
@@ -338,7 +341,7 @@
     // --- URL pubblico del listino (quello che apre il QR: solo il listino, mai la dashboard) ---
     function publicUrl() {
       return S.mode === 'supabase'
-        ? new URL('/listino?s=' + encodeURIComponent(S.business.slug), location.origin).href
+        ? new URL('/' + encodeURIComponent(S.business.slug), location.origin).href
         : new URL('listino.html?demo=1', location.href).href;
     }
 
@@ -753,7 +756,7 @@
       fillHours();
       $('p-wa').value = S.business.whatsapp || '';
       $('p-slug').value = S.business.slug || '';
-      $('p-url').textContent = publicUrl();
+      $('p-url').textContent = S.mode === 'supabase' ? 'Il tuo indirizzo: ' + publicUrl() : publicUrl();
       waInfo();
     }
     function waInfo() {
@@ -819,7 +822,7 @@
     function aboutCount() { $('p-about-count').textContent = $('p-about').value.length + ' / 1000'; }
     $('p-about').addEventListener('input', aboutCount);
     $('p-slug').addEventListener('input', () => {
-      $('p-url').textContent = S.mode === 'supabase' ? new URL('/listino?s=', location.origin).href + $('p-slug').value : publicUrl();
+      $('p-url').textContent = S.mode === 'supabase' ? 'Il tuo indirizzo: ' + new URL('/', location.origin).href + $('p-slug').value.trim().toLowerCase() : publicUrl();
     });
     $('profile-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -829,6 +832,7 @@
       const slug = $('p-slug').value.trim().toLowerCase();
       if (!name) return msg('Inserisci il nome dell\'attività.', true);
       if (wa && (wa.length < 8 || wa.length > 15)) return msg('Numero WhatsApp non valido: controlla le cifre e il prefisso (es. 39 per l\'Italia).', true);
+      if (S.mode === 'supabase' && RESERVED.includes(slug)) return msg('Questo nome è riservato al sito: scegline un altro (es. ' + slug + '-estetica).', true);
       if (S.mode === 'supabase' && !SLUG_RE.test(slug)) return msg('Il link può contenere solo lettere minuscole, numeri e trattini (da 3 a 40 caratteri).', true);
 
       const phone = $('p-phone').value.trim(), insta = $('p-insta').value.trim().replace(/^.*instagram\.com\//i, '').replace(/[@\/?#].*$/, '').replace(/[^A-Za-z0-9._]/g, '');

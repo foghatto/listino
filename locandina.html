@@ -131,7 +131,7 @@
       const key = 'lr_poster_' + (slug || 'demo');
 
       // Indirizzo che apre il QR: breve (/s/slug) per un codice più semplice da inquadrare
-      const url = slug && !demo ? location.origin + '/s/' + slug : new URL('listino.html?demo=1', location.href).href;
+      const url = slug && !demo ? location.origin + '/' + slug : new URL('listino.html?demo=1', location.href).href;
       const shown = url.replace(/^https?:\/\//, '');
 
       const st = { fmt: 'poster', theme: 'light', name: qs.get('n') || 'La mia attività', tag: '', head: 'Scansiona per vedere il listino', sub: 'Servizi, prezzi e prenotazione su WhatsApp', made: true };

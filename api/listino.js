@@ -32,7 +32,9 @@ async function rest(cfg, path) {
 
 // Costruisce i meta tag per l'anteprima; restituisce null se il listino non esiste
 async function buildMeta(cfg, slug, serviceId, pageUrl, origin) {
-  const v = (await rest(cfg, 'venues?slug=eq.' + encodeURIComponent(slug) + '&select=*&limit=1') || [])[0];
+  const rows = await rest(cfg, 'venues?slug=eq.' + encodeURIComponent(slug) + '&select=*&limit=1');
+  if (rows && !rows.length) return 'notfound';          // il database ha risposto: questo link non esiste
+  const v = rows && rows[0];
   if (!v) return null;
   let title = v.name + ' — Listino', desc = clip(v.about || v.tagline || 'Scopri i servizi e prenota su WhatsApp.', 160), image = v.cover_url || '';
   if (serviceId) {
@@ -75,16 +77,17 @@ module.exports = async (req, res) => {
   try {
     // Pagina statica (senza parametri, quindi senza passare di nuovo da questa funzione)
     const base = await (await fetch(origin + '/listino')).text();
-    let html = base;
+    let html = base, notFound = false;
     if (/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(slug) && /^[A-Za-z0-9-]{0,64}$/.test(serviceId)) {
       const cfg = await getConfig(origin);
-      const pageUrl = origin + '/listino?s=' + encodeURIComponent(slug) + (serviceId ? '&servizio=' + encodeURIComponent(serviceId) : '');
+      const pageUrl = origin + '/' + slug + (serviceId ? '?servizio=' + encodeURIComponent(serviceId) : '');
       const meta = cfg && await buildMeta(cfg, slug, serviceId, pageUrl, origin);
-      if (meta) html = base.replace(/<title>[\s\S]*?<\/title>/i, '').replace(/<\/head>/i, meta + '\n</head>');
+      if (meta === 'notfound') notFound = true;
+      else if (meta) html = base.replace(/<title>[\s\S]*?<\/title>/i, '').replace(/<\/head>/i, meta + '\n</head>');
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=600');
-    res.status(200).send(html);
+    res.status(notFound ? 404 : 200).send(html);
   } catch (e) {
     res.setHeader('Location', '/listino.html?s=' + encodeURIComponent(slug));
     res.status(302).end();

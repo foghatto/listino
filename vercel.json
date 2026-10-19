@@ -15,6 +15,10 @@
         }
       ],
       "destination": "/api/listino"
+    },
+    {
+      "source": "/:slug([a-z0-9][a-z0-9-]{1,38}[a-z0-9])",
+      "destination": "/api/listino?s=:slug"
     }
   ],
   "headers": [

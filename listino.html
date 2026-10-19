@@ -29,8 +29,8 @@
     (async () => {
       const $ = (id) => document.getElementById(id);
       const qs = new URLSearchParams(location.search);
-      const m = location.pathname.match(/\/s\/([^/]+)\/?$/);
-      const slug = m ? decodeURIComponent(m[1]) : qs.get('s');
+      const m = location.pathname.match(/^\/(?:s\/)?([a-z0-9][a-z0-9-]{1,38}[a-z0-9])\/?$/);          // /<link> oppure /s/<link>
+      const slug = m && m[1] !== 'listino' ? m[1] : qs.get('s');
       const cfg = window.LR_CONFIG || {};
       const live = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase);
       const configured = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY);
