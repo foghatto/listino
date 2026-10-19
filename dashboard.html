@@ -233,6 +233,32 @@
     </div>
   </dialog>
 
+  <!-- Benvenuto: nome dell'attività e link, al primo accesso -->
+  <dialog id="onb-dialog" class="w-[min(30rem,94vw)] rounded-2xl border border-slate-700 bg-slate-900 p-0 text-slate-300 backdrop:bg-black/70">
+    <form id="onb-form" class="space-y-4 p-6" novalidate>
+      <div>
+        <h2 class="text-xl font-bold text-white">Benvenuto! Iniziamo da te 👋</h2>
+        <p class="mt-1 text-sm text-slate-400">Come si chiama la tua attività? Con il nome scegli anche l'indirizzo del tuo listino, quello che aprirà il QR.</p>
+      </div>
+      <div><label for="ob-name" class="mb-1 block text-sm font-medium text-white">Nome dell'attività</label><input id="ob-name" class="input" maxlength="60" autocomplete="organization" placeholder="Es. Aurora Estetica"></div>
+      <div>
+        <label for="ob-slug" class="mb-1 block text-sm font-medium text-white">Il tuo indirizzo</label>
+        <div class="flex items-stretch rounded-lg border border-slate-800 bg-slate-950 focus-within:border-emerald-500">
+          <span id="ob-prefix" class="flex shrink-0 items-center pl-3 text-sm text-slate-500"></span>
+          <input id="ob-slug" class="min-w-0 flex-1 bg-transparent py-2.5 pr-3 text-sm text-white outline-none" maxlength="40" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="aurora-estetica">
+        </div>
+        <p id="ob-check" class="mt-1 min-h-[1.25rem] text-xs text-slate-500" role="status"></p>
+      </div>
+      <div><label for="ob-wa" class="mb-1 block text-sm font-medium text-white">Numero WhatsApp per le prenotazioni <span class="font-normal text-slate-500">(facoltativo)</span></label><input id="ob-wa" class="input" inputmode="tel" autocomplete="tel" placeholder="Es. 333 123 4567"></div>
+      <p id="ob-msg" class="hidden rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300" role="alert"></p>
+      <p class="text-xs text-slate-500">Potrai cambiare tutto dal Profilo. Se modifichi l'indirizzo dopo aver stampato il QR, quello vecchio non funzionerà più.</p>
+      <div class="flex flex-wrap justify-end gap-2">
+        <button type="button" id="ob-later" class="btn btn-ghost !px-4 !py-2 text-sm">Più tardi</button>
+        <button type="submit" id="ob-save" class="btn btn-primary !px-4 !py-2 text-sm">Crea il mio listino</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Modelli di partenza -->
   <dialog id="tpl-dialog" class="w-[min(34rem,94vw)] rounded-2xl border border-slate-700 bg-slate-900 p-0 text-slate-300 backdrop:bg-black/70">
     <div class="space-y-3 p-6">
@@ -474,6 +500,55 @@
       renderServices();
     }));
     $('svc-new').addEventListener('click', () => openEdit(null));
+
+    // --- Benvenuto: nome + link al primo accesso ---
+    const DEFAULT_NAME = 'La mia attività';
+    const slugify = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+      .replace(/&/g, ' e ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40).replace(/-+$/g, '');
+    let obTouched = false, obTimer, obSeq = 0, obOk = false;
+    function obCheck() {
+      const slug = $('ob-slug').value.trim().toLowerCase(), el = $('ob-check'), seq = ++obSeq;
+      const say = (t, cls) => { el.textContent = t; el.className = 'mt-1 min-h-[1.25rem] text-xs ' + cls; };
+      obOk = false; clearTimeout(obTimer);
+      if (!slug) return say('', 'text-slate-500');
+      if (!SLUG_RE.test(slug)) return say('Usa da 3 a 40 caratteri: lettere minuscole, numeri e trattini.', 'text-amber-300');
+      if (RESERVED.includes(slug)) return say('Questo nome è riservato al sito: scegline un altro.', 'text-red-300');
+      say('Controllo…', 'text-slate-500');
+      obTimer = setTimeout(async () => {
+        const free = await LRStore.slugFree(slug);
+        if (seq !== obSeq) return;
+        if (free === false) say('✗ Già usato da un\'altra attività: aggiungi ad esempio la tua città (' + slug + '-napoli).', 'text-red-300');
+        else { obOk = true; say(free ? '✓ Disponibile' : 'Non riesco a verificarlo ora, lo controllo al salvataggio.', free ? 'text-emerald-300' : 'text-slate-400'); }
+      }, 350);
+    }
+    function openOnb() {
+      $('ob-prefix').textContent = new URL('/', location.origin).href.replace(/^https?:\/\//, '');
+      $('ob-name').value = ''; $('ob-slug').value = ''; $('ob-wa').value = ''; obTouched = false; obCheck();
+      $('ob-msg').classList.add('hidden');
+      $('onb-dialog').showModal();
+    }
+    $('ob-name').addEventListener('input', () => { if (!obTouched) { $('ob-slug').value = slugify($('ob-name').value); obCheck(); } });
+    $('ob-slug').addEventListener('input', () => { obTouched = true; const v = $('ob-slug').value.toLowerCase().replace(/[^a-z0-9-]/g, ''); if (v !== $('ob-slug').value) $('ob-slug').value = v; obCheck(); });
+    $('ob-later').addEventListener('click', () => { try { sessionStorage.setItem('lr_onb_later', '1'); } catch (e) {} $('onb-dialog').close(); });
+    $('onb-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = (t) => { $('ob-msg').textContent = t; $('ob-msg').classList.remove('hidden'); };
+      const name = $('ob-name').value.trim(), slug = $('ob-slug').value.trim().toLowerCase(), wa = normWa($('ob-wa').value);
+      if (!name) return err('Inserisci il nome della tua attività.');
+      if (!SLUG_RE.test(slug)) return err('L\'indirizzo deve avere da 3 a 40 caratteri: lettere minuscole, numeri e trattini.');
+      if (RESERVED.includes(slug)) return err('Questo indirizzo è riservato al sito: scegline un altro.');
+      if (wa && (wa.length < 8 || wa.length > 15)) return err('Numero WhatsApp non valido: controlla le cifre e il prefisso.');
+      const btn = $('ob-save'); btn.disabled = true;
+      const before = JSON.stringify(S.business);
+      try {
+        if (await LRStore.slugFree(slug) === false) throw new Error('Questo indirizzo è già usato da un\'altra attività: scegline un altro.');
+        S.business.name = name; S.business.slug = slug; if (wa) S.business.whatsapp = wa;
+        await LRStore.updateBusiness();
+        $('onb-dialog').close(); fillProfile(); render();
+        toast('Fatto! Il tuo listino è online su ' + publicUrl().replace(/^https?:\/\//, ''));
+      } catch (er) { S.business = JSON.parse(before); err(er.message); }
+      finally { btn.disabled = false; }
+    });
 
     // --- Modelli di partenza ---
     let tplSel = null;
@@ -912,6 +987,7 @@
       if (!S) return;
       $('loading').classList.add('hidden');
       $('app').classList.remove('hidden');
+      try { if (S.mode === 'supabase' && S.business.name === DEFAULT_NAME && !sessionStorage.getItem('lr_onb_later')) openOnb(); } catch (e) {}
       $('stats-cta').href = 'demo-pro.html';   // sempre la demo PRO (il PRO non è ancora acquistabile)
       if (S.mode === 'supabase') {
         $('subtitle').textContent = 'Accesso come ' + S.email + '. Ogni modifica è salvata subito nel tuo listino.';

@@ -206,6 +206,13 @@
       fail((await sb.from('services').delete().eq('id', id)).error);
     },
 
+    // true = libero (o è già il tuo), false = usato da un'altra attività, null = non verificabile
+    async slugFree(slug) {
+      if (!live) return true;
+      const { data, error } = await sb.from('venues').select('id').eq('slug', slug).maybeSingle();
+      if (error) return null;
+      return !data || data.id === S.business.id;
+    },
     async updateBusiness() {
       if (!live) return demoSave();
       const b = S.business;
