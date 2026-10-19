@@ -50,10 +50,13 @@
     throw new Error(m || 'Operazione non riuscita. Riprova.');
   }
 
-  function makeSlug(email) {
+  // Link iniziale: prima quello pulito (es. "mariaestetista"); il codice casuale solo se è già preso o troppo corto
+  const RESERVED = ['index', 'accedi', 'dashboard', 'listino', 'demo-pro', 'locandina', 'note-legali', 'assets', 'api', 'supabase', 'admin', 'login', 'signup', 'registrati', 'www', 'app', 'robots', 'sitemap', 'favicon'];
+  function makeSlug(email, withCode) {
     const base = String(email || 'attivita').split('@')[0].toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24) || 'attivita';
-    return base + '-' + Math.random().toString(36).slice(2, 6);
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30).replace(/-+$/g, '') || 'attivita';
+    const clean = base.length >= 3 && !RESERVED.includes(base);
+    return clean && !withCode ? base : (clean ? base : 'attivita') + '-' + Math.random().toString(36).slice(2, 6);
   }
 
   const toItem = (r) => ({
@@ -127,8 +130,11 @@
       .eq('owner_id', user.id).order('created_at').limit(1).maybeSingle();
     fail(error);
     if (!venue) {            // primo accesso: crea l'attività (sempre piano Free)
-      ({ data: venue, error } = await sb.from('venues')
-        .insert({ owner_id: user.id, slug: makeSlug(user.email), name: 'La mia attività' }).select().single());
+      for (let i = 0; i < 3; i++) {            // 1° tentativo: link pulito; se è già preso, con un piccolo codice
+        ({ data: venue, error } = await sb.from('venues')
+          .insert({ owner_id: user.id, slug: makeSlug(user.email, i > 0), name: 'La mia attività' }).select().single());
+        if (!error || error.code !== '23505') break;
+      }
       fail(error);
     }
 
