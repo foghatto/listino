@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Amministrazione — ListinoRapido</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };</script>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+    th.sortable:hover { color: #34d399; }
+    .chip { border: 1px solid #334155; border-radius: 999px; padding: .3rem .8rem; font-size: .8rem; color: #cbd5e1; }
+    .chip[aria-pressed="true"] { background: #10b981; border-color: #10b981; color: #022c22; font-weight: 600; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-300">
+
+  <header class="border-b border-slate-800/80 bg-slate-950/85">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3.5 sm:px-6">
+      <span class="flex items-center gap-2.5 text-xl font-extrabold text-white"><span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-500 text-sm font-black text-slate-950">LR</span>Amministrazione</span>
+      <div class="flex items-center gap-3 text-sm">
+        <span id="who" class="hidden truncate text-slate-400 sm:inline"></span>
+        <a href="dashboard.html" class="text-slate-300 hover:text-emerald-400">La mia dashboard</a>
+        <button id="logout" type="button" class="btn btn-ghost !px-3 !py-1.5 text-sm">Esci</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <p id="state" class="card p-8 text-center text-slate-400" role="status">Caricamento…</p>
+
+    <div id="app" class="hidden">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-bold text-white">Account registrati</h1>
+          <p class="text-sm text-slate-400">Solo tu vedi questa pagina. I dati sono quelli attuali del database.</p>
+        </div>
+        <div class="flex gap-2">
+          <button id="refresh" type="button" class="btn btn-ghost !py-2 text-sm">Aggiorna</button>
+          <button id="csv" type="button" class="btn btn-primary !py-2 text-sm">Scarica CSV</button>
+        </div>
+      </div>
+
+      <div id="cards" class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"></div>
+
+      <div class="mt-8 flex flex-wrap items-center gap-2" role="tablist">
+        <button class="chip" data-tab="accounts" aria-pressed="true">Account</button>
+        <button class="chip" data-tab="waitlist" aria-pressed="false">Lista d'attesa PRO <span id="wl-count" class="opacity-70"></span></button>
+      </div>
+
+      <!-- ACCOUNT -->
+      <section id="tab-accounts" class="mt-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <input id="q" type="search" class="input !py-2 text-sm sm:w-72" placeholder="Cerca email, attività o link…" aria-label="Cerca">
+          <button class="chip" data-f="all" aria-pressed="true">Tutti</button>
+          <button class="chip" data-f="venue" aria-pressed="false">Con listino</button>
+          <button class="chip" data-f="novenue" aria-pressed="false">Mai entrati in dashboard</button>
+          <button class="chip" data-f="unconf" aria-pressed="false">Email non confermata</button>
+          <button class="chip" data-f="pro" aria-pressed="false">PRO</button>
+          <button class="chip" data-f="week" aria-pressed="false">Ultimi 7 giorni</button>
+        </div>
+        <p id="shown" class="mt-3 text-xs text-slate-500"></p>
+        <div class="mt-2 overflow-x-auto rounded-2xl border border-slate-800">
+          <table class="w-full min-w-[56rem] text-left text-sm">
+            <thead class="bg-slate-900 text-xs uppercase tracking-wide text-slate-400">
+              <tr id="head"></tr>
+            </thead>
+            <tbody id="rows" class="divide-y divide-slate-800/80"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- LISTA D'ATTESA -->
+      <section id="tab-waitlist" class="mt-4 hidden">
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-sm text-slate-400">Chi ha lasciato la email con "Avvisami" per il piano PRO.</p>
+          <button id="wl-csv" type="button" class="btn btn-ghost !py-2 text-sm">Scarica CSV</button>
+        </div>
+        <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-800">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-900 text-xs uppercase tracking-wide text-slate-400"><tr><th class="px-3 py-2.5">Email</th><th class="px-3 py-2.5">Iscritta il</th></tr></thead>
+            <tbody id="wl-rows" class="divide-y divide-slate-800/80"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="assets/config.js?v=2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+      const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const cfg = window.LR_CONFIG || {};
+      const configured = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY);
+      const sb = configured && window.supabase ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
+      const state = (html, err) => { const s = $('state'); s.innerHTML = html; s.className = 'card p-8 text-center ' + (err ? 'text-red-300' : 'text-slate-400'); s.classList.remove('hidden'); $('app').classList.add('hidden'); };
+
+      const COLS = [
+        { k: 'email', t: 'Email' }, { k: 'venue_name', t: 'Attività' }, { k: 'plan', t: 'Piano' }, { k: 'services', t: 'Servizi', n: 1 },
+        { k: 'views', t: 'Visite', n: 1 }, { k: 'wa_clicks', t: 'Click WA', n: 1 }, { k: 'created_at', t: 'Registrato il' }, { k: 'last_sign_in_at', t: 'Ultimo accesso' }
+      ];
+      let rows = [], wl = [], sort = { k: 'created_at', dir: -1 }, filter = 'all', query = '';
+
+      const fmtDate = (d) => d ? new Date(d).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+      const fmtTime = (d) => d ? new Date(d).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+      const ago = (d) => { if (!d) return ''; const days = Math.floor((Date.now() - new Date(d)) / 864e5); return days <= 0 ? 'oggi' : days === 1 ? 'ieri' : days + ' giorni fa'; };
+
+      function visible() {
+        const q = query.trim().toLowerCase(), week = Date.now() - 7 * 864e5;
+        return rows.filter((r) => {
+          if (filter === 'venue' && !r.venue_id) return false;
+          if (filter === 'novenue' && r.venue_id) return false;
+          if (filter === 'unconf' && r.confirmed_at) return false;
+          if (filter === 'pro' && r.plan !== 'pro') return false;
+          if (filter === 'week' && new Date(r.created_at) < week) return false;
+          return !q || [r.email, r.venue_name, r.slug].some((x) => String(x || '').toLowerCase().includes(q));
+        }).sort((a, b) => {
+          const x = a[sort.k], y = b[sort.k];
+          if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1;
+          return (typeof x === 'number' ? x - y : String(x).localeCompare(String(y), 'it')) * sort.dir;
+        });
+      }
+
+      function drawHead() {
+        $('head').innerHTML = COLS.map((c) => `<th class="sortable px-3 py-2.5" data-sort="${c.k}" aria-sort="${sort.k === c.k ? (sort.dir > 0 ? 'ascending' : 'descending') : 'none'}">${c.t}${sort.k === c.k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('') + '<th class="px-3 py-2.5">Listino</th>';
+      }
+
+      function draw() {
+        drawHead();
+        const v = visible();
+        $('shown').textContent = v.length + ' di ' + rows.length + ' account';
+        $('rows').innerHTML = v.length ? v.map((r) => `<tr class="hover:bg-slate-900/60">
+          <td class="max-w-[16rem] px-3 py-2.5"><span class="block truncate font-medium text-white" title="${esc(r.email)}">${esc(r.email)}</span>${r.confirmed_at ? '' : '<span class="text-[11px] text-amber-300">email non confermata</span>'}</td>
+          <td class="max-w-[12rem] px-3 py-2.5">${r.venue_id ? `<span class="block truncate" title="${esc(r.venue_name)}">${esc(r.venue_name)}</span>` : '<span class="text-slate-500">— mai entrato</span>'}</td>
+          <td class="px-3 py-2.5">${r.plan ? `<span class="rounded px-1.5 py-0.5 text-[11px] font-bold uppercase ${r.plan === 'pro' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-300'}">${esc(r.plan)}</span>` : '—'}</td>
+          <td class="px-3 py-2.5 tabular-nums">${r.venue_id ? r.services : '—'}</td>
+          <td class="px-3 py-2.5 tabular-nums">${r.venue_id ? r.views : '—'}</td>
+          <td class="px-3 py-2.5 tabular-nums">${r.venue_id ? r.wa_clicks : '—'}</td>
+          <td class="whitespace-nowrap px-3 py-2.5" title="${esc(fmtTime(r.created_at))}">${fmtDate(r.created_at)}<span class="block text-[11px] text-slate-500">${ago(r.created_at)}</span></td>
+          <td class="whitespace-nowrap px-3 py-2.5" title="${esc(fmtTime(r.last_sign_in_at))}">${r.last_sign_in_at ? fmtDate(r.last_sign_in_at) + `<span class="block text-[11px] text-slate-500">${ago(r.last_sign_in_at)}</span>` : '<span class="text-slate-500">mai</span>'}</td>
+          <td class="px-3 py-2.5">${r.slug ? `<a href="/${encodeURIComponent(r.slug)}" target="_blank" rel="noopener" class="text-emerald-400 hover:underline">/${esc(r.slug)} ↗</a>` : '—'}</td>
+        </tr>`).join('') : '<tr><td colspan="9" class="px-3 py-8 text-center text-slate-500">Nessun account corrisponde ai filtri.</td></tr>';
+      }
+
+      function drawCards() {
+        const week = Date.now() - 7 * 864e5;
+        const items = [
+          ['Account totali', rows.length], ['Nuovi (7 giorni)', rows.filter((r) => new Date(r.created_at) >= week).length],
+          ['Email confermate', rows.filter((r) => r.confirmed_at).length], ['Con listino', rows.filter((r) => r.venue_id).length],
+          ['Piano PRO', rows.filter((r) => r.plan === 'pro').length], ['In lista d\'attesa', wl.length]
+        ];
+        $('cards').innerHTML = items.map(([l, n]) => `<div class="card p-4"><p class="text-2xl font-bold text-white">${n}</p><p class="text-xs text-slate-400">${l}</p></div>`).join('');
+        $('wl-count').textContent = '(' + wl.length + ')';
+        $('wl-rows').innerHTML = wl.length ? wl.map((w) => `<tr><td class="px-3 py-2.5 text-white">${esc(w.email)}</td><td class="px-3 py-2.5">${esc(fmtTime(w.created_at))}</td></tr>`).join('') : '<tr><td colspan="2" class="px-3 py-8 text-center text-slate-500">Nessuna iscrizione.</td></tr>';
+      }
+
+      // CSV (con protezione da formule: celle che iniziano con = + - @ vengono precedute da un apice)
+      const cell = (v) => { let s = String(v == null ? '' : v); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+      function download(name, lines) {
+        const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+      $('csv').addEventListener('click', () => download('account-listinorapido.csv',
+        [['Email', 'Email confermata', 'Attività', 'Link', 'Piano', 'Servizi', 'Visite', 'Click WhatsApp', 'Registrato il', 'Ultimo accesso'].map(cell).join(';')]
+          .concat(visible().map((r) => [r.email, r.confirmed_at ? 'sì' : 'no', r.venue_name, r.slug, r.plan, r.services, r.views, r.wa_clicks, r.created_at, r.last_sign_in_at].map(cell).join(';')))));
+      $('wl-csv').addEventListener('click', () => download('lista-attesa-pro.csv', [['Email', 'Iscritta il'].map(cell).join(';')].concat(wl.map((w) => [w.email, w.created_at].map(cell).join(';')))));
+
+      // Interazioni
+      $('head').addEventListener('click', (e) => { const th = e.target.closest('[data-sort]'); if (!th) return; const k = th.dataset.sort; sort = { k, dir: sort.k === k ? -sort.dir : (k === 'created_at' || k === 'last_sign_in_at' || COLS.find((c) => c.k === k).n ? -1 : 1) }; draw(); });
+      $('q').addEventListener('input', (e) => { query = e.target.value; draw(); });
+      document.querySelectorAll('[data-f]').forEach((b) => b.addEventListener('click', () => { filter = b.dataset.f; document.querySelectorAll('[data-f]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); draw(); }));
+      document.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => {
+        document.querySelectorAll('[data-tab]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        $('tab-accounts').classList.toggle('hidden', b.dataset.tab !== 'accounts'); $('tab-waitlist').classList.toggle('hidden', b.dataset.tab !== 'waitlist');
+      }));
+      $('logout').addEventListener('click', async () => { try { await sb.auth.signOut(); } catch (e) {} location.href = 'accedi.html'; });
+      $('refresh').addEventListener('click', load);
+
+      const NUM = ['services', 'views', 'wa_clicks'];
+      async function load() {
+        const [o, w] = await Promise.all([sb.rpc('admin_overview'), sb.rpc('admin_waitlist')]);
+        const err = o.error || w.error;
+        if (err) {
+          if (err.code === '42501' || /forbidden/i.test(err.message || '')) return state('<b class="text-white">Accesso negato.</b><br>Questo account non è un amministratore del sito.', true);
+          if (err.code === 'PGRST202' || err.code === '42883' || /could not find the function|schema cache/i.test(err.message || ''))
+            return state('Il pannello non è ancora attivo: esegui <b class="text-white">supabase/admin.sql</b> nello SQL Editor di Supabase e poi aggiungi la tua email come amministratore (istruzioni in fondo al file).', true);
+          return state('Impossibile caricare i dati (' + esc(err.code || err.message || 'errore') + '). Riprova.', true);
+        }
+        rows = (o.data || []).map((r) => { NUM.forEach((k) => { r[k] = Number(r[k]) || 0; }); return r; });
+        wl = w.data || [];
+        $('state').classList.add('hidden'); $('app').classList.remove('hidden');
+        drawCards(); draw();
+      }
+
+      (async () => {
+        if (!sb) return state(configured ? 'Servizio non raggiungibile. Ricarica la pagina.' : 'Il pannello è disponibile solo con Supabase collegato.', true);
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { location.href = 'accedi.html'; return; }
+        $('who').textContent = session.user.email || ''; $('who').classList.remove('hidden');
+        try { await load(); } catch (e) { state('Impossibile caricare i dati. Riprova.', true); }
+      })();
+    })();
+  </script>
+</body>
+</html>

@@ -101,3 +101,8 @@ con `servizio` l'anteprima mostra foto, nome e prezzo (con promo) del servizio; 
 
 Il listino è raggiungibile su `https://<dominio>/<link>` (es. `/auroraestetic`), con `?servizio=<id>` per un singolo servizio. Restano validi i vecchi `/s/<link>` e `/listino?s=<link>`.
 Funziona con una rewrite in `vercel.json` (le pagine vere, come `/dashboard`, hanno la precedenza). I nomi riservati sono bloccati in dashboard e, con `supabase/slug-riservati.sql`, anche nel database.
+
+## Pannello amministratore
+
+`/admin` (file `admin.html`, non linkata da nessuna parte): elenco di tutti gli account (email, conferma, attività, link, piano, servizi, visite, click WhatsApp, date di registrazione e ultimo accesso), filtri, ricerca, ordinamento, export CSV e lista d'attesa PRO.
+Attivazione: esegui `supabase/admin.sql` e aggiungi la tua email alla tabella `admins` (istruzione in fondo al file). L'accesso è controllato dal database: chi non è in `admins` riceve "forbidden".
