@@ -1,6 +1,10 @@
 /* ListinoRapido — stili condivisi (Tailwind via CDN + queste utility) */
 html { scroll-behavior: smooth; }
 body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+/* Titoli e logo in Sora (come nello spot); testi e interfaccia restano in Inter */
+h1, h2, .font-display, a[aria-label^="ListinoRapido"] { font-family: 'Sora', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+h1, h2 { letter-spacing: -.03em; }
+a[aria-label^="ListinoRapido"] { letter-spacing: -.04em; }
 
 /* Sfondo con alone smeraldo */
 .glow-bg {

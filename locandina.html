@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };</script>
   <link rel="stylesheet" href="assets/style.css">
@@ -25,6 +25,7 @@
 
     /* Locandina A4 */
     .poster { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 18mm 16mm; gap: 7mm; }
+    .poster .name, .poster .head, .card6 .name, .card6 .head { font-family: Sora, Inter, system-ui, sans-serif; }
     .poster .name { font-size: 15mm; font-weight: 800; line-height: 1.05; letter-spacing: -.02em; overflow-wrap: anywhere; }
     .poster .tag { font-size: 5.5mm; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; opacity: .7; }
     .poster .qrbox { width: 112mm; padding: 7mm; border-radius: 8mm; }

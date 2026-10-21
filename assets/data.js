@@ -152,7 +152,7 @@
         <div class="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent"></div>
         <div class="absolute bottom-3 left-4 right-4">
           <p class="text-[11px] uppercase tracking-widest text-emerald-400">${esc(nm(d.business.tagline))}</p>
-          <h3 class="text-xl font-bold text-white">${esc(d.business.name)}</h3>
+          <h3 class="font-display text-xl font-bold text-white">${esc(d.business.name)}</h3>
         </div>
       </div>
       ${about ? `<div class="px-4 pt-3">
