@@ -15,6 +15,7 @@ create table if not exists public.venues (
   whatsapp    text,                       -- solo cifre con prefisso, es. 393331234567
   cover_url   text,
   plan        text not null default 'free' check (plan in ('free', 'pro')),
+  theme       text check (theme is null or theme in ('rose', 'gold', 'ocean')),   -- palette PRO, assegnata dall'admin (vedi temi.sql)
   created_at  timestamptz not null default now()
 );
 
@@ -106,7 +107,7 @@ drop policy if exists venues_owner_update on public.venues;
 drop policy if exists venues_owner_delete on public.venues;
 create policy venues_public_read  on public.venues for select using (true);
 create policy venues_owner_insert on public.venues for insert to authenticated
-  with check (owner_id = auth.uid() and plan = 'free');          -- nessuno si crea una venue già PRO
+  with check (owner_id = auth.uid() and plan = 'free' and theme is null);          -- nessuno si crea una venue già PRO
 create policy venues_owner_update on public.venues for update to authenticated
   using (owner_id = auth.uid()) with check (owner_id = auth.uid());
 create policy venues_owner_delete on public.venues for delete to authenticated

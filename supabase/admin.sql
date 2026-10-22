@@ -60,3 +60,5 @@ grant execute on function public.is_admin(), public.admin_overview(), public.adm
 
 -- Per nominarti amministratore (sostituisci l'email con la tua, quella con cui accedi al sito):
 --   insert into public.admins (user_id) select id from auth.users where lower(email) = lower('la-tua-email@esempio.it') on conflict do nothing;
+
+-- Piano e tema colore dei clienti si cambiano dal pannello dopo aver eseguito anche supabase/temi.sql.

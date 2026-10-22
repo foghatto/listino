@@ -37,7 +37,7 @@
       const sb = live ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
       const show = (t) => { $('msg').textContent = t; $('msg').classList.remove('hidden'); };
 
-      let data, pro = false, venueId = null, lang = 'it';
+      let data, pro = false, theme = '', venueId = null, lang = 'it';
 
       try {
         if (slug) {
@@ -68,11 +68,13 @@
             }))
           };
           pro = v.plan === 'pro';
+          theme = v.theme || '';
           venueId = v.id;
         } else {
           // Nessun link: listino di esempio (?demo=pro per la versione Professionale)
           pro = qs.get('demo') === 'pro';
           data = pro ? LR.DATA : LR.freeData();
+          theme = qs.get('tema') || '';                     // anteprima palette: ?demo=pro&tema=rose|gold|ocean
         }
       } catch (e) {
         return show('Impossibile caricare il listino. Riprova tra poco.');
@@ -91,11 +93,12 @@
       let opened = false;                    // la scheda del servizio si apre solo la prima volta
       const draw = () => {
         const keep = el.scrollTop;
-        LR.renderListino(el, { pro, lang, data, openService: opened ? null : qs.get('servizio'), onView: (id) => track('whatsapp_click', id) });
+        LR.renderListino(el, { pro, theme, lang, data, openService: opened ? null : qs.get('servizio'), onView: (id) => track('whatsapp_click', id) });
         opened = true;
         el.scrollTop = keep;
       };
 
+      if (pro && LR.THEMES[theme]) document.documentElement.dataset.theme = theme;   // colora anche lo sfondo ai lati e il messaggio
       document.title = data.business.name + ' — Listino';
       draw();
       $('msg').classList.add('hidden');

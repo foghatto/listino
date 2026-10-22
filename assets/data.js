@@ -89,6 +89,13 @@
   const eur = (n) => Number(n).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' €';
 
   /* Disegna il listino in un contenitore. opts: { pro, lang, data, onView } */
+  // Palette disponibili (assegnate dal pannello admin). Colori: accento, sfondo, bordo — solo per le anteprime.
+  const THEMES = {
+    rose:  { name: 'Rosa cipria', accent: '#e8789f', bg: '#1a0f14', card: '#26151d' },
+    gold:  { name: 'Oro nero',    accent: '#d4a93a', bg: '#0a0a0a', card: '#161513' },
+    ocean: { name: 'Oceano',      accent: '#22bcd6', bg: '#04121f', card: '#0a1f33' }
+  };
+
   function renderListino(el, opts) {
     const o = Object.assign({ pro: false, lang: 'it', data: DATA }, opts || {});
     const d = o.data, t = T[o.lang] || T.it, lang = T[o.lang] ? o.lang : 'it';
@@ -96,6 +103,10 @@
     const nm = (x) => (x && (x[lang] || x.it)) || '';
     const isLong = (txt, n) => String(txt || '').length > (n || 85) || /\n/.test(txt || '');
     const about = String(d.business.about || '').trim();
+
+    // Tema colore (solo PRO): il CSS in style.css ridefinisce gli accenti in base a data-theme
+    const th = o.pro && THEMES[o.theme] ? o.theme : '';
+    if (el.parentElement) { if (th) el.parentElement.dataset.theme = th; else delete el.parentElement.dataset.theme; }
 
     // ----- Orari e contatti -----
     const B = d.business, hrs = Array.isArray(B.hours) ? B.hours : [];
@@ -310,5 +321,5 @@
     return d;
   }
 
-  window.LR = { DATA, T, renderListino, esc, eur, IMG, freeData, promoInfo, effective, ymd };
+  window.LR = { DATA, T, THEMES, renderListino, esc, eur, IMG, freeData, promoInfo, effective, ymd };
 })();

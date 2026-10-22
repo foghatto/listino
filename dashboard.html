@@ -479,7 +479,7 @@
 
     function renderPreview() {
       // L'anteprima mostra solo i servizi con almeno un elemento; il listino pubblico è identico
-      LR.renderListino($('preview'), { pro: isPro(), lang: 'it', data: S, preview: true });
+      LR.renderListino($('preview'), { pro: isPro(), theme: S.theme, lang: 'it', data: S, preview: true });
     }
 
     // --- Categorie e servizi ---

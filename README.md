@@ -106,3 +106,11 @@ Funziona con una rewrite in `vercel.json` (le pagine vere, come `/dashboard`, ha
 
 `/admin` (file `admin.html`, non linkata da nessuna parte): elenco di tutti gli account (email, conferma, attività, link, piano, servizi, visite, click WhatsApp, date di registrazione e ultimo accesso), filtri, ricerca, ordinamento, export CSV e lista d'attesa PRO.
 Attivazione: esegui `supabase/admin.sql` e aggiungi la tua email alla tabella `admins` (istruzione in fondo al file). L'accesso è controllato dal database: chi non è in `admins` riceve "forbidden".
+
+## Temi colore (PRO)
+Tre palette per la pagina pubblica del listino: **Rosa cipria**, **Oro nero**, **Oceano** (la base resta lo smeraldo).
+1. Esegui `supabase/temi.sql` nello SQL Editor (dopo `admin.sql`).
+2. Dal pannello admin, nella tabella account, scegli il tema dal menu "Tema colore" (e, se serve, il piano dal menu "Piano").
+3. Il tema si vede solo se la venue è PRO. Il cliente non può cambiarlo da solo.
+Anteprima senza database: `/listino?demo=pro&tema=rose` (oppure `gold`, `ocean`).
+I colori sono definiti in `assets/style.css` (blocco "Temi colore") e i nomi in `LR.THEMES` (`assets/data.js`): per aggiungere una palette bastano questi due punti, più il valore nel check di `temi.sql`.

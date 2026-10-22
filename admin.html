@@ -19,6 +19,7 @@
   </style>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-300">
+  <div id="toast" class="hidden" role="status" aria-live="polite"></div>
 
   <header class="border-b border-slate-800/80 bg-slate-950/85">
     <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3.5 sm:px-6">
@@ -93,6 +94,7 @@
 
   <script src="assets/config.js?v=2"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/data.js"></script>
   <script>
     (function () {
       const $ = (id) => document.getElementById(id);
@@ -103,7 +105,7 @@
       const state = (html, err) => { const s = $('state'); s.innerHTML = html; s.className = 'card p-8 text-center ' + (err ? 'text-red-300' : 'text-slate-400'); s.classList.remove('hidden'); $('app').classList.add('hidden'); };
 
       const COLS = [
-        { k: 'email', t: 'Email' }, { k: 'venue_name', t: 'Attività' }, { k: 'plan', t: 'Piano' }, { k: 'services', t: 'Servizi', n: 1 },
+        { k: 'email', t: 'Email' }, { k: 'venue_name', t: 'Attività' }, { k: 'plan', t: 'Piano' }, { k: 'theme', t: 'Tema colore' }, { k: 'services', t: 'Servizi', n: 1 },
         { k: 'views', t: 'Visite', n: 1 }, { k: 'wa_clicks', t: 'Click WA', n: 1 }, { k: 'created_at', t: 'Registrato il' }, { k: 'last_sign_in_at', t: 'Ultimo accesso' }
       ];
       let rows = [], wl = [], sort = { k: 'created_at', dir: -1 }, filter = 'all', query = '';
@@ -128,6 +130,8 @@
         });
       }
 
+      const themeColor = (k) => (LR.THEMES[k] || { accent: '#10b981' }).accent;
+
       function drawHead() {
         $('head').innerHTML = COLS.map((c) => `<th class="sortable px-3 py-2.5" data-sort="${c.k}" aria-sort="${sort.k === c.k ? (sort.dir > 0 ? 'ascending' : 'descending') : 'none'}">${c.t}${sort.k === c.k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('') + '<th class="px-3 py-2.5">Listino</th>';
       }
@@ -139,14 +143,15 @@
         $('rows').innerHTML = v.length ? v.map((r) => `<tr class="hover:bg-slate-900/60">
           <td class="max-w-[16rem] px-3 py-2.5"><span class="block truncate font-medium text-white" title="${esc(r.email)}">${esc(r.email)}</span>${r.confirmed_at ? '' : '<span class="text-[11px] text-amber-300">email non confermata</span>'}</td>
           <td class="max-w-[12rem] px-3 py-2.5">${r.venue_id ? `<span class="block truncate" title="${esc(r.venue_name)}">${esc(r.venue_name)}</span>` : '<span class="text-slate-500">— mai entrato</span>'}</td>
-          <td class="px-3 py-2.5">${r.plan ? `<span class="rounded px-1.5 py-0.5 text-[11px] font-bold uppercase ${r.plan === 'pro' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-300'}">${esc(r.plan)}</span>` : '—'}</td>
+          <td class="px-3 py-2.5">${r.venue_id ? `<select data-plan="${esc(r.venue_id)}" aria-label="Piano di ${esc(r.email)}" class="sel rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-xs font-bold uppercase ${r.plan === 'pro' ? 'text-emerald-300' : 'text-slate-300'}"><option value="free"${r.plan === 'free' ? ' selected' : ''}>free</option><option value="pro"${r.plan === 'pro' ? ' selected' : ''}>pro</option></select>` : '—'}</td>
+          <td class="px-3 py-2.5">${r.venue_id ? `<div class="flex items-center gap-2"><span class="h-3.5 w-3.5 shrink-0 rounded-full border border-slate-600" style="background:${esc(themeColor(r.theme))}"></span><select data-theme-sel="${esc(r.venue_id)}" aria-label="Tema di ${esc(r.email)}" class="sel rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200"><option value="">Smeraldo (base)</option>${Object.entries(LR.THEMES).map(([k, t]) => `<option value="${k}"${r.theme === k ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></div>${r.theme && r.plan !== 'pro' ? '<span class="mt-1 block text-[11px] text-amber-300">non visibile: serve il piano PRO</span>' : ''}` : '—'}</td>
           <td class="px-3 py-2.5 tabular-nums">${r.venue_id ? r.services : '—'}</td>
           <td class="px-3 py-2.5 tabular-nums">${r.venue_id ? r.views : '—'}</td>
           <td class="px-3 py-2.5 tabular-nums">${r.venue_id ? r.wa_clicks : '—'}</td>
           <td class="whitespace-nowrap px-3 py-2.5" title="${esc(fmtTime(r.created_at))}">${fmtDate(r.created_at)}<span class="block text-[11px] text-slate-500">${ago(r.created_at)}</span></td>
           <td class="whitespace-nowrap px-3 py-2.5" title="${esc(fmtTime(r.last_sign_in_at))}">${r.last_sign_in_at ? fmtDate(r.last_sign_in_at) + `<span class="block text-[11px] text-slate-500">${ago(r.last_sign_in_at)}</span>` : '<span class="text-slate-500">mai</span>'}</td>
           <td class="px-3 py-2.5">${r.slug ? `<a href="/${encodeURIComponent(r.slug)}" target="_blank" rel="noopener" class="text-emerald-400 hover:underline">/${esc(r.slug)} ↗</a>` : '—'}</td>
-        </tr>`).join('') : '<tr><td colspan="9" class="px-3 py-8 text-center text-slate-500">Nessun account corrisponde ai filtri.</td></tr>';
+        </tr>`).join('') : '<tr><td colspan="10" class="px-3 py-8 text-center text-slate-500">Nessun account corrisponde ai filtri.</td></tr>';
       }
 
       function drawCards() {
@@ -169,12 +174,32 @@
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
       }
       $('csv').addEventListener('click', () => download('account-listinorapido.csv',
-        [['Email', 'Email confermata', 'Attività', 'Link', 'Piano', 'Servizi', 'Visite', 'Click WhatsApp', 'Registrato il', 'Ultimo accesso'].map(cell).join(';')]
-          .concat(visible().map((r) => [r.email, r.confirmed_at ? 'sì' : 'no', r.venue_name, r.slug, r.plan, r.services, r.views, r.wa_clicks, r.created_at, r.last_sign_in_at].map(cell).join(';')))));
+        [['Email', 'Email confermata', 'Attività', 'Link', 'Piano', 'Tema', 'Servizi', 'Visite', 'Click WhatsApp', 'Registrato il', 'Ultimo accesso'].map(cell).join(';')]
+          .concat(visible().map((r) => [r.email, r.confirmed_at ? 'sì' : 'no', r.venue_name, r.slug, r.plan, r.theme, r.services, r.views, r.wa_clicks, r.created_at, r.last_sign_in_at].map(cell).join(';')))));
       $('wl-csv').addEventListener('click', () => download('lista-attesa-pro.csv', [['Email', 'Iscritta il'].map(cell).join(';')].concat(wl.map((w) => [w.email, w.created_at].map(cell).join(';')))));
 
       // Interazioni
       $('head').addEventListener('click', (e) => { const th = e.target.closest('[data-sort]'); if (!th) return; const k = th.dataset.sort; sort = { k, dir: sort.k === k ? -sort.dir : (k === 'created_at' || k === 'last_sign_in_at' || COLS.find((c) => c.k === k).n ? -1 : 1) }; draw(); });
+      // Piano e tema: cambiano subito sul database (funzioni riservate agli admin)
+      $('rows').addEventListener('change', async (e) => {
+        const sel = e.target.closest('select[data-plan], select[data-theme-sel]'); if (!sel) return;
+        const isPlan = 'plan' in sel.dataset, id = isPlan ? sel.dataset.plan : sel.dataset.themeSel;
+        const row = rows.find((r) => r.venue_id === id); if (!row) return;
+        sel.disabled = true;
+        const { error } = isPlan ? await sb.rpc('admin_set_plan', { p_venue: id, p_plan: sel.value }) : await sb.rpc('admin_set_theme', { p_venue: id, p_theme: sel.value });
+        if (error) {
+          sel.disabled = false; sel.value = isPlan ? row.plan : (row.theme || '');
+          const missing = error.code === 'PGRST202' || error.code === '42883' || /could not find the function|schema cache/i.test(error.message || '');
+          return toast(missing ? 'Esegui prima supabase/temi.sql nello SQL Editor di Supabase.' : 'Salvataggio non riuscito (' + (error.code || error.message || 'errore') + ').', true);
+        }
+        if (isPlan) row.plan = sel.value; else row.theme = sel.value || null;
+        draw(); drawCards(); toast(isPlan ? 'Piano aggiornato.' : 'Tema aggiornato.');
+      });
+      let toastT;
+      function toast(msg, err) {
+        const t = $('toast'); t.textContent = msg; t.className = 'fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-xl border px-4 py-2 text-sm shadow-lg ' + (err ? 'border-red-500/40 bg-red-950 text-red-200' : 'border-emerald-500/40 bg-slate-900 text-emerald-300');
+        clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hidden'), 3500);
+      }
       $('q').addEventListener('input', (e) => { query = e.target.value; draw(); });
       document.querySelectorAll('[data-f]').forEach((b) => b.addEventListener('click', () => { filter = b.dataset.f; document.querySelectorAll('[data-f]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); draw(); }));
       document.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => {

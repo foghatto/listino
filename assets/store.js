@@ -153,7 +153,7 @@
     fail(c.error); fail(s.error);
 
     S = {
-      mode: 'supabase', plan: venue.plan, hasAbout: 'about' in venue, extV, extS, extP, email: user.email, userId: user.id,
+      mode: 'supabase', plan: venue.plan, theme: venue.theme || '', hasAbout: 'about' in venue, extV, extS, extP, email: user.email, userId: user.id,
       business: {
         id: venue.id, slug: venue.slug, name: venue.name,
         tagline: { it: venue.tagline || '' }, whatsapp: venue.whatsapp || '', about: venue.about || '', address: venue.address || '', phone: venue.phone || '', instagram: venue.instagram || '', hours: venue.hours || [], cover: venue.cover_url || COVER
