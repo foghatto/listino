@@ -156,7 +156,7 @@
       mode: 'supabase', plan: venue.plan, theme: venue.theme || '', hasAbout: 'about' in venue, extV, extS, extP, email: user.email, userId: user.id,
       business: {
         id: venue.id, slug: venue.slug, name: venue.name,
-        tagline: { it: venue.tagline || '' }, whatsapp: venue.whatsapp || '', about: venue.about || '', address: venue.address || '', phone: venue.phone || '', instagram: venue.instagram || '', hours: venue.hours || [], cover: venue.cover_url || COVER
+        tagline: { it: venue.tagline || '' }, whatsapp: venue.whatsapp || '', about: venue.about || '', address: venue.address || '', phone: venue.phone || '', instagram: venue.instagram || '', hours: venue.hours || [], cover: venue.cover_url || ''
       },
       categories: c.data.map((x) => ({
         id: x.id,
@@ -168,7 +168,7 @@
   }
 
   const Store = {
-    live, uuid, init, defaultCover: COVER,
+    live, uuid, init, defaultCover: live ? '' : COVER,   // con Supabase nessuna foto esterna: se non ne carichi una, resta lo sfondo a colori
 
     async addCategory(cat, position) {
       if (!live) return demoSave();
@@ -259,6 +259,27 @@
       };
       const [views, clicks] = await Promise.all([count('view'), count('whatsapp_click')]);
       return { views, clicks };
+    },
+
+    // Elimina l'account e tutti i dati collegati (foto incluse). Con Supabase serve supabase/elimina-account.sql.
+    async deleteAccount() {
+      if (!live) { try { localStorage.removeItem(KEY); localStorage.removeItem('lr_user'); localStorage.removeItem('lr_waitlist'); } catch (e) {} return; }
+      try {                                                   // prima le foto: l'archivio le rimuove solo tramite la sua API
+        for (let guard = 0; guard < 20; guard++) {
+          const { data } = await sb.storage.from(BUCKET).list(S.userId, { limit: 100 });
+          if (!data || !data.length) break;
+          const { error } = await sb.storage.from(BUCKET).remove(data.map((f) => S.userId + '/' + f.name));
+          if (error) break;
+        }
+      } catch (e) { /* le foto rimaste non bloccano l'eliminazione dell'account */ }
+      const { error } = await sb.rpc('delete_my_account');
+      if (error) {
+        if (error.code === 'PGRST202' || error.code === '42883' || /could not find the function|schema cache/i.test(error.message || ''))
+          throw new Error('Per eliminare l\'account esegui una volta supabase/elimina-account.sql nello SQL Editor di Supabase.');
+        throw new Error('Eliminazione non riuscita (' + (error.code || error.message || 'errore') + '). Riprova o scrivici.');
+      }
+      try { await sb.auth.signOut(); } catch (e) {}
+      try { localStorage.removeItem('lr_user'); } catch (e) {}
     },
 
     resetDemo() { try { localStorage.removeItem(KEY); } catch (e) {} },

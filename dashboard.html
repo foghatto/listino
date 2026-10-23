@@ -5,12 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dashboard — ListinoRapido</title>
   <meta name="robots" content="noindex">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };</script>
+  <link rel="stylesheet" href="assets/fonts.css">
   <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/tailwind.css">
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-300">
 
@@ -168,11 +165,26 @@
           <button class="btn btn-primary" type="submit">Salva</button>
         </form>
 
+        <section class="card mt-6 max-w-2xl space-y-3 border-red-500/30 p-6" aria-labelledby="del-title">
+          <h2 id="del-title" class="text-lg font-bold text-white">Elimina il mio account</h2>
+          <p class="text-sm text-slate-400">Cancella per sempre il tuo account, il listino, i servizi, le foto e le statistiche. Il link e il codice QR smetteranno di funzionare. Non si può annullare.</p>
+          <button type="button" id="del-open" class="btn border border-red-500/50 text-red-300 hover:bg-red-500/10">Elimina il mio account…</button>
+          <form id="del-form" class="hidden space-y-3" novalidate>
+            <label for="del-word" class="block text-sm font-medium text-slate-200">Per confermare scrivi <b class="text-red-300">ELIMINA</b></label>
+            <input id="del-word" class="input" autocomplete="off" autocapitalize="characters" spellcheck="false">
+            <p id="del-msg" class="hidden rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300" role="alert"></p>
+            <div class="flex flex-wrap gap-2">
+              <button type="submit" id="del-go" class="btn bg-red-600 text-white hover:bg-red-500" disabled>Elimina definitivamente</button>
+              <button type="button" id="del-cancel" class="btn btn-ghost">Annulla</button>
+            </div>
+          </form>
+        </section>
+
         <div class="card mt-6 max-w-xl p-6">
           <h2 class="text-lg font-bold text-white">Foto di copertina</h2>
           <p class="mt-1 text-sm text-slate-400">È l'immagine in alto nel tuo listino (la tua struttura, il tuo studio).</p>
           <div id="cover-box" class="relative mt-4 h-40 overflow-hidden rounded-xl border border-slate-800 img-fallback"><img id="cover-img" alt="Foto di copertina" class="absolute inset-0 h-full w-full object-cover" onerror="this.style.display='none'"></div>
-          <p id="cover-note" class="mt-2 hidden text-xs text-amber-300">Questa è una foto di esempio: caricane una tua.</p>
+          <p id="cover-note" class="mt-2 hidden text-xs text-amber-300">Non hai ancora caricato una foto di copertina: caricane una tua.</p>
           <div class="mt-4 flex flex-wrap gap-2">
             <button type="button" id="cover-up" class="btn btn-primary !px-4 !py-2 text-sm" data-cover="change">Carica foto</button>
             <button type="button" id="cover-rm" class="btn btn-ghost !px-4 !py-2 text-sm" data-cover="remove">Rimuovi</button>
@@ -327,8 +339,8 @@
   </style>
 
   <script src="assets/config.js?v=2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="assets/vendor/supabase.js"></script>
+  <script src="assets/vendor/qrcode.min.js"></script>
   <script src="assets/data.js"></script>
   <script src="assets/consent.js" data-mode="modal"></script>
   <script src="assets/templates.js"></script>
@@ -816,7 +828,7 @@
     }
     function fillCover() {
       const c = S.business.cover || '';
-      $('cover-img').style.display = ''; $('cover-img').src = c;
+      $('cover-img').style.display = c ? '' : 'none'; $('cover-img').src = c;
       const sample = !c || c === LRStore.defaultCover;
       $('cover-note').classList.toggle('hidden', !sample);
       $('cover-up').textContent = sample ? 'Carica foto' : 'Sostituisci foto';
@@ -925,6 +937,21 @@
       try { await LRStore.updateBusiness(); msg(wa ? 'Salvato. Il pulsante Prenota (WhatsApp) è attivo accanto ai servizi.' : 'Salvato. Senza numero WhatsApp il pulsante Prenota non viene mostrato.'); $('p-wa').value = wa; render(); }
       catch (err) { S.business = JSON.parse(before); msg(err.message, true); }
     });
+
+    // --- Eliminazione account ---
+    (function () {
+      const open = $('del-open'), form = $('del-form'), word = $('del-word'), go = $('del-go'), msg = $('del-msg');
+      open.addEventListener('click', () => { form.classList.remove('hidden'); open.classList.add('hidden'); word.focus(); });
+      $('del-cancel').addEventListener('click', () => { form.classList.add('hidden'); open.classList.remove('hidden'); word.value = ''; go.disabled = true; msg.classList.add('hidden'); });
+      word.addEventListener('input', () => { go.disabled = word.value.trim().toUpperCase() !== 'ELIMINA'; });
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (word.value.trim().toUpperCase() !== 'ELIMINA') return;
+        go.disabled = true; msg.classList.add('hidden');
+        try { await LRStore.deleteAccount(); location.href = 'index.html'; }
+        catch (err) { msg.textContent = err.message; msg.classList.remove('hidden'); go.disabled = false; }
+      });
+    })();
 
     // --- Navigazione viste ---
     async function loadStats() {

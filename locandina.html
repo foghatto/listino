@@ -5,12 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Locandina QR — ListinoRapido</title>
   <meta name="robots" content="noindex">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };</script>
+  <link rel="stylesheet" href="assets/fonts.css">
   <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/tailwind.css">
   <style>
     :root { --s: 1; }
     body { font-family: Inter, system-ui, sans-serif; }
@@ -117,8 +114,8 @@
   </div>
 
   <script src="assets/config.js?v=2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="assets/vendor/supabase.js"></script>
+  <script src="assets/vendor/qrcode.min.js"></script>
   <script>
     (function () {
       const $ = (id) => document.getElementById(id);

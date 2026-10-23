@@ -121,3 +121,14 @@ I colori sono definiti in `assets/style.css` (blocco "Temi colore") e i nomi in 
 - Alla registrazione serve anche la casella "Ho letto e accetto…"; data e versione dell'accettazione restano nei dati dell'utente su Supabase (`terms_accepted_at`, `terms_version`).
 - Se cambi in modo sostanziale privacy o termini, aumenta `VERSION` in `consent.js` (e `terms_version` in `accedi.html`): il popup ricompare a tutti.
 - Il link "Gestisci accettazione" nel footer della landing lo riapre.
+
+## Note legali, consensi, eliminazione account
+- **Dati del titolare**: compila `assets/legal.js` (nome, indirizzo, email). Finché manca qualcosa, in `note-legali.html` resta un avviso e i campi appaiono tra [parentesi].
+- Il servizio è descritto come gestito da una persona fisica e gratuito, senza vendita del piano PRO. Se cambia (società, partita IVA, abbonamenti), vanno riscritte privacy e termini e aumentata la versione in `assets/consent.js` (`VERSION`) e in `accedi.html` (`terms_version`).
+- Alla registrazione servono due caselle: presa visione della privacy + accettazione dei termini, e approvazione specifica delle clausole 9-14 (artt. 1341-1342 c.c.). Se cambi la numerazione dei termini, aggiorna anche il testo di quella casella.
+- Il modulo "Avvisami" richiede il consenso con una casella; la data dell'iscrizione (`created_at` in `waitlist`) è la prova.
+- **Eliminare l'account** (dashboard → Profilo): esegui una volta `supabase/elimina-account.sql`. Cancella le foto e poi, a cascata, listino, servizi, statistiche e l'email in lista d'attesa.
+
+## Risorse ospitate sul sito (nessun CDN esterno)
+Font Inter e Sora (`assets/fonts/`), `supabase-js` e `qrcode` (`assets/vendor/`) e il CSS Tailwind compilato (`assets/tailwind.css`). Dopo aver usato nuove classi Tailwind in un `.html` o `.js`:
+`cd tools && npm install && npm run build:css`, poi commit di `assets/tailwind.css`. L'unico servizio esterno rimasto sono le foto di esempio di Unsplash (landing e demo).

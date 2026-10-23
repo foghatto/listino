@@ -6,12 +6,9 @@
   <title>Listino — ListinoRapido</title>
   <meta name="theme-color" content="#020617">
   <!-- Percorsi assoluti: questa pagina viene servita anche su /s/nome-attivita (vedi vercel.json) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };</script>
+  <link rel="stylesheet" href="/assets/fonts.css">
   <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="/assets/tailwind.css">
 </head>
 <body class="bg-slate-950 text-slate-300 antialiased">
 
@@ -23,7 +20,7 @@
   </div>
 
   <script src="/assets/config.js?v=2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/vendor/supabase.js"></script>
   <script src="/assets/data.js"></script>
   <script>
     (async () => {
@@ -54,7 +51,7 @@
           if (c.error) throw c.error;
           if (s.error) throw s.error;
           data = {
-            business: { name: v.name, tagline: { it: v.tagline || '' }, whatsapp: v.whatsapp || '', about: v.about || '', address: v.address || '', phone: v.phone || '', instagram: v.instagram || '', hours: v.hours || [], cover: v.cover_url || LR.DATA.business.cover },
+            business: { name: v.name, tagline: { it: v.tagline || '' }, whatsapp: v.whatsapp || '', about: v.about || '', address: v.address || '', phone: v.phone || '', instagram: v.instagram || '', hours: v.hours || [], cover: v.cover_url || '' },
             categories: c.data.map((x) => ({
               id: x.id,
               name: Object.assign({}, x.name_i18n, { it: x.name }),

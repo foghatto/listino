@@ -159,7 +159,7 @@
     const gone = !!o.openService && !target;
     let html = `
       <div class="relative h-36 img-fallback">
-        <img src="${esc(d.business.cover)}" alt="" class="absolute inset-0 w-full h-full object-cover opacity-70" loading="lazy" onerror="this.remove()">
+        ${d.business.cover ? `<img src="${esc(d.business.cover)}" alt="" class="absolute inset-0 w-full h-full object-cover opacity-70" loading="lazy" onerror="this.remove()">` : ''}
         <div class="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent"></div>
         <div class="absolute bottom-3 left-4 right-4">
           <p class="text-[11px] uppercase tracking-widest text-emerald-400">${esc(nm(d.business.tagline))}</p>

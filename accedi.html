@@ -4,12 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Accedi — ListinoRapido</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } };</script>
+  <link rel="stylesheet" href="assets/fonts.css">
   <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/tailwind.css">
 </head>
 <body class="glow-bg min-h-screen bg-slate-950 text-slate-300">
   <main class="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10">
@@ -30,10 +27,16 @@
           </div>
           <input id="password" type="password" required minlength="6" autocomplete="current-password" class="input" placeholder="••••••••">
         </div>
-        <div id="row-terms" class="hidden"><label class="flex cursor-pointer items-start gap-2.5 text-sm text-slate-300">
-          <input id="terms" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-emerald-500">
-          <span>Ho letto e accetto la <a href="note-legali.html#privacy" target="_blank" rel="noopener" class="font-medium text-emerald-400 underline underline-offset-2">Privacy Policy</a> e i <a href="note-legali.html#termini" target="_blank" rel="noopener" class="font-medium text-emerald-400 underline underline-offset-2">Termini e condizioni</a>.</span>
-        </label></div>
+        <div id="row-terms" class="hidden space-y-3">
+          <label class="flex cursor-pointer items-start gap-2.5 text-sm text-slate-300">
+            <input id="terms" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-emerald-500">
+            <span>Dichiaro di aver preso visione della <a href="note-legali.html#privacy" target="_blank" rel="noopener" class="font-medium text-emerald-400 underline underline-offset-2">Privacy Policy</a> e accetto i <a href="note-legali.html#termini" target="_blank" rel="noopener" class="font-medium text-emerald-400 underline underline-offset-2">Termini e condizioni</a>.</span>
+          </label>
+          <label class="flex cursor-pointer items-start gap-2.5 text-sm text-slate-300">
+            <input id="terms2" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-emerald-500">
+            <span>Approvo specificamente, ai sensi degli artt. 1341 e 1342 c.c., le clausole 9, 10, 11, 12, 13 e 14 dei <a href="note-legali.html#termini" target="_blank" rel="noopener" class="font-medium text-emerald-400 underline underline-offset-2">Termini</a> (disponibilità del servizio, limitazione di responsabilità, sospensione e chiusura, modifiche, cessione del servizio, legge applicabile e foro competente).</span>
+          </label>
+        </div>
         <p id="msg" class="hidden rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm" role="status"></p>
         <button id="submit" type="submit" class="btn btn-primary w-full">Accedi</button>
       </form>
@@ -50,7 +53,7 @@
   </main>
 
   <script src="assets/config.js?v=2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/vendor/supabase.js"></script>
   <script>
     const cfg = window.LR_CONFIG || {};
     // Demo SOLO se Supabase non è configurato. Se è configurato ma la libreria non si carica
@@ -119,7 +122,7 @@
       const needEmail = MODES[mode].email, needPw = MODES[mode].pw;
       if (needEmail && !/^\S+@\S+\.\S+$/.test(email)) return msg('Inserisci un indirizzo email valido.', true);
       if (needPw && password.length < 6) return msg('La password deve avere almeno 6 caratteri.', true);
-      if (mode === 'signup' && !$('terms').checked) return msg('Per creare l\'account devi accettare la Privacy Policy e i Termini e condizioni.', true);
+      if (mode === 'signup' && !($('terms').checked && $('terms2').checked)) return msg('Per creare l\'account spunta entrambe le caselle: presa visione della privacy e accettazione dei Termini, e approvazione specifica delle clausole indicate.', true);
 
       if (configured && !live) return msg(NO_SERVICE, true);
       if (!live) {                                   // modalità demo (Supabase non configurato)
@@ -141,7 +144,7 @@
           setTimeout(() => { location.href = 'dashboard.html'; }, 1200);
         } else {
           const { data, error } = mode === 'signup'
-            ? await sb.auth.signUp({ email, password, options: { data: { terms_accepted_at: new Date().toISOString(), terms_version: 1 } } })   // data e versione dell'accettazione restano nei dati dell'utente
+            ? await sb.auth.signUp({ email, password, options: { data: { terms_accepted_at: new Date().toISOString(), terms_version: 2, clauses_1341_approved: true } } })   // data e versione dell'accettazione restano nei dati dell'utente
             : await sb.auth.signInWithPassword({ email, password });
           if (error) throw error;
           if (mode === 'signup' && !data.session) msg('Controlla la tua email per confermare la registrazione.');

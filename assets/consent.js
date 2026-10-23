@@ -11,7 +11,7 @@
  */
 (function () {
   'use strict';
-  var VERSION = 1;
+  var VERSION = 2;
   var KEY = 'lr_consent';
   var script = document.currentScript;
   var MODE = (script && script.getAttribute('data-mode')) === 'banner' ? 'banner' : 'modal';
@@ -45,7 +45,7 @@
   var root = null, prev = null;
 
   function links() {
-    return '<a href="' + LEGAL + '#privacy" target="_blank" rel="noopener">Privacy Policy</a> e i ' +
+    return '<a href="' + LEGAL + '#privacy" target="_blank" rel="noopener">Privacy Policy</a> e accetti i ' +
            '<a href="' + LEGAL + '#termini" target="_blank" rel="noopener">Termini e condizioni</a>';
   }
 
@@ -67,7 +67,7 @@
       root.className = 'lrc-bn';
       root.innerHTML =
         '<div class="lrc-box" role="region" aria-label="Privacy e termini">' +
-          '<p>Usando ListinoRapido accetti la ' + links() + '. Usiamo solo strumenti tecnici necessari, senza cookie di profilazione o marketing.</p>' +
+          '<p>Usando ListinoRapido prendi visione della ' + links() + '. Usiamo solo strumenti tecnici necessari, senza cookie di profilazione, analisi o pubblicità.</p>' +
           '<button type="button" class="lrc-btn" data-ok>Accetto</button>' +
         '</div>';
       document.body.appendChild(root);
@@ -79,8 +79,8 @@
     root.innerHTML =
       '<div class="lrc-box" role="dialog" aria-modal="true" aria-labelledby="lrc-t" aria-describedby="lrc-d">' +
         '<h2 id="lrc-t">Privacy e termini d’uso</h2>' +
-        '<p id="lrc-d">Per usare ListinoRapido devi accettare la ' + links() + '. Usiamo solo strumenti tecnici necessari al funzionamento, senza cookie di profilazione o marketing.</p>' +
-        '<label class="lrc-chk"><input type="checkbox" id="lrc-c"><span>Ho letto e accetto la Privacy Policy e i Termini e condizioni.</span></label>' +
+        '<p id="lrc-d">Per usare ListinoRapido prendi visione della ' + links() + '. Usiamo solo strumenti tecnici necessari al funzionamento, senza cookie di profilazione, analisi o pubblicità.</p>' +
+        '<label class="lrc-chk"><input type="checkbox" id="lrc-c"><span>Dichiaro di aver preso visione della Privacy Policy e accetto i Termini e condizioni.</span></label>' +
         '<button type="button" class="lrc-btn" id="lrc-ok" disabled>Accetto e continuo</button>' +
       '</div>';
     document.body.appendChild(root);
