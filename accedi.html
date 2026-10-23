@@ -30,6 +30,10 @@
           </div>
           <input id="password" type="password" required minlength="6" autocomplete="current-password" class="input" placeholder="••••••••">
         </div>
+        <div id="row-terms" class="hidden"><label class="flex cursor-pointer items-start gap-2.5 text-sm text-slate-300">
+          <input id="terms" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 accent-emerald-500">
+          <span>Ho letto e accetto la <a href="note-legali.html#privacy" target="_blank" rel="noopener" class="font-medium text-emerald-400 underline underline-offset-2">Privacy Policy</a> e i <a href="note-legali.html#termini" target="_blank" rel="noopener" class="font-medium text-emerald-400 underline underline-offset-2">Termini e condizioni</a>.</span>
+        </label></div>
         <p id="msg" class="hidden rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm" role="status"></p>
         <button id="submit" type="submit" class="btn btn-primary w-full">Accedi</button>
       </form>
@@ -77,6 +81,7 @@
       $('row-email').classList.toggle('hidden', !c.email);
       $('row-password').classList.toggle('hidden', !c.pw);
       $('forgot').classList.toggle('hidden', !c.forgot);
+      $('row-terms').classList.toggle('hidden', m !== 'signup');
       $('pw-label').textContent = m === 'newpass' ? 'Nuova password' : 'Password';
       $('password').autocomplete = c.auto;
       $('switch-row').classList.toggle('hidden', !c.sw);
@@ -114,6 +119,7 @@
       const needEmail = MODES[mode].email, needPw = MODES[mode].pw;
       if (needEmail && !/^\S+@\S+\.\S+$/.test(email)) return msg('Inserisci un indirizzo email valido.', true);
       if (needPw && password.length < 6) return msg('La password deve avere almeno 6 caratteri.', true);
+      if (mode === 'signup' && !$('terms').checked) return msg('Per creare l\'account devi accettare la Privacy Policy e i Termini e condizioni.', true);
 
       if (configured && !live) return msg(NO_SERVICE, true);
       if (!live) {                                   // modalità demo (Supabase non configurato)
@@ -135,7 +141,7 @@
           setTimeout(() => { location.href = 'dashboard.html'; }, 1200);
         } else {
           const { data, error } = mode === 'signup'
-            ? await sb.auth.signUp({ email, password })
+            ? await sb.auth.signUp({ email, password, options: { data: { terms_accepted_at: new Date().toISOString(), terms_version: 1 } } })   // data e versione dell'accettazione restano nei dati dell'utente
             : await sb.auth.signInWithPassword({ email, password });
           if (error) throw error;
           if (mode === 'signup' && !data.session) msg('Controlla la tua email per confermare la registrazione.');
@@ -147,5 +153,6 @@
 
     setMode(mode === 'login' && new URLSearchParams(location.search).has('signup') ? 'signup' : mode, true);
   </script>
+  <script src="assets/consent.js" data-mode="modal"></script>
 </body>
 </html>

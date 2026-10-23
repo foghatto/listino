@@ -114,3 +114,10 @@ Tre palette per la pagina pubblica del listino: **Rosa cipria**, **Oro nero**, *
 3. Il tema si vede solo se la venue è PRO. Il cliente non può cambiarlo da solo.
 Anteprima senza database: `/listino?demo=pro&tema=rose` (oppure `gold`, `ocean`).
 I colori sono definiti in `assets/style.css` (blocco "Temi colore") e i nomi in `LR.THEMES` (`assets/data.js`): per aggiungere una palette bastano questi due punti, più il valore nel check di `temi.sql`.
+
+## Accettazione di privacy e termini
+- `assets/consent.js` mostra un popup con pulsante "Accetto" e salva data e versione nel browser (`lr_consent`).
+  Finestra bloccante su accesso e dashboard (con casella da spuntare), riquadro in basso su landing e demo. Non compare sul listino pubblico.
+- Alla registrazione serve anche la casella "Ho letto e accetto…"; data e versione dell'accettazione restano nei dati dell'utente su Supabase (`terms_accepted_at`, `terms_version`).
+- Se cambi in modo sostanziale privacy o termini, aumenta `VERSION` in `consent.js` (e `terms_version` in `accedi.html`): il popup ricompare a tutti.
+- Il link "Gestisci accettazione" nel footer della landing lo riapre.
