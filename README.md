@@ -123,7 +123,7 @@ I colori sono definiti in `assets/style.css` (blocco "Temi colore") e i nomi in 
 - Il link "Gestisci accettazione" nel footer della landing lo riapre.
 
 ## Note legali, consensi, eliminazione account
-- **Dati del titolare**: compila `assets/legal.js` (nome, indirizzo, email). Finché manca qualcosa, in `note-legali.html` resta un avviso e i campi appaiono tra [parentesi].
+- **Email di contatto e data di aggiornamento** delle note legali: `assets/legal.js` (oggi `info@listinorapido.it`). Se il campo resta vuoto, in `note-legali.html` compare un avviso.
 - Il servizio è descritto come gestito da una persona fisica e gratuito, senza vendita del piano PRO. Se cambia (società, partita IVA, abbonamenti), vanno riscritte privacy e termini e aumentata la versione in `assets/consent.js` (`VERSION`) e in `accedi.html` (`terms_version`).
 - Alla registrazione servono due caselle: presa visione della privacy + accettazione dei termini, e approvazione specifica delle clausole 9-14 (artt. 1341-1342 c.c.). Se cambi la numerazione dei termini, aggiorna anche il testo di quella casella.
 - Il modulo "Avvisami" richiede il consenso con una casella; la data dell'iscrizione (`created_at` in `waitlist`) è la prova.
