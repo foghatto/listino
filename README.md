@@ -140,3 +140,6 @@ Quando un utente crea il proprio listino, Supabase chiama `api/notify-signup.js`
 3. Apri `supabase/notifica-admin.sql`, sostituisci `INCOLLA-QUI-IL-SEGRETO` con lo stesso valore di `NOTIFY_WEBHOOK_SECRET` ed eseguilo nello SQL Editor di Supabase.
 4. **Cambiare l'email di destinazione:** modifica `ADMIN_NOTIFY_EMAIL` su Vercel e fai Redeploy. Nessun file da toccare. Senza dominio verificato in Resend, il destinatario può essere solo l'email con cui hai creato l'account Resend; per scrivere ad altri indirizzi verifica `listinorapido.it` in Resend e imposta `NOTIFY_FROM` (es. `ListinoRapido <avvisi@listinorapido.it>`).
 5. Se il sito cambia indirizzo (es. www.listinorapido.it), cambia l'URL dentro `notifica-admin.sql` e rieseguilo.
+
+## Se il browser blocca le richieste a Supabase (CORS / "Failed to fetch")
+Il sito inoltra le richieste di Supabase anche da `/sb/...` (regola in `vercel.json`, con l'indirizzo del progetto Supabase). Se una richiesta diretta fallisce, `assets/store.js` la ripete una volta da lì, senza limiti di CORS; per i metodi che falliscono ricorda la scelta per la sessione. Se cambi progetto Supabase, aggiorna l'indirizzo anche in `vercel.json`.

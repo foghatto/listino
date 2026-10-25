@@ -13,23 +13,38 @@
   const configured = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY);
   const forceDemo = new URLSearchParams(location.search).has('demo');   // dashboard.html?demo=1
   const live = configured && !!window.supabase && !forceDemo;
-  // Rete instabile o bloccata ("TypeError: Failed to fetch"): un solo nuovo tentativo per le richieste ripetibili
-  // (mai per gli inserimenti, per non duplicarli) e un messaggio chiaro, con la richiesta fallita, se non va ancora.
+  // Rete instabile, bloccata o con problemi di CORS ("TypeError: Failed to fetch", "Method PATCH is not allowed…"):
+  // se la richiesta diretta a Supabase fallisce, la ripetiamo UNA volta passando dal nostro sito (/sb, vedi vercel.json),
+  // che la inoltra a Supabase e non ha limiti di CORS. Gli inserimenti non si ripetono mai, per non duplicarli.
   let lastNet = '';
   const isNet = (m) => /failed to fetch|networkerror|load failed|network request failed/i.test(String(m || ''));
   const netMsg = () => 'Connessione al servizio non riuscita. Controlla la rete, disattiva eventuali blocchi pubblicità e riprova.' + (lastNet ? ' (' + lastNet + ')' : '');
+  const DIRECT = String(cfg.SUPABASE_URL || '').replace(/\/$/, '');
+  const viaSite = (u) => (DIRECT && u.indexOf(DIRECT) === 0 ? location.origin + '/sb' + u.slice(DIRECT.length) : null);
+  let px = {};                                                    // metodi per cui la via diretta non funziona: da subito dal sito
+  try { px = JSON.parse(sessionStorage.getItem('lr_px') || '{}'); } catch (e) {}
   async function lrFetch(input, init) {
     const method = String((init && init.method) || (input && input.method) || 'GET').toUpperCase();
     const url = String((input && input.url) || input);
     const tag = method + ' ' + url.replace(/^https?:\/\/[^/]+/, '').split('?')[0].replace(/\/[0-9a-f-]{20,}.*$/, '/…');
-    for (let i = 0; ; i++) {
-      try { return await fetch(input, init); }
-      catch (e) {
-        lastNet = tag;
-        console.error('[ListinoRapido] richiesta non riuscita:', tag, e);
-        if (i >= 1 || (method === 'POST' && !/\/storage\//.test(url))) throw e;
+    const site = viaSite(url);
+    if (site && px[method]) { try { return await fetch(site, init); } catch (e) { /* si riprova in diretta */ } }
+    try { return await fetch(input, init); }
+    catch (e) {
+      lastNet = tag;
+      console.error('[ListinoRapido] richiesta non riuscita:', tag, e);
+      if (method === 'POST' && !/\/storage\//.test(url)) throw e;
+      if (site) {
+        try {
+          const r = await fetch(site, init);
+          px[method] = 1; try { sessionStorage.setItem('lr_px', JSON.stringify(px)); } catch (e2) {}
+          return r;
+        } catch (e2) { console.error('[ListinoRapido] anche via sito non riuscita:', tag, e2); }
+      } else {
         await new Promise((r) => setTimeout(r, 700));
+        try { return await fetch(input, init); } catch (e3) { /* messaggio sotto */ }
       }
+      throw e;
     }
   }
   const sb = live ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, { global: { fetch: lrFetch } }) : null;

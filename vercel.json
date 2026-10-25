@@ -3,6 +3,10 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/sb/:path*",
+      "destination": "https://mayzhipooiltzsmpcuhy.supabase.co/:path*"
+    },
+    {
       "source": "/s/:slug",
       "destination": "/api/listino?s=:slug"
     },
