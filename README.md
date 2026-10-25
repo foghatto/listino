@@ -132,3 +132,11 @@ I colori sono definiti in `assets/style.css` (blocco "Temi colore") e i nomi in 
 ## Risorse ospitate sul sito (nessun CDN esterno)
 Font Inter e Sora (`assets/fonts/`), `supabase-js` e `qrcode` (`assets/vendor/`) e il CSS Tailwind compilato (`assets/tailwind.css`). Dopo aver usato nuove classi Tailwind in un `.html` o `.js`:
 `cd tools && npm install && npm run build:css`, poi commit di `assets/tailwind.css`. L'unico servizio esterno rimasto sono le foto di esempio di Unsplash (landing e demo).
+
+## Email all'amministratore per ogni nuovo listino
+Quando un utente crea il proprio listino, Supabase chiama `api/notify-signup.js`, che invia un'email tramite Resend.
+1. Crea un account su resend.com (con l'email che deve ricevere gli avvisi, finché non verifichi un dominio) e genera una **API key**.
+2. Su Vercel → Settings → Environment Variables aggiungi: `RESEND_API_KEY`, `NOTIFY_WEBHOOK_SECRET` (una stringa lunga a caso) e `ADMIN_NOTIFY_EMAIL` (chi riceve; più indirizzi separati da virgola). Poi **Redeploy**.
+3. Apri `supabase/notifica-admin.sql`, sostituisci `INCOLLA-QUI-IL-SEGRETO` con lo stesso valore di `NOTIFY_WEBHOOK_SECRET` ed eseguilo nello SQL Editor di Supabase.
+4. **Cambiare l'email di destinazione:** modifica `ADMIN_NOTIFY_EMAIL` su Vercel e fai Redeploy. Nessun file da toccare. Senza dominio verificato in Resend, il destinatario può essere solo l'email con cui hai creato l'account Resend; per scrivere ad altri indirizzi verifica `listinorapido.it` in Resend e imposta `NOTIFY_FROM` (es. `ListinoRapido <avvisi@listinorapido.it>`).
+5. Se il sito cambia indirizzo (es. www.listinorapido.it), cambia l'URL dentro `notifica-admin.sql` e rieseguilo.
