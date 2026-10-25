@@ -22,7 +22,7 @@ begin
   begin
     perform net.http_post(
       url     := 'https://listino-green.vercel.app/api/notify-signup',
-      headers := jsonb_build_object('Content-Type', 'application/json', 'x-webhook-secret', 'Babbasone23!'),
+      headers := jsonb_build_object('Content-Type', 'application/json', 'x-webhook-secret', 'INCOLLA-QUI-IL-SEGRETO'),
       body    := jsonb_build_object('venue_id', new.id, 'name', new.name, 'slug', new.slug, 'email', mail, 'created_at', new.created_at)
     );
   exception when others then

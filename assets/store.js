@@ -13,7 +13,26 @@
   const configured = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY);
   const forceDemo = new URLSearchParams(location.search).has('demo');   // dashboard.html?demo=1
   const live = configured && !!window.supabase && !forceDemo;
-  const sb = live ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
+  // Rete instabile o bloccata ("TypeError: Failed to fetch"): un solo nuovo tentativo per le richieste ripetibili
+  // (mai per gli inserimenti, per non duplicarli) e un messaggio chiaro, con la richiesta fallita, se non va ancora.
+  let lastNet = '';
+  const isNet = (m) => /failed to fetch|networkerror|load failed|network request failed/i.test(String(m || ''));
+  const netMsg = () => 'Connessione al servizio non riuscita. Controlla la rete, disattiva eventuali blocchi pubblicità e riprova.' + (lastNet ? ' (' + lastNet + ')' : '');
+  async function lrFetch(input, init) {
+    const method = String((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+    const url = String((input && input.url) || input);
+    const tag = method + ' ' + url.replace(/^https?:\/\/[^/]+/, '').split('?')[0].replace(/\/[0-9a-f-]{20,}.*$/, '/…');
+    for (let i = 0; ; i++) {
+      try { return await fetch(input, init); }
+      catch (e) {
+        lastNet = tag;
+        console.error('[ListinoRapido] richiesta non riuscita:', tag, e);
+        if (i >= 1 || (method === 'POST' && !/\/storage\//.test(url))) throw e;
+        await new Promise((r) => setTimeout(r, 700));
+      }
+    }
+  }
+  const sb = live ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, { global: { fetch: lrFetch } }) : null;
 
   const KEY = 'lr_demo_data_v1';
   const BUCKET = 'service-images';
@@ -45,6 +64,7 @@
   function fail(error) {
     if (!error) return;
     const m = String(error.message || '');
+    if (isNet(m)) throw new Error(netMsg());
     if (/massimo 10 servizi/i.test(m)) throw new Error('Hai raggiunto il limite di 10 servizi del piano Free.');
     if (error.code === '23505') throw new Error('Questo link è già usato da un\'altra attività: scegline un altro.');
     throw new Error(m || 'Operazione non riuscita. Riprova.');
@@ -237,7 +257,7 @@
       const blob = await toBlob(file, cover ? 1600 : 1000, 0.82);
       const path = `${S.userId}/${kind}-${uuid()}.jpg`;
       const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
-      if (error) throw new Error('Caricamento foto non riuscito: ' + (error.message || 'riprova.'));
+      if (error) throw new Error(isNet(error.message) ? netMsg() : 'Caricamento foto non riuscito: ' + (error.message || 'riprova.'));
       return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
     },
     // Elimina dal bucket la vecchia foto (se è una nostra): errori ignorati, non blocca nulla
