@@ -283,6 +283,12 @@
       try { await sb.storage.from(BUCKET).remove([decodeURIComponent(m[1])]); } catch (e) {}
     },
 
+    // true se l'utente connesso è un amministratore (funzione is_admin su Supabase; se manca, false)
+    async isAdmin() {
+      if (!live) return false;
+      try { const { data, error } = await sb.rpc('is_admin'); return !error && data === true; } catch (e) { return false; }
+    },
+
     // Statistiche reali (piano PRO): visite e click WhatsApp registrati dalla pagina pubblica
     async stats() {
       if (!live) return { views: 1248, clicks: 214 };

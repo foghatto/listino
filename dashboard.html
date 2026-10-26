@@ -18,6 +18,7 @@
       <div class="flex items-center gap-3">
         <span id="plan-badge" class="hidden rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-400 sm:inline">Piano Free</span>
         <a id="upgrade" href="demo-pro.html" title="Il piano PRO non è ancora acquistabile: guarda la demo" class="btn btn-ghost !px-4 !py-2 text-sm">PRO in arrivo · vedi demo</a>
+        <a id="admin-link" href="admin.html" class="hidden rounded-full border border-emerald-500/40 px-3 py-1 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/10">Area admin</a>
         <button id="logout" class="text-sm text-slate-400 hover:text-white">Esci</button>
       </div>
     </div>
@@ -1007,6 +1008,7 @@
       render();
     }
     $('logout').addEventListener('click', () => LRStore.logout());
+    LRStore.isAdmin().then((a) => { if (a) $('admin-link').classList.remove('hidden'); });
     $('reset').addEventListener('click', () => { if (confirm('Ripristinare i dati di prova?')) { LRStore.resetDemo(); reload(); } });
 
     (async () => {
