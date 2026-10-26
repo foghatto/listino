@@ -17,6 +17,19 @@
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-300">
   <div id="toast" class="hidden" role="status" aria-live="polite"></div>
+  <div id="del-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 p-4" role="dialog" aria-modal="true" aria-labelledby="del-title">
+    <div class="w-full max-w-md rounded-2xl border border-red-500/30 bg-slate-900 p-6 shadow-2xl">
+      <h2 id="del-title" class="font-display text-lg font-bold text-white">Eliminare questo account?</h2>
+      <p class="mt-2 text-sm text-slate-300"><b id="del-mail" class="break-all text-white"></b></p>
+      <p class="mt-2 text-sm text-slate-400">Verranno cancellati definitivamente account, listino, servizi, foto e statistiche. L'operazione non si può annullare.</p>
+      <label for="del-word" class="mt-4 block text-xs text-slate-400">Per confermare scrivi <b class="text-red-300">ELIMINA</b></label>
+      <input id="del-word" autocomplete="off" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white">
+      <div class="mt-5 flex justify-end gap-2">
+        <button id="del-cancel" type="button" class="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Annulla</button>
+        <button id="del-go" type="button" disabled class="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-40">Elimina definitivamente</button>
+      </div>
+    </div>
+  </div>
 
   <header class="border-b border-slate-800/80 bg-slate-950/85">
     <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3.5 sm:px-6">
@@ -64,7 +77,7 @@
         </div>
         <p id="shown" class="mt-3 text-xs text-slate-500"></p>
         <div class="mt-2 overflow-x-auto rounded-2xl border border-slate-800">
-          <table class="w-full min-w-[56rem] text-left text-sm">
+          <table class="w-full min-w-[62rem] text-left text-sm">
             <thead class="bg-slate-900 text-xs uppercase tracking-wide text-slate-400">
               <tr id="head"></tr>
             </thead>
@@ -105,7 +118,7 @@
         { k: 'email', t: 'Email' }, { k: 'venue_name', t: 'Attività' }, { k: 'plan', t: 'Piano' }, { k: 'theme', t: 'Tema colore' }, { k: 'services', t: 'Servizi', n: 1 },
         { k: 'views', t: 'Visite', n: 1 }, { k: 'wa_clicks', t: 'Click WA', n: 1 }, { k: 'created_at', t: 'Registrato il' }, { k: 'last_sign_in_at', t: 'Ultimo accesso' }
       ];
-      let rows = [], wl = [], sort = { k: 'created_at', dir: -1 }, filter = 'all', query = '';
+      let myId = null, rows = [], wl = [], sort = { k: 'created_at', dir: -1 }, filter = 'all', query = '';
 
       const fmtDate = (d) => d ? new Date(d).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
       const fmtTime = (d) => d ? new Date(d).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
@@ -130,7 +143,7 @@
       const themeColor = (k) => (LR.THEMES[k] || { accent: '#10b981' }).accent;
 
       function drawHead() {
-        $('head').innerHTML = COLS.map((c) => `<th class="sortable px-3 py-2.5" data-sort="${c.k}" aria-sort="${sort.k === c.k ? (sort.dir > 0 ? 'ascending' : 'descending') : 'none'}">${c.t}${sort.k === c.k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('') + '<th class="px-3 py-2.5">Listino</th>';
+        $('head').innerHTML = COLS.map((c) => `<th class="sortable px-3 py-2.5" data-sort="${c.k}" aria-sort="${sort.k === c.k ? (sort.dir > 0 ? 'ascending' : 'descending') : 'none'}">${c.t}${sort.k === c.k ? (sort.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('') + '<th class="px-3 py-2.5">Listino</th><th class="px-3 py-2.5">Azioni</th>';
       }
 
       function draw() {
@@ -148,7 +161,8 @@
           <td class="whitespace-nowrap px-3 py-2.5" title="${esc(fmtTime(r.created_at))}">${fmtDate(r.created_at)}<span class="block text-[11px] text-slate-500">${ago(r.created_at)}</span></td>
           <td class="whitespace-nowrap px-3 py-2.5" title="${esc(fmtTime(r.last_sign_in_at))}">${r.last_sign_in_at ? fmtDate(r.last_sign_in_at) + `<span class="block text-[11px] text-slate-500">${ago(r.last_sign_in_at)}</span>` : '<span class="text-slate-500">mai</span>'}</td>
           <td class="px-3 py-2.5">${r.slug ? `<a href="/${encodeURIComponent(r.slug)}" target="_blank" rel="noopener" class="text-emerald-400 hover:underline">/${esc(r.slug)} ↗</a>` : '—'}</td>
-        </tr>`).join('') : '<tr><td colspan="10" class="px-3 py-8 text-center text-slate-500">Nessun account corrisponde ai filtri.</td></tr>';
+          <td class="px-3 py-2.5">${r.user_id === myId ? '<span class="text-[11px] text-slate-500">' + 'tu' + '</span>' : `<button type="button" data-del="${esc(r.user_id)}" class="rounded-lg border border-red-500/40 px-2 py-1 text-xs font-semibold text-red-300 hover:bg-red-500/10" aria-label="Elimina ${esc(r.email)}">Elimina</button>`}</td>
+        </tr>`).join('') : '<tr><td colspan="11" class="px-3 py-8 text-center text-slate-500">Nessun account corrisponde ai filtri.</td></tr>';
       }
 
       function drawCards() {
@@ -192,6 +206,39 @@
         if (isPlan) row.plan = sel.value; else row.theme = sel.value || null;
         draw(); drawCards(); toast(isPlan ? 'Piano aggiornato.' : 'Tema aggiornato.');
       });
+      // Eliminazione account (solo admin, funzione admin_delete_user)
+      let delRow = null;
+      const modal = $('del-modal');
+      const closeDel = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); delRow = null; };
+      $('rows').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-del]'); if (!b) return;
+        delRow = rows.find((r) => r.user_id === b.dataset.del); if (!delRow) return;
+        $('del-mail').textContent = delRow.email; $('del-word').value = ''; $('del-go').disabled = true;
+        modal.classList.remove('hidden'); modal.classList.add('flex'); $('del-word').focus();
+      });
+      $('del-word').addEventListener('input', (e) => { $('del-go').disabled = e.target.value.trim().toUpperCase() !== 'ELIMINA'; });
+      $('del-cancel').addEventListener('click', closeDel);
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeDel(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && delRow) closeDel(); });
+      $('del-go').addEventListener('click', async () => {
+        const r = delRow; if (!r) return;
+        $('del-go').disabled = true; $('del-go').textContent = 'Elimino…';
+        try {
+          // foto del servizio (cartella = id utente)
+          try {
+            const { data } = await sb.storage.from('service-images').list(r.user_id, { limit: 1000 });
+            if (data && data.length) await sb.storage.from('service-images').remove(data.map((f) => r.user_id + '/' + f.name));
+          } catch (x) {}
+          const { error } = await sb.rpc('admin_delete_user', { p_user: r.user_id });
+          if (error) {
+            const missing = error.code === 'PGRST202' || error.code === '42883' || /could not find the function|schema cache/i.test(error.message || '');
+            toast(missing ? 'Esegui prima supabase/admin-elimina.sql nello SQL Editor di Supabase.' : /yourself|admin/i.test(error.message || '') ? 'Non puoi eliminare te stesso o un altro amministratore.' : 'Eliminazione non riuscita (' + (error.code || error.message || 'errore') + ').', true);
+          } else {
+            rows = rows.filter((x) => x.user_id !== r.user_id); wl = wl.filter((w) => String(w.email).toLowerCase() !== String(r.email).toLowerCase());
+            closeDel(); draw(); drawCards(); toast('Account eliminato.');
+          }
+        } finally { $('del-go').textContent = 'Elimina definitivamente'; $('del-go').disabled = false; }
+      });
       let toastT;
       function toast(msg, err) {
         const t = $('toast'); t.textContent = msg; t.className = 'fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-xl border px-4 py-2 text-sm shadow-lg ' + (err ? 'border-red-500/40 bg-red-950 text-red-200' : 'border-emerald-500/40 bg-slate-900 text-emerald-300');
@@ -226,7 +273,7 @@
         if (!sb) return state(configured ? 'Servizio non raggiungibile. Ricarica la pagina.' : 'Il pannello è disponibile solo con Supabase collegato.', true);
         const { data: { session } } = await sb.auth.getSession();
         if (!session) { location.href = 'accedi.html'; return; }
-        $('who').textContent = session.user.email || ''; $('who').classList.remove('hidden');
+        myId = session.user.id; $('who').textContent = session.user.email || ''; $('who').classList.remove('hidden');
         try { await load(); } catch (e) { state('Impossibile caricare i dati. Riprova.', true); }
       })();
     })();

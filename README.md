@@ -143,3 +143,9 @@ Quando un utente crea il proprio listino, Supabase chiama `api/notify-signup.js`
 
 ## Se il browser blocca le richieste a Supabase (CORS / "Failed to fetch")
 Il sito inoltra le richieste di Supabase anche da `/sb/...` (regola in `vercel.json`, con l'indirizzo del progetto Supabase). Se una richiesta diretta fallisce, `assets/store.js` la ripete una volta da lì, senza limiti di CORS; per i metodi che falliscono ricorda la scelta per la sessione. Se cambi progetto Supabase, aggiorna l'indirizzo anche in `vercel.json`.
+
+## Eliminare un account dal pannello admin
+
+`admin.html` ha una colonna **Azioni** con il pulsante *Elimina* per ogni account (non per il tuo né per altri admin). Chiede di scrivere `ELIMINA`, poi cancella le foto dall'archivio e chiama la funzione `admin_delete_user`. Dall'account partono a cascata listino, servizi e statistiche; viene tolta anche l'iscrizione alla lista d'attesa con la stessa email.
+
+Prima di usarla esegui una volta `supabase/admin-elimina.sql` nello SQL Editor di Supabase (richiede `admin.sql` già eseguito).
