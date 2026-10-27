@@ -149,3 +149,9 @@ Il sito inoltra le richieste di Supabase anche da `/sb/...` (regola in `vercel.j
 `admin.html` ha una colonna **Azioni** con il pulsante *Elimina* per ogni account (non per il tuo né per altri admin). Chiede di scrivere `ELIMINA`, poi cancella le foto dall'archivio e chiama la funzione `admin_delete_user`. Dall'account partono a cascata listino, servizi e statistiche; viene tolta anche l'iscrizione alla lista d'attesa con la stessa email.
 
 Prima di usarla esegui una volta `supabase/admin-elimina.sql` nello SQL Editor di Supabase (richiede `admin.sql` già eseguito).
+
+## Moderazione: sospensione e segnalazioni
+
+- **Sospendere un listino**: esegui una volta `supabase/moderazione.sql`. Nel pannello admin ogni account con listino ha il pulsante *Sospendi* / *Riattiva* (filtro "Sospesi" per vederli). Un listino sospeso sparisce dal sito pubblico e dall'API pubblica (anche categorie e servizi); i dati restano. Il proprietario vede un avviso rosso nella dashboard e non può riattivarlo.
+- **Segnalazioni dei visitatori**: in fondo a ogni listino reale c'è "Segnala questo listino". Invia una email all'admin tramite `api/report.js` (usa `RESEND_API_KEY`, `ADMIN_NOTIFY_EMAIL`, `NOTIFY_FROM`; nessuna variabile nuova). Difese: campo trappola, lunghezze massime, max 5 segnalazioni/ora per IP.
+- Le foto già caricate restano raggiungibili da chi conosce l'indirizzo diretto del file; per rimuoverle del tutto elimina l'account dal pannello.

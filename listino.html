@@ -19,6 +19,32 @@
     <p id="msg" class="absolute inset-0 grid place-items-center bg-slate-950 p-8 text-center text-slate-400" role="status">Caricamento…</p>
   </div>
 
+  <!-- Segnalazione del listino (solo listini reali) -->
+  <div id="rep-modal" class="fixed inset-0 z-50 hidden items-end justify-center bg-slate-950/80 p-4 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="rep-title">
+    <form id="rep-form" class="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-5 shadow-2xl" novalidate>
+      <h2 id="rep-title" class="font-display text-lg font-bold text-white">Segnala questo listino</h2>
+      <p class="mt-1 text-xs text-slate-400">Se contiene qualcosa di illegale, per adulti o ingannevole, dicci di cosa si tratta: lo controlliamo.</p>
+      <label for="rep-reason" class="mt-4 block text-xs text-slate-400">Motivo</label>
+      <select id="rep-reason" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white">
+        <option value="illegal">Contenuti o servizi illegali</option>
+        <option value="adult">Contenuti per adulti</option>
+        <option value="scam">Truffa o contenuto ingannevole</option>
+        <option value="rights">Violazione di diritti (immagini, marchi)</option>
+        <option value="other">Altro</option>
+      </select>
+      <label for="rep-details" class="mt-3 block text-xs text-slate-400">Dettagli (facoltativo)</label>
+      <textarea id="rep-details" rows="3" maxlength="1000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"></textarea>
+      <label for="rep-email" class="mt-3 block text-xs text-slate-400">La tua email (facoltativa, se vuoi una risposta)</label>
+      <input id="rep-email" type="email" maxlength="160" autocomplete="email" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white">
+      <input id="rep-website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="absolute -left-[9999px] h-0 w-0 opacity-0">
+      <p id="rep-msg" class="mt-3 hidden text-xs" role="status"></p>
+      <div class="mt-4 flex justify-end gap-2">
+        <button id="rep-cancel" type="button" class="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Chiudi</button>
+        <button id="rep-send" type="submit" class="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50">Invia segnalazione</button>
+      </div>
+    </form>
+  </div>
+
   <script src="/assets/config.js?v=2"></script>
   <script src="/assets/vendor/supabase.js"></script>
   <script src="/assets/data.js"></script>
@@ -91,9 +117,34 @@
       const draw = () => {
         const keep = el.scrollTop;
         LR.renderListino(el, { pro, theme, lang, data, openService: opened ? null : qs.get('servizio'), onView: (id) => track('whatsapp_click', id) });
+        if (venueId) {                                   // link di segnalazione in fondo (solo listini reali)
+          const r = document.createElement('p');
+          r.className = 'px-4 pb-8 pt-2 text-center text-[11px] text-slate-500';
+          r.innerHTML = '<button type="button" id="rep-open" class="underline hover:text-slate-300">Segnala questo listino</button>';
+          el.appendChild(r);
+        }
         opened = true;
         el.scrollTop = keep;
       };
+
+      // Segnalazione: invia un'email all'amministratore tramite /api/report
+      const rep = $('rep-modal'), repMsg = (t, ok) => { const m = $('rep-msg'); m.textContent = t; m.className = 'mt-3 text-xs ' + (ok ? 'text-emerald-400' : 'text-red-300'); };
+      const repClose = () => { rep.classList.add('hidden'); rep.classList.remove('flex'); };
+      el.addEventListener('click', (e) => { if (!e.target.closest('#rep-open')) return; $('rep-msg').className = 'hidden'; $('rep-send').disabled = false; rep.classList.remove('hidden'); rep.classList.add('flex'); $('rep-reason').focus(); });
+      $('rep-cancel').addEventListener('click', repClose);
+      rep.addEventListener('click', (e) => { if (e.target === rep) repClose(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') repClose(); });
+      $('rep-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        $('rep-send').disabled = true;
+        try {
+          const r = await fetch('/api/report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug, reason: $('rep-reason').value, details: $('rep-details').value, email: $('rep-email').value, website: $('rep-website').value }) });
+          if (r.status === 429) { repMsg('Hai già inviato diverse segnalazioni: riprova più tardi.'); $('rep-send').disabled = false; return; }
+          if (!r.ok) throw new Error(r.status);
+          repMsg('Grazie, la segnalazione è stata inviata.', true); $('rep-details').value = '';
+          setTimeout(repClose, 1800);
+        } catch (x) { repMsg('Invio non riuscito. Scrivi a info@listinorapido.it indicando il link del listino.'); $('rep-send').disabled = false; }
+      });
 
       if (pro && LR.THEMES[theme]) document.documentElement.dataset.theme = theme;   // colora anche lo sfondo ai lati e il messaggio
       document.title = data.business.name + ' — Listino';

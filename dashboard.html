@@ -37,6 +37,7 @@
     </nav>
 
     <main class="min-w-0">
+      <div id="susp-banner" class="mb-4 hidden rounded-2xl border border-red-500/40 bg-red-950/60 p-4 text-sm text-red-200" role="alert"><b class="text-white">Il tuo listino è sospeso.</b> Al momento non è visibile al pubblico perché potrebbe non rispettare le condizioni d'uso. Per chiarimenti scrivi a <a href="mailto:info@listinorapido.it" class="underline">info@listinorapido.it</a>.</div>
       <!-- Benvenuto -->
       <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -1005,6 +1006,7 @@
       const s = await LRStore.init();
       if (!s) return;                                // reindirizzato al login
       S = s;
+      $('susp-banner').classList.toggle('hidden', !s.suspended);
       render();
     }
     $('logout').addEventListener('click', () => LRStore.logout());

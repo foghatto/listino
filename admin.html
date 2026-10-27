@@ -74,11 +74,12 @@
           <button class="chip" data-f="novenue" aria-pressed="false">Mai entrati in dashboard</button>
           <button class="chip" data-f="unconf" aria-pressed="false">Email non confermata</button>
           <button class="chip" data-f="pro" aria-pressed="false">PRO</button>
+          <button class="chip" data-f="susp" aria-pressed="false">Sospesi</button>
           <button class="chip" data-f="week" aria-pressed="false">Ultimi 7 giorni</button>
         </div>
         <p id="shown" class="mt-3 text-xs text-slate-500"></p>
         <div class="mt-2 overflow-x-auto rounded-2xl border border-slate-800">
-          <table class="w-full min-w-[62rem] text-left text-sm">
+          <table class="w-full min-w-[66rem] text-left text-sm">
             <thead class="bg-slate-900 text-xs uppercase tracking-wide text-slate-400">
               <tr id="head"></tr>
             </thead>
@@ -132,6 +133,7 @@
           if (filter === 'novenue' && r.venue_id) return false;
           if (filter === 'unconf' && r.confirmed_at) return false;
           if (filter === 'pro' && r.plan !== 'pro') return false;
+          if (filter === 'susp' && !r.suspended_at) return false;
           if (filter === 'week' && new Date(r.created_at) < week) return false;
           return !q || [r.email, r.venue_name, r.slug].some((x) => String(x || '').toLowerCase().includes(q));
         }).sort((a, b) => {
@@ -153,7 +155,7 @@
         $('shown').textContent = v.length + ' di ' + rows.length + ' account';
         $('rows').innerHTML = v.length ? v.map((r) => `<tr class="hover:bg-slate-900/60">
           <td class="max-w-[16rem] px-3 py-2.5"><span class="block truncate font-medium text-white" title="${esc(r.email)}">${esc(r.email)}</span>${r.confirmed_at ? '' : '<span class="text-[11px] text-amber-300">email non confermata</span>'}</td>
-          <td class="max-w-[12rem] px-3 py-2.5">${r.venue_id ? `<span class="block truncate" title="${esc(r.venue_name)}">${esc(r.venue_name)}</span>` : '<span class="text-slate-500">— mai entrato</span>'}</td>
+          <td class="max-w-[12rem] px-3 py-2.5">${r.venue_id ? `<span class="block truncate" title="${esc(r.venue_name)}">${esc(r.venue_name)}</span>${r.suspended_at ? '<span class="text-[11px] font-semibold text-red-300">● sospeso</span>' : ''}` : '<span class="text-slate-500">— mai entrato</span>'}</td>
           <td class="px-3 py-2.5">${r.venue_id ? `<select data-plan="${esc(r.venue_id)}" aria-label="Piano di ${esc(r.email)}" class="sel rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-xs font-bold uppercase ${r.plan === 'pro' ? 'text-emerald-300' : 'text-slate-300'}"><option value="free"${r.plan === 'free' ? ' selected' : ''}>free</option><option value="pro"${r.plan === 'pro' ? ' selected' : ''}>pro</option></select>` : '—'}</td>
           <td class="px-3 py-2.5">${r.venue_id ? `<div class="flex items-center gap-2"><span class="h-3.5 w-3.5 shrink-0 rounded-full border border-slate-600" style="background:${esc(themeColor(r.theme))}"></span><select data-theme-sel="${esc(r.venue_id)}" aria-label="Tema di ${esc(r.email)}" class="sel rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200"><option value="">Smeraldo (base)</option>${Object.entries(LR.THEMES).map(([k, t]) => `<option value="${k}"${r.theme === k ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></div>${r.theme && r.plan !== 'pro' ? '<span class="mt-1 block text-[11px] text-amber-300">non visibile: serve il piano PRO</span>' : ''}` : '—'}</td>
           <td class="px-3 py-2.5 tabular-nums">${r.venue_id ? r.services : '—'}</td>
@@ -162,7 +164,7 @@
           <td class="whitespace-nowrap px-3 py-2.5" title="${esc(fmtTime(r.created_at))}">${fmtDate(r.created_at)}<span class="block text-[11px] text-slate-500">${ago(r.created_at)}</span></td>
           <td class="whitespace-nowrap px-3 py-2.5" title="${esc(fmtTime(r.last_sign_in_at))}">${r.last_sign_in_at ? fmtDate(r.last_sign_in_at) + `<span class="block text-[11px] text-slate-500">${ago(r.last_sign_in_at)}</span>` : '<span class="text-slate-500">mai</span>'}</td>
           <td class="px-3 py-2.5">${r.slug ? `<a href="/${encodeURIComponent(r.slug)}" target="_blank" rel="noopener" class="text-emerald-400 hover:underline">/${esc(r.slug)} ↗</a>` : '—'}</td>
-          <td class="px-3 py-2.5">${r.user_id === myId ? '<span class="text-[11px] text-slate-500">' + 'tu' + '</span>' : `<button type="button" data-del="${esc(r.user_id)}" class="rounded-lg border border-red-500/40 px-2 py-1 text-xs font-semibold text-red-300 hover:bg-red-500/10" aria-label="Elimina ${esc(r.email)}">Elimina</button>`}</td>
+          <td class="px-3 py-2.5">${r.user_id === myId ? '<span class="text-[11px] text-slate-500">' + 'tu' + '</span>' : `${r.venue_id ? `<button type="button" data-susp="${esc(r.venue_id)}" class="mr-1 rounded-lg border ${r.suspended_at ? 'border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10' : 'border-amber-500/40 text-amber-300 hover:bg-amber-500/10'} px-2 py-1 text-xs font-semibold" aria-label="${r.suspended_at ? 'Riattiva' : 'Sospendi'} il listino di ${esc(r.email)}">${r.suspended_at ? 'Riattiva' : 'Sospendi'}</button>` : ''}<button type="button" data-del="${esc(r.user_id)}" class="rounded-lg border border-red-500/40 px-2 py-1 text-xs font-semibold text-red-300 hover:bg-red-500/10" aria-label="Elimina ${esc(r.email)}">Elimina</button>`}</td>
         </tr>`).join('') : '<tr><td colspan="11" class="px-3 py-8 text-center text-slate-500">Nessun account corrisponde ai filtri.</td></tr>';
       }
 
@@ -207,6 +209,23 @@
         if (isPlan) row.plan = sel.value; else row.theme = sel.value || null;
         draw(); drawCards(); toast(isPlan ? 'Piano aggiornato.' : 'Tema aggiornato.');
       });
+      // Sospensione / riattivazione del listino (reversibile, funzione admin_set_suspended)
+      $('rows').addEventListener('click', async (e) => {
+        const b = e.target.closest('[data-susp]'); if (!b) return;
+        const row = rows.find((r) => r.venue_id === b.dataset.susp); if (!row) return;
+        const on = !row.suspended_at;
+        if (on && !confirm('Sospendere il listino "' + (row.venue_name || row.slug) + '"?\nSparisce subito dal sito pubblico; i dati restano e puoi riattivarlo quando vuoi.')) return;
+        b.disabled = true;
+        const { error } = await sb.rpc('admin_set_suspended', { p_venue: row.venue_id, p_suspended: on });
+        if (error) {
+          b.disabled = false;
+          const missing = error.code === 'PGRST202' || error.code === '42883' || /could not find the function|schema cache/i.test(error.message || '');
+          return toast(missing ? 'Esegui prima supabase/moderazione.sql nello SQL Editor di Supabase.' : 'Operazione non riuscita (' + (error.code || error.message || 'errore') + ').', true);
+        }
+        row.suspended_at = on ? new Date().toISOString() : null;
+        draw(); drawCards(); toast(on ? 'Listino sospeso.' : 'Listino riattivato.');
+      });
+
       // Eliminazione account (solo admin, funzione admin_delete_user)
       let delRow = null;
       const modal = $('del-modal');
