@@ -155,3 +155,15 @@ Prima di usarla esegui una volta `supabase/admin-elimina.sql` nello SQL Editor d
 - **Sospendere un listino**: esegui una volta `supabase/moderazione.sql`. Nel pannello admin ogni account con listino ha il pulsante *Sospendi* / *Riattiva* (filtro "Sospesi" per vederli). Un listino sospeso sparisce dal sito pubblico e dall'API pubblica (anche categorie e servizi); i dati restano. Il proprietario vede un avviso rosso nella dashboard e non può riattivarlo.
 - **Segnalazioni dei visitatori**: in fondo a ogni listino reale c'è "Segnala questo listino". Invia una email all'admin tramite `api/report.js` (usa `RESEND_API_KEY`, `ADMIN_NOTIFY_EMAIL`, `NOTIFY_FROM`; nessuna variabile nuova). Difese: campo trappola, lunghezze massime, max 5 segnalazioni/ora per IP.
 - Le foto già caricate restano raggiungibili da chi conosce l'indirizzo diretto del file; per rimuoverle del tutto elimina l'account dal pannello.
+
+## Pulsante "Aiuto" (supporto agli utenti)
+
+`assets/help.js` aggiunge in basso a destra il pulsante **Aiuto** (pagine: home, demo PRO, accedi, dashboard). Si apre un pannello con due schede: *Risposte rapide* (FAQ, si modificano nell'elenco `FAQ` in cima al file) e *Scrivici* (modulo email + messaggio).
+
+Il modulo invia a `api/support.js`, che manda una email all'amministratore con Resend (stesse variabili di `notify-signup`: `RESEND_API_KEY`, `ADMIN_NOTIFY_EMAIL`, `NOTIFY_FROM`; nessuna nuova). Rispondendo a quella email, la risposta va all'utente. Nella dashboard la email e il link del listino sono precompilati. Difese: campo trappola, lunghezze massime, max 5 richieste/ora per IP.
+
+Per aprire il pannello da un altro link: `data-help-open="scrivici"` (o `"faq"`) su qualsiasi elemento.
+
+## Controllo giornaliero che tiene attivo Supabase
+
+`api/keepalive.js`, lanciata ogni giorno dal cron in `vercel.json`, fa una lettura minima sul database: i progetti gratuiti Supabase vanno in pausa dopo ~7 giorni senza attività. Opzionale: variabile `CRON_SECRET` per farla rispondere solo a Vercel.

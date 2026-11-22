@@ -345,6 +345,7 @@
   <script src="assets/vendor/qrcode.min.js"></script>
   <script src="assets/data.js"></script>
   <script src="assets/consent.js" data-mode="modal"></script>
+  <script src="assets/help.js" defer></script>
   <script src="assets/templates.js"></script>
   <script src="assets/store.js"></script>
   <script>
@@ -1006,6 +1007,7 @@
       const s = await LRStore.init();
       if (!s) return;                                // reindirizzato al login
       S = s;
+      window.LR_HELP_CTX = { email: s.email || '', slug: (s.business && s.business.slug) || '' };
       $('susp-banner').classList.toggle('hidden', !s.suspended);
       render();
     }
