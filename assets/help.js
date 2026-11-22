@@ -70,7 +70,7 @@
   var lastFocus = null;
   function open(tab) {
     lastFocus = document.activeElement; var c = window.LR_HELP_CTX || {};
-    show(tab || 1); var em = form.querySelector('#lrh-em'); if (c.email && !em.value) em.value = c.email;
+    show(tab || 1); var em = form.querySelector('#lrh-em'), ta = form.querySelector('#lrh-ms'); if (c.email && !em.value) em.value = c.email; if (c.prefill && !ta.value) ta.value = c.prefill;
     ov.classList.add('on'); close.focus();
   }
   function shut() { ov.classList.remove('on'); if (lastFocus && lastFocus.focus) lastFocus.focus(); }
@@ -88,7 +88,7 @@
     if (ms.length < 10) return say('Scrivi qualche parola in più, così possiamo capire come aiutarti.');
     go.disabled = true; say('Invio in corso…', true);
     var c = window.LR_HELP_CTX || {};
-    fetch('/api/support', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: em, message: ms, page: location.pathname, slug: c.slug || '', website: form.querySelector('#lrh-wb').value }) })
+    fetch('/api/support', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: em, message: ms, page: location.pathname, slug: c.slug || '', ua: navigator.userAgent, website: form.querySelector('#lrh-wb').value }) })
       .then(function (r) {
         if (r.status === 429) { say('Hai già inviato diverse richieste: riprova tra un po\'.'); go.disabled = false; return; }
         if (!r.ok) throw new Error(r.status);

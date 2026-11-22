@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
   const message = String(b.message || '').trim().slice(0, 2000);
   if (!/^[^\s@]{1,64}@[^\s@]{1,120}\.[^\s@]{2,}$/.test(email)) return res.status(400).json({ error: 'email' });
   if (message.length < 10) return res.status(400).json({ error: 'message' });
-  const slug = clean(b.slug, 60), page = clean(b.page, 80);
+  const slug = clean(b.slug, 60), page = clean(b.page, 80), ua = clean(b.ua, 200);
 
   const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'x';
   if (limited(ip)) return res.status(429).json({ error: 'rate' });
@@ -41,12 +41,13 @@ module.exports = async (req, res) => {
 <table style="border-collapse:collapse">
 <tr><td style="padding:3px 16px 3px 0;color:#64748b">Email</td><td><a href="mailto:${esc(email)}">${esc(email)}</a></td></tr>
 <tr><td style="padding:3px 16px 3px 0;color:#64748b">Pagina</td><td>${esc(page || '(non indicata)')}</td></tr>
+<tr><td style="padding:3px 16px 3px 0;color:#64748b">Browser</td><td>${esc(ua || '(non indicato)')}</td></tr>
 <tr><td style="padding:3px 16px 3px 0;color:#64748b">Listino</td><td>${slug ? `<a href="${esc(origin + '/' + slug)}">${esc(origin + '/' + slug)}</a>` : '(nessuno)'}</td></tr>
 </table>
 <p style="margin:14px 0 4px;color:#64748b">Messaggio</p>
 <p style="margin:0;padding:12px 14px;background:#f1f5f9;border-radius:10px">${esc(message).replace(/\n/g, '<br>')}</p>
 <p style="margin-top:16px;color:#64748b;font-size:13px">Rispondi a questa email: la risposta arriva all'utente.</p></div>`;
-  const text = `Richiesta di aiuto\nEmail: ${email}\nPagina: ${page || '-'}\nListino: ${slug ? origin + '/' + slug : '-'}\n\n${message}`;
+  const text = `Richiesta di aiuto\nEmail: ${email}\nPagina: ${page || '-'}\nListino: ${slug ? origin + '/' + slug : '-'}\nBrowser: ${ua || '-'}\n\n${message}`;
 
   try {
     const r = await fetch('https://api.resend.com/emails', {

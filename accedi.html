@@ -64,7 +64,16 @@
     if (configured) document.getElementById('demo-note').remove();
 
     const $ = (id) => document.getElementById(id);
-    const msg = (t, err) => { const m = $('msg'); m.textContent = t; m.className = 'rounded-lg border px-3 py-2 text-sm ' + (err ? 'border-red-500/40 bg-red-500/10 text-red-300' : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'); };
+    const msg = (t, err) => {
+      const m = $('msg'); m.textContent = t; m.className = 'rounded-lg border px-3 py-2 text-sm ' + (err ? 'border-red-500/40 bg-red-500/10 text-red-300' : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300');
+      if (!err) return;
+      // In caso di errore: link per chiedere aiuto, con l'errore già scritto nel messaggio
+      const em = $('email'); const a = document.createElement('a');
+      a.href = '#'; a.setAttribute('data-help-open', 'scrivici'); a.textContent = 'Hai bisogno di aiuto? Scrivici.';
+      a.style.cssText = 'display:block;margin-top:6px;text-decoration:underline;font-weight:600';
+      m.appendChild(a);
+      window.LR_HELP_CTX = { email: em ? em.value.trim() : '', slug: '', prefill: 'Mi compare questo errore nella pagina "' + (document.title || 'Accedi') + '": "' + t + '"\n\nCosa stavo facendo: ' };
+    };
     const NO_SERVICE = 'Impossibile contattare il servizio di accesso. Ricarica la pagina o disattiva il blocco pubblicità e riprova.';
 
     // Modalità della pagina: login | signup | forgot | newpass

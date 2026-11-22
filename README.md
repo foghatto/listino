@@ -167,3 +167,5 @@ Per aprire il pannello da un altro link: `data-help-open="scrivici"` (o `"faq"`)
 ## Controllo giornaliero che tiene attivo Supabase
 
 `api/keepalive.js`, lanciata ogni giorno dal cron in `vercel.json`, fa una lettura minima sul database: i progetti gratuiti Supabase vanno in pausa dopo ~7 giorni senza attività. Opzionale: variabile `CRON_SECRET` per farla rispondere solo a Vercel.
+
+Nella pagina `accedi`, quando registrazione o accesso danno errore, sotto il messaggio compare "Hai bisogno di aiuto? Scrivici.": apre il pannello già compilato con l'errore e l'email scritta. La richiesta passa da `/api/support` (Vercel), quindi arriva anche se Supabase non risponde; nell'email c'è anche il browser dell'utente.
